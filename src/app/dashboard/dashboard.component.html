@@ -1,0 +1,14 @@
+<div class="wrap">
+  <header>
+    <div class="brand">
+      <div class="logo">AT</div>
+      <div class="name">Avaltrust Dashboard</div>
+    </div>
+    <button (click)="logout()">Cerrar sesión</button>
+  </header>
+  <main>
+    <h1>Panel principal</h1>
+    <p>Has iniciado sesión como <b>{{ auth.user()?.username }}</b>.</p>
+    <p class="hint">Esta ruta está protegida por un guard.</p>
+  </main>
+</div>

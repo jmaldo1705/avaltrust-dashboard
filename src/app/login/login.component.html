@@ -1,0 +1,38 @@
+<div class="login-page">
+  <div class="bg">
+    <div class="orb orb1"></div>
+    <div class="orb orb2"></div>
+    <div class="grid"></div>
+  </div>
+
+  <div class="card" [class.loading]="loading()">
+    <div class="brand">
+      <div class="logo">AT</div>
+      <div class="name">Avaltrust</div>
+    </div>
+    <h2>Bienvenido</h2>
+    <p class="subtitle">Inicia sesión para continuar</p>
+
+    <form (ngSubmit)="onSubmit()" novalidate>
+      <div class="field">
+        <label>Usuario</label>
+        <input [(ngModel)]="username" name="username" type="text" required autocomplete="username" (focus)="focused='user'" (blur)="focused=''" />
+        <div class="focus"></div>
+      </div>
+      <div class="field">
+        <label>Contraseña</label>
+        <input [(ngModel)]="password" name="password" type="password" required minlength="4" autocomplete="current-password" (focus)="focused='pass'" (blur)="focused=''" />
+        <div class="focus"></div>
+      </div>
+
+      <button class="btn" type="submit" [disabled]="loading()">{{ loading() ? 'Ingresando…' : 'Ingresar' }}</button>
+      @if (error()) {
+        <div class="error">{{ error() }}</div>
+      }
+    </form>
+
+    <div class="footer">
+      <a routerLink="/" class="muted">Ir al sitio</a>
+    </div>
+  </div>
+</div>
