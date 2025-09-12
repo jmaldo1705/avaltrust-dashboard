@@ -33,12 +33,18 @@ export class LoginComponent {
     if (this.loading()) return;
     this.error.set('');
     this.loading.set(true);
+
     this.auth.login(this.username.trim(), this.password)
-      .then(() => {
-        const returnUrl = this.route.snapshot.queryParamMap.get('returnUrl') || '/dashboard';
-        this.router.navigateByUrl(returnUrl);
-      })
-      .catch(err => this.error.set(err?.message || 'No se pudo iniciar sesión'))
-      .finally(() => this.loading.set(false));
+      .subscribe({
+        next: () => {
+          const returnUrl = this.route.snapshot.queryParamMap.get('returnUrl') || '/dashboard';
+          this.router.navigateByUrl(returnUrl);
+          this.loading.set(false);
+        },
+        error: (err) => {
+          this.error.set(err?.message || 'No se pudo iniciar sesión');
+          this.loading.set(false);
+        }
+      });
   }
 }
