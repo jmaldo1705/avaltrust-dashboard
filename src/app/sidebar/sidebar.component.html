@@ -1,0 +1,60 @@
+<!-- Menú lateral -->
+<aside class="sidebar" [class.open]="isSidebarOpen">
+  <div class="sidebar-header">
+    <div class="logo">
+      <span class="logo-icon">🏢</span>
+      <span class="logo-text">Avaltrust</span>
+    </div>
+  </div>
+
+  <nav class="sidebar-nav">
+    <!-- Sección principal -->
+    <div class="nav-section">
+      <h3 class="section-title">Principal</h3>
+
+      <button class="nav-item active" (click)="navigateTo('/dashboard')">
+        <span class="nav-icon">🏠</span>
+        <span class="nav-label">Dashboard</span>
+      </button>
+    </div>
+
+    <!-- Menú específico por rol -->
+    <div class="nav-section" *ngFor="let item of getMenuItems()">
+      <button class="nav-item" (click)="navigateTo(item.route)">
+        <span class="nav-icon">{{ item.icon }}</span>
+        <span class="nav-label">{{ item.label }}</span>
+      </button>
+    </div>
+
+    <!-- Sección de acceso rápido solo para admin -->
+    <div class="nav-section" *appHasRole="'ROLE_ADMIN'">
+      <h3 class="section-title">Administración</h3>
+
+      <button class="nav-item admin-item" (click)="goToAdmin()">
+        <span class="nav-icon">⚙️</span>
+        <span class="nav-label">Panel Admin</span>
+      </button>
+    </div>
+
+    <!-- Sección para usuarios regulares -->
+    <div class="nav-section" *appHasRole="'ROLE_USER'">
+      <h3 class="section-title">Mi Área</h3>
+
+      <button class="nav-item user-item" (click)="goToUserArea()">
+        <span class="nav-icon">👤</span>
+        <span class="nav-label">Área Personal</span>
+      </button>
+    </div>
+  </nav>
+
+  <!-- Footer del sidebar -->
+  <div class="sidebar-footer">
+    <div class="user-mini-profile" *ngIf="userProfile() as profile">
+      <img [src]="getUserAvatar()" alt="Avatar" class="mini-avatar">
+      <div class="mini-user-info">
+        <div class="mini-username">{{ profile.username }}</div>
+        <div class="mini-role">{{ profile.isAdmin ? 'Admin' : 'Usuario' }}</div>
+      </div>
+    </div>
+  </div>
+</aside>

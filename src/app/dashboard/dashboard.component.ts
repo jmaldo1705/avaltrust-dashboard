@@ -3,11 +3,12 @@ import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { AuthService } from '../auth/auth.service';
 import { HasRoleDirective } from '../auth/has-role.directive';
+import { SidebarComponent } from '../sidebar/sidebar.component';
 
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [CommonModule, HasRoleDirective],
+  imports: [CommonModule, HasRoleDirective, SidebarComponent],
   templateUrl: './dashboard.component.html',
   styleUrls: ['./dashboard.component.css']
 })
@@ -18,25 +19,6 @@ export class DashboardComponent implements OnInit {
   userProfile = this.auth.userProfile;
   isSidebarOpen = false;
   isUserMenuOpen = false;
-
-  // Elementos del menú para usuarios
-  userMenuItems = [
-    { label: 'Mis Solicitudes', icon: '📋', route: '/user/requests' },
-    { label: 'Mis Documentos', icon: '📄', route: '/user/documents' },
-    { label: 'Mi Perfil', icon: '👤', route: '/user/profile' },
-    { label: 'Configuración', icon: '⚙️', route: '/user/settings' },
-    { label: 'Contactar Soporte', icon: '📞', route: '/user/support' }
-  ];
-
-  // Elementos del menú para administradores
-  adminMenuItems = [
-    { label: 'Dashboard Admin', icon: '📊', route: '/admin/dashboard' },
-    { label: 'Gestionar Usuarios', icon: '👥', route: '/admin/users' },
-    { label: 'Reportes', icon: '📈', route: '/admin/reports' },
-    { label: 'Configuración del Sistema', icon: '⚡', route: '/admin/settings' },
-    { label: 'Auditoría', icon: '🔍', route: '/admin/audit' },
-    { label: 'Respaldo y Restauración', icon: '💾', route: '/admin/backup' }
-  ];
 
   ngOnInit() {
     // Cargar datos del usuario si no están disponibles
@@ -66,6 +48,14 @@ export class DashboardComponent implements OnInit {
     this.closeSidebar();
   }
 
+  onSidebarNavigate(route: string) {
+    this.navigateTo(route);
+  }
+
+  onSidebarClose() {
+    this.closeSidebar();
+  }
+
   goToAdmin() {
     this.router.navigate(['/admin']);
     this.closeSidebar();
@@ -78,18 +68,6 @@ export class DashboardComponent implements OnInit {
 
   logout() {
     this.auth.logout(true);
-  }
-
-  // Obtener elementos del menú según el rol del usuario
-  getMenuItems() {
-    const profile = this.userProfile();
-    if (!profile) return [];
-
-    if (profile.isAdmin) {
-      return [...this.adminMenuItems, ...this.userMenuItems];
-    } else {
-      return this.userMenuItems;
-    }
   }
 
   // Obtener imagen de perfil (por defecto un avatar genérico)
