@@ -1,14 +1,214 @@
-<div class="wrap">
-  <header>
-    <div class="brand">
-      <div class="logo">AT</div>
-      <div class="name">Avaltrust Dashboard</div>
+<div class="dashboard-layout">
+  <!-- Barra superior -->
+  <header class="top-bar">
+    <div class="top-bar-left">
+      <button class="menu-toggle" (click)="toggleSidebar()" aria-label="Toggle menu">
+        <span class="hamburger-icon">☰</span>
+      </button>
+      <h1 class="app-title">Avaltrust Dashboard</h1>
     </div>
-    <button (click)="logout()">Cerrar sesión</button>
+
+    <div class="top-bar-right">
+      <div class="user-menu" *ngIf="userProfile() as profile">
+        <button class="user-menu-trigger" (click)="toggleUserMenu()">
+          <img [src]="getUserAvatar()" alt="Avatar" class="user-avatar">
+          <span class="user-name">{{ profile.username }}</span>
+          <span class="dropdown-arrow">▼</span>
+        </button>
+
+        <!-- Menú desplegable del usuario -->
+        <div class="user-dropdown" [class.open]="isUserMenuOpen">
+          <div class="user-info">
+            <img [src]="getUserAvatar()" alt="Avatar" class="user-avatar-large">
+            <div class="user-details">
+              <div class="username">{{ profile.username }}</div>
+              <div class="user-role">{{ profile.isAdmin ? 'Administrador' : 'Usuario' }}</div>
+              <div class="user-email" *ngIf="profile.email">{{ profile.email }}</div>
+            </div>
+          </div>
+
+          <div class="dropdown-divider"></div>
+
+          <button class="dropdown-item" (click)="navigateTo('/user/profile'); closeUserMenu()">
+            <span class="item-icon">👤</span>
+            Mi Perfil
+          </button>
+
+          <button class="dropdown-item" (click)="navigateTo('/user/settings'); closeUserMenu()">
+            <span class="item-icon">⚙️</span>
+            Configuración
+          </button>
+
+          <div class="dropdown-divider"></div>
+
+          <button class="dropdown-item logout-item" (click)="logout()">
+            <span class="item-icon">🚪</span>
+            Cerrar Sesión
+          </button>
+        </div>
+      </div>
+    </div>
   </header>
-  <main>
-    <h1>Panel principal</h1>
-    <p>Has iniciado sesión como <b>{{ auth.user()?.username }}</b>.</p>
-    <p class="hint">Esta ruta está protegida por un guard.</p>
+
+  <!-- Overlay para cerrar menús en móvil -->
+  <div
+    class="overlay"
+    [class.active]="isSidebarOpen || isUserMenuOpen"
+    (click)="closeSidebar(); closeUserMenu()">
+  </div>
+
+  <!-- Menú lateral -->
+  <aside class="sidebar" [class.open]="isSidebarOpen">
+    <div class="sidebar-header">
+      <div class="logo">
+        <span class="logo-icon">🏢</span>
+        <span class="logo-text">Avaltrust</span>
+      </div>
+    </div>
+
+    <nav class="sidebar-nav">
+      <!-- Sección principal -->
+      <div class="nav-section">
+        <h3 class="section-title">Principal</h3>
+
+        <button class="nav-item active" (click)="navigateTo('/dashboard')">
+          <span class="nav-icon">🏠</span>
+          <span class="nav-label">Dashboard</span>
+        </button>
+      </div>
+
+      <!-- Menú específico por rol -->
+      <div class="nav-section" *ngFor="let item of getMenuItems()">
+        <button class="nav-item" (click)="navigateTo(item.route)">
+          <span class="nav-icon">{{ item.icon }}</span>
+          <span class="nav-label">{{ item.label }}</span>
+        </button>
+      </div>
+
+      <!-- Sección de acceso rápido solo para admin -->
+      <div class="nav-section" *appHasRole="'ROLE_ADMIN'">
+        <h3 class="section-title">Administración</h3>
+
+        <button class="nav-item admin-item" (click)="goToAdmin()">
+          <span class="nav-icon">⚙️</span>
+          <span class="nav-label">Panel Admin</span>
+        </button>
+      </div>
+
+      <!-- Sección para usuarios regulares -->
+      <div class="nav-section" *appHasRole="'ROLE_USER'">
+        <h3 class="section-title">Mi Área</h3>
+
+        <button class="nav-item user-item" (click)="goToUserArea()">
+          <span class="nav-icon">👤</span>
+          <span class="nav-label">Área Personal</span>
+        </button>
+      </div>
+    </nav>
+
+    <!-- Footer del sidebar -->
+    <div class="sidebar-footer">
+      <div class="user-mini-profile" *ngIf="userProfile() as profile">
+        <img [src]="getUserAvatar()" alt="Avatar" class="mini-avatar">
+        <div class="mini-user-info">
+          <div class="mini-username">{{ profile.username }}</div>
+          <div class="mini-role">{{ profile.isAdmin ? 'Admin' : 'Usuario' }}</div>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Contenido principal -->
+  <main class="main-content">
+    <div class="content-header">
+      <h2>Bienvenido al Sistema</h2>
+      <p *ngIf="userProfile() as profile" class="welcome-message">
+        Hola <strong>{{ profile.username }}</strong>, tienes acceso como
+        <span class="role-badge" [class.admin-badge]="profile.isAdmin" [class.user-badge]="!profile.isAdmin">
+          {{ profile.isAdmin ? 'Administrador' : 'Usuario' }}
+        </span>
+      </p>
+    </div>
+
+    <!-- Cards de resumen -->
+    <div class="dashboard-cards">
+      <!-- Card para administradores -->
+      <div class="dashboard-card admin-card" *appHasRole="'ROLE_ADMIN'">
+        <div class="card-icon admin-icon">⚙️</div>
+        <div class="card-content">
+          <h3>Panel de Administración</h3>
+          <p>Gestiona usuarios, configura el sistema y accede a reportes detallados.</p>
+          <button class="card-button" (click)="goToAdmin()">Acceder al Panel</button>
+        </div>
+      </div>
+
+      <!-- Card para usuarios -->
+      <div class="dashboard-card user-card">
+        <div class="card-icon user-icon">👤</div>
+        <div class="card-content">
+          <h3>Mi Área Personal</h3>
+          <p>Accede a tus documentos, solicitudes y configura tu perfil.</p>
+          <button class="card-button" (click)="goToUserArea()">Ir a Mi Área</button>
+        </div>
+      </div>
+
+      <!-- Card de estadísticas (ejemplo) -->
+      <div class="dashboard-card stats-card">
+        <div class="card-icon stats-icon">📊</div>
+        <div class="card-content">
+          <h3>Estadísticas</h3>
+          <p>Revisa tu actividad y estadísticas de uso del sistema.</p>
+          <button class="card-button" (click)="navigateTo('/user/stats')">Ver Estadísticas</button>
+        </div>
+      </div>
+
+      <!-- Card de soporte -->
+      <div class="dashboard-card support-card">
+        <div class="card-icon support-icon">📞</div>
+        <div class="card-content">
+          <h3>Soporte</h3>
+          <p>¿Necesitas ayuda? Contacta con nuestro equipo de soporte.</p>
+          <button class="card-button" (click)="navigateTo('/user/support')">Contactar</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Sección de acciones rápidas -->
+    <div class="quick-actions">
+      <h3>Acciones Rápidas</h3>
+      <div class="actions-grid">
+        <!-- Acciones para administradores -->
+        <div *appHasRole="'ROLE_ADMIN'" class="action-group">
+          <button class="action-btn admin-action" (click)="navigateTo('/admin/users')">
+            <span class="action-icon">👥</span>
+            Gestionar Usuarios
+          </button>
+          <button class="action-btn admin-action" (click)="navigateTo('/admin/reports')">
+            <span class="action-icon">📈</span>
+            Ver Reportes
+          </button>
+          <button class="action-btn admin-action" (click)="navigateTo('/admin/settings')">
+            <span class="action-icon">⚡</span>
+            Configuración
+          </button>
+        </div>
+
+        <!-- Acciones para usuarios -->
+        <div class="action-group">
+          <button class="action-btn user-action" (click)="navigateTo('/user/requests')">
+            <span class="action-icon">📋</span>
+            Nueva Solicitud
+          </button>
+          <button class="action-btn user-action" (click)="navigateTo('/user/documents')">
+            <span class="action-icon">📄</span>
+            Mis Documentos
+          </button>
+          <button class="action-btn user-action" (click)="navigateTo('/user/profile')">
+            <span class="action-icon">🔧</span>
+            Editar Perfil
+          </button>
+        </div>
+      </div>
+    </div>
   </main>
 </div>

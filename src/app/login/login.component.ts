@@ -37,9 +37,18 @@ export class LoginComponent {
     this.auth.login(this.username.trim(), this.password)
       .subscribe({
         next: () => {
-          const returnUrl = this.route.snapshot.queryParamMap.get('returnUrl') || '/dashboard';
-          this.router.navigateByUrl(returnUrl);
+          const returnUrl = this.route.snapshot.queryParamMap.get('returnUrl');
+
           this.loading.set(false);
+
+          if (returnUrl) {
+            this.router.navigateByUrl(returnUrl);
+          } else {
+            // Esperar un momento para que se cargue el perfil y luego redirigir
+            setTimeout(() => {
+              this.auth.redirectToAppropriateRoute();
+            }, 500); // Aumenté el tiempo para asegurar que se carguen los datos
+          }
         },
         error: (err) => {
           this.error.set(err?.message || 'No se pudo iniciar sesión');
