@@ -4,11 +4,12 @@ import { Router } from '@angular/router';
 import { AuthService } from '../auth/auth.service';
 import { HasRoleDirective } from '../auth/has-role.directive';
 import { SidebarComponent } from '../sidebar/sidebar.component';
+import { HeaderComponent } from '../header/header.component';
 
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [CommonModule, HasRoleDirective, SidebarComponent],
+  imports: [CommonModule, HasRoleDirective, SidebarComponent, HeaderComponent],
   templateUrl: './dashboard.component.html',
   styleUrls: ['./dashboard.component.css']
 })
@@ -56,6 +57,10 @@ export class DashboardComponent implements OnInit {
     this.closeSidebar();
   }
 
+  onHeaderNavigate(route: string) {
+    this.navigateTo(route);
+  }
+
   goToAdmin() {
     this.router.navigate(['/admin']);
     this.closeSidebar();
@@ -68,10 +73,5 @@ export class DashboardComponent implements OnInit {
 
   logout() {
     this.auth.logout(true);
-  }
-
-  // Obtener imagen de perfil (por defecto un avatar genérico)
-  getUserAvatar() {
-    return 'https://via.placeholder.com/40x40/007bff/fff?text=U';
   }
 }

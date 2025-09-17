@@ -1,54 +1,13 @@
 <div class="dashboard-layout">
-  <!-- Barra superior -->
-  <header class="top-bar">
-    <div class="top-bar-left">
-      <button class="menu-toggle" (click)="toggleSidebar()" aria-label="Toggle menu">
-        <span class="hamburger-icon">☰</span>
-      </button>
-      <h1 class="app-title">Avaltrust Dashboard</h1>
-    </div>
-
-    <div class="top-bar-right">
-      <div class="user-menu" *ngIf="userProfile() as profile">
-        <button class="user-menu-trigger" (click)="toggleUserMenu()">
-          <img [src]="getUserAvatar()" alt="Avatar" class="user-avatar">
-          <span class="user-name">{{ profile.username }}</span>
-          <span class="dropdown-arrow">▼</span>
-        </button>
-
-        <!-- Menú desplegable del usuario -->
-        <div class="user-dropdown" [class.open]="isUserMenuOpen">
-          <div class="user-info">
-            <img [src]="getUserAvatar()" alt="Avatar" class="user-avatar-large">
-            <div class="user-details">
-              <div class="username">{{ profile.username }}</div>
-              <div class="user-role">{{ profile.isAdmin ? 'Administrador' : 'Usuario' }}</div>
-              <div class="user-email" *ngIf="profile.email">{{ profile.email }}</div>
-            </div>
-          </div>
-
-          <div class="dropdown-divider"></div>
-
-          <button class="dropdown-item" (click)="navigateTo('/user/profile'); closeUserMenu()">
-            <span class="item-icon">👤</span>
-            Mi Perfil
-          </button>
-
-          <button class="dropdown-item" (click)="navigateTo('/user/settings'); closeUserMenu()">
-            <span class="item-icon">⚙️</span>
-            Configuración
-          </button>
-
-          <div class="dropdown-divider"></div>
-
-          <button class="dropdown-item logout-item" (click)="logout()">
-            <span class="item-icon">🚪</span>
-            Cerrar Sesión
-          </button>
-        </div>
-      </div>
-    </div>
-  </header>
+  <!-- Header componente -->
+  <app-header
+    [isUserMenuOpen]="isUserMenuOpen"
+    (toggleSidebar)="toggleSidebar()"
+    (toggleUserMenu)="toggleUserMenu()"
+    (closeUserMenu)="closeUserMenu()"
+    (navigate)="onHeaderNavigate($event)"
+    (logout)="logout()">
+  </app-header>
 
   <!-- Overlay para cerrar menús en móvil -->
   <div

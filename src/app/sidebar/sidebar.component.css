@@ -1,12 +1,11 @@
-
 /* Sidebar principal */
 .sidebar {
   position: fixed;
-  top: 0;
+  top: 64px; /* Inicia debajo del header */
   left: -280px;
   width: 280px;
-  height: 100vh;
-  z-index: 1000;
+  height: calc(100vh - 64px); /* Altura ajustada para el header */
+  z-index: 1001; /* Menor que el header */
   transition: left 0.5s cubic-bezier(0.16, 1, 0.3, 1);
   overflow: hidden;
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.8);
@@ -127,7 +126,7 @@
 
 /* Header minimalista */
 .sidebar-header {
-  padding: 2.5rem 1.5rem 2rem;
+  padding: 2rem 1.5rem 1.5rem; /* Reducido el padding superior */
   position: relative;
 }
 
@@ -210,7 +209,7 @@
 /* Navegación minimalista */
 .sidebar-nav {
   flex: 1;
-  padding: 1.5rem 0;
+  padding: 1rem 0; /* Reducido el padding */
   overflow-y: auto;
 }
 
@@ -422,10 +421,12 @@
   .sidebar {
     width: 300px;
     left: -300px;
+    top: 64px; /* También en móvil respeta el header */
+    height: calc(100vh - 64px);
   }
 
   .sidebar-header {
-    padding: 2rem 1rem 1.5rem;
+    padding: 1.5rem 1rem 1rem; /* Reducido para móvil */
   }
 
   .nav-container {
@@ -434,6 +435,10 @@
 
   .nav-link-inner {
     padding: 1rem 1.25rem;
+  }
+
+  .sidebar-nav {
+    padding: 0.75rem 0; /* Reducido para móvil */
   }
 }
 

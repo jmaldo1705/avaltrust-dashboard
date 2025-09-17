@@ -6,205 +6,6 @@
   flex-direction: column;
 }
 
-/* Barra superior */
-.top-bar {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 64px;
-  background: white;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0 1rem;
-  z-index: 1001;
-}
-
-.top-bar-left {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-}
-
-.menu-toggle {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 40px;
-  height: 40px;
-  background: transparent;
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
-  transition: background-color 0.2s;
-}
-
-.menu-toggle:hover {
-  background: #f1f5f9;
-}
-
-.hamburger-icon {
-  font-size: 1.25rem;
-  color: #334155;
-}
-
-.app-title {
-  font-size: 1.5rem;
-  font-weight: 700;
-  color: #1e293b;
-  margin: 0;
-}
-
-.top-bar-right {
-  display: flex;
-  align-items: center;
-}
-
-/* Menú de usuario */
-.user-menu {
-  position: relative;
-}
-
-.user-menu-trigger {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0.5rem 1rem;
-  background: transparent;
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
-  transition: background-color 0.2s;
-}
-
-.user-menu-trigger:hover {
-  background: #f1f5f9;
-}
-
-.user-avatar {
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
-  border: 2px solid #e2e8f0;
-}
-
-.user-name {
-  font-weight: 500;
-  color: #1e293b;
-  margin: 0 0.25rem;
-}
-
-.dropdown-arrow {
-  color: #64748b;
-  font-size: 0.75rem;
-  transition: transform 0.2s;
-}
-
-.user-menu:hover .dropdown-arrow {
-  transform: rotate(180deg);
-}
-
-.user-dropdown {
-  position: absolute;
-  top: 100%;
-  right: 0;
-  width: 280px;
-  background: white;
-  border: 1px solid #e2e8f0;
-  border-radius: 12px;
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
-  opacity: 0;
-  visibility: hidden;
-  transform: translateY(-10px);
-  transition: all 0.2s ease;
-  z-index: 1000;
-  margin-top: 0.5rem;
-}
-
-.user-dropdown.open {
-  opacity: 1;
-  visibility: visible;
-  transform: translateY(0);
-}
-
-.user-info {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  padding: 1rem;
-}
-
-.user-avatar-large {
-  width: 48px;
-  height: 48px;
-  border-radius: 50%;
-  border: 2px solid #e2e8f0;
-}
-
-.user-details {
-  flex: 1;
-}
-
-.username {
-  font-weight: 600;
-  color: #1e293b;
-  margin-bottom: 0.25rem;
-}
-
-.user-role {
-  font-size: 0.8rem;
-  color: #64748b;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  margin-bottom: 0.125rem;
-}
-
-.user-email {
-  font-size: 0.85rem;
-  color: #64748b;
-}
-
-.dropdown-divider {
-  height: 1px;
-  background: #e2e8f0;
-  margin: 0.5rem 0;
-}
-
-.dropdown-item {
-  width: 100%;
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  padding: 0.75rem 1rem;
-  background: transparent;
-  border: none;
-  color: #374151;
-  font-size: 0.9rem;
-  cursor: pointer;
-  transition: background-color 0.2s;
-  text-align: left;
-}
-
-.dropdown-item:hover {
-  background: #f8fafc;
-}
-
-.dropdown-item.logout-item {
-  color: #dc2626;
-}
-
-.dropdown-item.logout-item:hover {
-  background: #fef2f2;
-}
-
-.item-icon {
-  font-size: 1rem;
-  width: 1.25rem;
-  text-align: center;
-}
-
 /* Overlay */
 .overlay {
   position: fixed;
@@ -216,7 +17,7 @@
   opacity: 0;
   visibility: hidden;
   transition: all 0.3s ease;
-  z-index: 999;
+  z-index: 1000; /* Por debajo del sidebar y header */
 }
 
 .overlay.active {
@@ -234,6 +35,7 @@
   width: 100%;
   box-sizing: border-box;
 }
+
 
 .content-header {
   margin-bottom: 2rem;
@@ -425,10 +227,6 @@
 
 /* Responsive Design */
 @media (min-width: 768px) {
-  .menu-toggle {
-    display: none;
-  }
-
   .main-content {
     margin-left: 280px;
   }
@@ -436,7 +234,7 @@
 
 @media (min-width: 1024px) {
   .main-content {
-    margin-left: 320px;
+    margin-left: 320px; /* Ajustado si cambias el ancho del sidebar */
     padding: 3rem;
   }
 
@@ -450,20 +248,9 @@
 }
 
 @media (max-width: 767px) {
-  .top-bar {
-    padding: 0 0.75rem;
-  }
-
-  .app-title {
-    font-size: 1.25rem;
-  }
-
-  .user-name {
-    display: none;
-  }
-
   .main-content {
     padding: 1rem;
+    margin-left: 0; /* En móvil no hay margen porque el sidebar se oculta */
   }
 
   .dashboard-cards {
