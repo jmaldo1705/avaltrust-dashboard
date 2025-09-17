@@ -21,24 +21,10 @@ export class SidebarComponent {
 
   userProfile = this.auth.userProfile;
 
-  // Elementos del menú para usuarios
-  userMenuItems = [
-    { label: 'Mis Solicitudes', icon: '📋', route: '/user/requests' },
-    { label: 'Mis Documentos', icon: '📄', route: '/user/documents' },
-    { label: 'Mi Perfil', icon: '👤', route: '/user/profile' },
-    { label: 'Configuración', icon: '⚙️', route: '/user/settings' },
-    { label: 'Contactar Soporte', icon: '📞', route: '/user/support' }
-  ];
-
-  // Elementos del menú para administradores
-  adminMenuItems = [
-    { label: 'Dashboard Admin', icon: '📊', route: '/admin/dashboard' },
-    { label: 'Gestionar Usuarios', icon: '👥', route: '/admin/users' },
-    { label: 'Reportes', icon: '📈', route: '/admin/reports' },
-    { label: 'Configuración del Sistema', icon: '⚡', route: '/admin/settings' },
-    { label: 'Auditoría', icon: '🔍', route: '/admin/audit' },
-    { label: 'Respaldo y Restauración', icon: '💾', route: '/admin/backup' }
-  ];
+  // Método para verificar si una ruta está activa
+  isActive(route: string): boolean {
+    return this.router.url === route || this.router.url.startsWith(route + '/');
+  }
 
   navigateTo(route: string) {
     this.navigate.emit(route);
@@ -49,28 +35,8 @@ export class SidebarComponent {
     this.sidebarClose.emit();
   }
 
-  goToAdmin() {
-    this.navigateTo('/admin');
-  }
-
-  goToUserArea() {
-    this.navigateTo('/user');
-  }
-
-  // Obtener elementos del menú según el rol del usuario
-  getMenuItems() {
-    const profile = this.userProfile();
-    if (!profile) return [];
-
-    if (profile.isAdmin) {
-      return [...this.adminMenuItems, ...this.userMenuItems];
-    } else {
-      return this.userMenuItems;
-    }
-  }
-
   // Obtener imagen de perfil (por defecto un avatar genérico)
   getUserAvatar() {
-    return 'https://via.placeholder.com/40x40/007bff/fff?text=U';
+    return 'https://via.placeholder.com/44x44/3b82f6/fff?text=U';
   }
 }
