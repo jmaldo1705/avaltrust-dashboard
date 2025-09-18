@@ -52,28 +52,11 @@ function checkRoleAccess(
     return true;
   }
 
-  // No tiene los roles necesarios
+  // No tiene los roles necesarios - redirigir al dashboard
   console.warn(`Acceso denegado. Roles requeridos: ${requiredRoles.join(', ')}`);
-
-  // Mostrar mensaje de error
   alert('No tienes permisos para acceder a esta página.');
 
-  // Redirigir a la página apropiada según el rol del usuario
-  authService.redirectToAppropriateRoute();
-
+  // Siempre redirigir al dashboard
+  router.navigate(['/dashboard']);
   return false;
 }
-
-// Guard específico para administradores
-export const adminGuard: CanActivateFn = (route: ActivatedRouteSnapshot, state: RouterStateSnapshot) => {
-  // Establecer roles requeridos para admin y usar el guard principal
-  route.data = { ...route.data, roles: ['ROLE_ADMIN'] };
-  return authGuard(route, state);
-};
-
-// Guard específico para usuarios (incluye admins)
-export const userGuard: CanActivateFn = (route: ActivatedRouteSnapshot, state: RouterStateSnapshot) => {
-  // Establecer roles requeridos para usuarios y usar el guard principal
-  route.data = { ...route.data, roles: ['ROLE_USER', 'ROLE_ADMIN'] };
-  return authGuard(route, state);
-};

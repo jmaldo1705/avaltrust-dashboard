@@ -61,16 +61,6 @@ export class DashboardComponent implements OnInit {
     this.navigateTo(route);
   }
 
-  goToAdmin() {
-    this.router.navigate(['/admin']);
-    this.closeSidebar();
-  }
-
-  goToUserArea() {
-    this.router.navigate(['/user']);
-    this.closeSidebar();
-  }
-
   logout() {
     this.auth.logout(true);
   }

@@ -41,13 +41,11 @@ export class LoginComponent {
 
           this.loading.set(false);
 
-          if (returnUrl) {
+          if (returnUrl && returnUrl !== '/admin' && returnUrl !== '/user') {
             this.router.navigateByUrl(returnUrl);
           } else {
-            // Esperar un momento para que se cargue el perfil y luego redirigir
-            setTimeout(() => {
-              this.auth.redirectToAppropriateRoute();
-            }, 500); // Aumenté el tiempo para asegurar que se carguen los datos
+            // Siempre redirigir al dashboard después del login
+            this.router.navigate(['/dashboard']);
           }
         },
         error: (err) => {

@@ -4,14 +4,14 @@
   top: 0;
   left: 0;
   right: 0;
-  height: 64px;
-  background: white;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  height: 64px; /* Aumentado de 64px a 80px */
+  background: #1a1f2e; /* Azul muy oscuro casi negro */
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0 1rem;
-  z-index: 1002; /* Aumentado para estar por encima del sidebar */
+  padding: 0 1.5rem; /* Aumentado el padding */
+  z-index: 1002;
 }
 
 .top-bar-left {
@@ -21,7 +21,7 @@
 }
 
 .menu-toggle {
-  display: flex;
+  display: none; /* Oculto por defecto, solo visible en móvil */
   align-items: center;
   justify-content: center;
   width: 40px;
@@ -34,18 +34,32 @@
 }
 
 .menu-toggle:hover {
-  background: #f1f5f9;
+  background: rgba(255, 255, 255, 0.1);
 }
 
 .hamburger-icon {
   font-size: 1.25rem;
-  color: #334155;
+  color: #ffffff;
+}
+
+/* Contenedor del brand (logo + título) */
+.brand-container {
+  display: flex;
+  align-items: center;
+  gap: 1rem; /* Aumentado el gap */
+}
+
+.header-logo {
+  height: 50px; /* Aumentado de 40px a 50px */
+  width: auto;
+  max-width: 180px; /* Aumentado el máximo ancho */
+  object-fit: contain;
 }
 
 .app-title {
-  font-size: 1.5rem;
+  font-size: 1.6rem; /* Ligeramente más grande */
   font-weight: 700;
-  color: #1e293b;
+  color: #ffffff;
   margin: 0;
 }
 
@@ -72,24 +86,24 @@
 }
 
 .user-menu-trigger:hover {
-  background: #f1f5f9;
+  background: rgba(255, 255, 255, 0.1);
 }
 
 .user-avatar {
-  width: 32px;
-  height: 32px;
+  width: 36px; /* Ligeramente más grande */
+  height: 36px;
   border-radius: 50%;
-  border: 2px solid #e2e8f0;
+  border: 2px solid rgba(255, 255, 255, 0.2);
 }
 
 .user-name {
   font-weight: 500;
-  color: #1e293b;
+  color: #ffffff;
   margin: 0 0.25rem;
 }
 
 .dropdown-arrow {
-  color: #64748b;
+  color: rgba(255, 255, 255, 0.7);
   font-size: 0.75rem;
   transition: transform 0.2s;
 }
@@ -106,12 +120,12 @@
   background: white;
   border: 1px solid #e2e8f0;
   border-radius: 12px;
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
   opacity: 0;
   visibility: hidden;
   transform: translateY(-10px);
   transition: all 0.2s ease;
-  z-index: 1003; /* Aumentado para estar por encima de todo */
+  z-index: 1003;
   margin-top: 0.5rem;
 }
 
@@ -198,22 +212,45 @@
 }
 
 /* Responsive Design */
-@media (min-width: 768px) {
-  .menu-toggle {
-    display: none;
-  }
-}
-
 @media (max-width: 767px) {
+  .menu-toggle {
+    display: flex; /* Solo visible en móvil */
+  }
+
   .top-bar {
-    padding: 0 0.75rem;
+    padding: 0 1rem;
+    height: 70px; /* Ligeramente más pequeño en móvil */
   }
 
   .app-title {
-    font-size: 1.25rem;
+    font-size: 1.4rem;
   }
 
   .user-name {
     display: none;
+  }
+
+  .header-logo {
+    height: 40px;
+    max-width: 140px;
+  }
+
+  .brand-container {
+    gap: 0.75rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .app-title {
+    display: none; /* Ocultar título en pantallas muy pequeñas */
+  }
+
+  .header-logo {
+    height: 36px;
+    max-width: 120px;
+  }
+
+  .top-bar {
+    height: 64px; /* Más compacto en pantallas muy pequeñas */
   }
 }

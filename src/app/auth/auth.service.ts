@@ -159,17 +159,9 @@ export class AuthService {
     return permissions?.permissions?.[permission] || false;
   }
 
-  /**
-   * Redirige al usuario a la ruta apropiada según su rol
-   */
   redirectToAppropriateRoute(): void {
-    if (this.isAdmin()) {
-      this.router.navigate(['/admin']);
-    } else if (this.isUser()) {
-      this.router.navigate(['/user']);
-    } else {
-      this.router.navigate(['/dashboard']);
-    }
+    // Siempre redirigir al dashboard sin importar el rol
+    this.router.navigate(['/dashboard']);
   }
 
   login(username: string, password: string): Observable<AuthUser> {

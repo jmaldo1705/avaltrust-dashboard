@@ -1,49 +1,62 @@
+
 <header class="top-bar">
   <div class="top-bar-left">
     <button class="menu-toggle" (click)="onToggleSidebar()" aria-label="Toggle menu">
       <span class="hamburger-icon">☰</span>
     </button>
-    <h1 class="app-title">Avaltrust Dashboard</h1>
+    <div class="brand-container">
+      <img
+        ngSrc="assets/images/logo.png"
+        alt="Avaltrust Logo"
+        class="header-logo"
+        width="449"
+        height="142"
+        priority>
+    </div>
   </div>
 
   <div class="top-bar-right">
-    <div class="user-menu" *ngIf="userProfile() as profile">
-      <button class="user-menu-trigger" (click)="onToggleUserMenu()">
-        <img [src]="getUserAvatar()" alt="Avatar" class="user-avatar">
-        <span class="user-name">{{ profile.username }}</span>
-        <span class="dropdown-arrow">▼</span>
-      </button>
+    @if (userProfile(); as profile) {
+      <div class="user-menu">
+        <button class="user-menu-trigger" (click)="onToggleUserMenu()">
+          <img [src]="getUserAvatar()" alt="Avatar" class="user-avatar">
+          <span class="user-name">{{ profile.username }}</span>
+          <span class="dropdown-arrow">▼</span>
+        </button>
 
-      <!-- Menú desplegable del usuario -->
-      <div class="user-dropdown" [class.open]="isUserMenuOpen">
-        <div class="user-info">
-          <img [src]="getUserAvatar()" alt="Avatar" class="user-avatar-large">
-          <div class="user-details">
-            <div class="username">{{ profile.username }}</div>
-            <div class="user-role">{{ profile.isAdmin ? 'Administrador' : 'Usuario' }}</div>
-            <div class="user-email" *ngIf="profile.email">{{ profile.email }}</div>
+        <!-- Menú desplegable del usuario -->
+        <div class="user-dropdown" [class.open]="isUserMenuOpen">
+          <div class="user-info">
+            <img [src]="getUserAvatar()" alt="Avatar" class="user-avatar-large">
+            <div class="user-details">
+              <div class="username">{{ profile.username }}</div>
+              <div class="user-role">{{ profile.isAdmin ? 'Administrador' : 'Usuario' }}</div>
+              @if (profile.email) {
+                <div class="user-email">{{ profile.email }}</div>
+              }
+            </div>
           </div>
+
+          <div class="dropdown-divider"></div>
+
+          <button class="dropdown-item" (click)="onNavigate('/user/profile')">
+            <span class="item-icon">👤</span>
+            Mi Perfil
+          </button>
+
+          <button class="dropdown-item" (click)="onNavigate('/user/settings')">
+            <span class="item-icon">⚙️</span>
+            Configuración
+          </button>
+
+          <div class="dropdown-divider"></div>
+
+          <button class="dropdown-item logout-item" (click)="onLogout()">
+            <span class="item-icon">🚪</span>
+            Cerrar Sesión
+          </button>
         </div>
-
-        <div class="dropdown-divider"></div>
-
-        <button class="dropdown-item" (click)="onNavigate('/user/profile')">
-          <span class="item-icon">👤</span>
-          Mi Perfil
-        </button>
-
-        <button class="dropdown-item" (click)="onNavigate('/user/settings')">
-          <span class="item-icon">⚙️</span>
-          Configuración
-        </button>
-
-        <div class="dropdown-divider"></div>
-
-        <button class="dropdown-item logout-item" (click)="onLogout()">
-          <span class="item-icon">🚪</span>
-          Cerrar Sesión
-        </button>
       </div>
-    </div>
+    }
   </div>
 </header>

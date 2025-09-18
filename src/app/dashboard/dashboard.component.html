@@ -37,33 +37,23 @@
 
     <!-- Cards de resumen -->
     <div class="dashboard-cards">
-      <!-- Card para administradores -->
-      <div class="dashboard-card admin-card" *appHasRole="'ROLE_ADMIN'">
-        <div class="card-icon admin-icon">⚙️</div>
-        <div class="card-content">
-          <h3>Panel de Administración</h3>
-          <p>Gestiona usuarios, configura el sistema y accede a reportes detallados.</p>
-          <button class="card-button" (click)="goToAdmin()">Acceder al Panel</button>
-        </div>
-      </div>
-
-      <!-- Card para usuarios -->
-      <div class="dashboard-card user-card">
-        <div class="card-icon user-icon">👤</div>
-        <div class="card-content">
-          <h3>Mi Área Personal</h3>
-          <p>Accede a tus documentos, solicitudes y configura tu perfil.</p>
-          <button class="card-button" (click)="goToUserArea()">Ir a Mi Área</button>
-        </div>
-      </div>
-
-      <!-- Card de estadísticas (ejemplo) -->
+      <!-- Card de estadísticas -->
       <div class="dashboard-card stats-card">
         <div class="card-icon stats-icon">📊</div>
         <div class="card-content">
           <h3>Estadísticas</h3>
           <p>Revisa tu actividad y estadísticas de uso del sistema.</p>
-          <button class="card-button" (click)="navigateTo('/user/stats')">Ver Estadísticas</button>
+          <button class="card-button" (click)="navigateTo('/dashboard/stats')">Ver Estadísticas</button>
+        </div>
+      </div>
+
+      <!-- Card de documentos -->
+      <div class="dashboard-card user-card">
+        <div class="card-icon user-icon">📄</div>
+        <div class="card-content">
+          <h3>Mis Documentos</h3>
+          <p>Accede a tus documentos y archivos personales.</p>
+          <button class="card-button" (click)="navigateTo('/dashboard/documents')">Ver Documentos</button>
         </div>
       </div>
 
@@ -73,7 +63,17 @@
         <div class="card-content">
           <h3>Soporte</h3>
           <p>¿Necesitas ayuda? Contacta con nuestro equipo de soporte.</p>
-          <button class="card-button" (click)="navigateTo('/user/support')">Contactar</button>
+          <button class="card-button" (click)="navigateTo('/dashboard/support')">Contactar</button>
+        </div>
+      </div>
+
+      <!-- Card adicional para administradores -->
+      <div class="dashboard-card admin-card" *appHasRole="'ROLE_ADMIN'">
+        <div class="card-icon admin-icon">⚙️</div>
+        <div class="card-content">
+          <h3>Herramientas de Admin</h3>
+          <p>Accede a las funciones administrativas del sistema.</p>
+          <button class="card-button" (click)="navigateTo('/dashboard/admin-tools')">Ver Herramientas</button>
         </div>
       </div>
     </div>
@@ -82,35 +82,31 @@
     <div class="quick-actions">
       <h3>Acciones Rápidas</h3>
       <div class="actions-grid">
-        <!-- Acciones para administradores -->
-        <div *appHasRole="'ROLE_ADMIN'" class="action-group">
-          <button class="action-btn admin-action" (click)="navigateTo('/admin/users')">
-            <span class="action-icon">👥</span>
-            Gestionar Usuarios
+        <!-- Acciones generales -->
+        <div class="action-group">
+          <button class="action-btn user-action" (click)="navigateTo('/dashboard/requests')">
+            <span class="action-icon">📋</span>
+            Nueva Solicitud
           </button>
-          <button class="action-btn admin-action" (click)="navigateTo('/admin/reports')">
-            <span class="action-icon">📈</span>
-            Ver Reportes
+          <button class="action-btn user-action" (click)="navigateTo('/dashboard/profile')">
+            <span class="action-icon">🔧</span>
+            Editar Perfil
           </button>
-          <button class="action-btn admin-action" (click)="navigateTo('/admin/settings')">
+          <button class="action-btn user-action" (click)="navigateTo('/dashboard/settings')">
             <span class="action-icon">⚡</span>
             Configuración
           </button>
         </div>
 
-        <!-- Acciones para usuarios -->
-        <div class="action-group">
-          <button class="action-btn user-action" (click)="navigateTo('/user/requests')">
-            <span class="action-icon">📋</span>
-            Nueva Solicitud
+        <!-- Acciones adicionales para administradores -->
+        <div *appHasRole="'ROLE_ADMIN'" class="action-group">
+          <button class="action-btn admin-action" (click)="navigateTo('/dashboard/manage-users')">
+            <span class="action-icon">👥</span>
+            Gestionar Usuarios
           </button>
-          <button class="action-btn user-action" (click)="navigateTo('/user/documents')">
-            <span class="action-icon">📄</span>
-            Mis Documentos
-          </button>
-          <button class="action-btn user-action" (click)="navigateTo('/user/profile')">
-            <span class="action-icon">🔧</span>
-            Editar Perfil
+          <button class="action-btn admin-action" (click)="navigateTo('/dashboard/reports')">
+            <span class="action-icon">📈</span>
+            Ver Reportes
           </button>
         </div>
       </div>
