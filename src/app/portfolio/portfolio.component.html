@@ -7,12 +7,15 @@
   </app-sidebar>
 
   <!-- Overlay para móvil -->
-  <div class="overlay" [class.active]="isSidebarOpen" (click)="closeSidebar()"></div>
+  <div class="overlay" [class.active]="isSidebarOpen || isUserMenuOpen" (click)="closeSidebar(); closeUserMenu()"></div>
 
   <!-- Header Component -->
   <app-header
     [isSidebarOpen]="isSidebarOpen"
+    [isUserMenuOpen]="isUserMenuOpen"
     (toggleSidebar)="toggleSidebar()"
+    (toggleUserMenu)="toggleUserMenu()"
+    (closeUserMenu)="closeUserMenu()"
     (navigate)="onHeaderNavigate($event)"
     (logout)="logout()">
   </app-header>
@@ -26,6 +29,7 @@
         Administre los registros de cartera mediante formulario manual o carga masiva de archivos
       </p>
     </div>
+
 
     <!-- Navegación por pestañas -->
     <div class="tabs-container">

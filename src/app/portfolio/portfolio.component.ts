@@ -61,12 +61,14 @@ export class PortfolioComponent implements OnInit {
 
   userProfile = this.auth.userProfile;
   isSidebarOpen = false;
+  isUserMenuOpen = false;
   activeTab: 'form' | 'upload' = 'form';
   isLoading = false;
 
   portfolioForm: FormGroup = this.fb.group({});
   uploadedFile: File | null = null;
   uploadResult: UploadResult | null = null;
+
 
   // Opciones para campos select
   documentTypes = [
@@ -297,6 +299,14 @@ export class PortfolioComponent implements OnInit {
     window.URL.revokeObjectURL(url);
   }
 
+  toggleUserMenu() {
+    this.isUserMenuOpen = !this.isUserMenuOpen;
+  }
+
+  closeUserMenu() {
+    this.isUserMenuOpen = false;
+  }
+
   // Navigation methods
   toggleSidebar() {
     this.isSidebarOpen = !this.isSidebarOpen;
@@ -304,6 +314,7 @@ export class PortfolioComponent implements OnInit {
 
   closeSidebar() {
     this.isSidebarOpen = false;
+    this.closeUserMenu();
   }
 
   navigateTo(route: string) {
