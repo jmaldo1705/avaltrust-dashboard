@@ -16,12 +16,18 @@ export class SidebarComponent {
   private router = inject(Router);
 
   @Input() isSidebarOpen = false;
+  @Input() isOpen = false; // ✅ Agregamos esta propiedad para compatibilidad
   @Output() sidebarClose = new EventEmitter<void>();
   @Output() navigate = new EventEmitter<string>();
+  @Output() close = new EventEmitter<void>(); // ✅ Agregamos este output para compatibilidad
 
   userProfile = this.auth.userProfile;
 
-  // Método para verificar si una ruta está activa
+  // Getter para determinar si el sidebar está abierto usando cualquiera de las dos propiedades
+  get isMenuOpen(): boolean {
+    return this.isSidebarOpen || this.isOpen;
+  }
+
   isActive(route: string): boolean {
     return this.router.url === route || this.router.url.startsWith(route + '/');
   }
@@ -33,6 +39,7 @@ export class SidebarComponent {
 
   closeSidebar() {
     this.sidebarClose.emit();
+    this.close.emit(); // Emitir ambos eventos para compatibilidad
   }
 
   // Obtener imagen de perfil (por defecto un avatar genérico)

@@ -14,6 +14,7 @@ export class HeaderComponent {
   private readonly router = inject(Router);
   private readonly auth = inject(AuthService);
 
+  @Input() isSidebarOpen = false;
   @Input() isUserMenuOpen = false;
   @Output() toggleSidebar = new EventEmitter<void>();
   @Output() toggleUserMenu = new EventEmitter<void>();

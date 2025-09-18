@@ -1,6 +1,7 @@
 <div class="dashboard-layout">
   <!-- Header componente -->
   <app-header
+    [isSidebarOpen]="isSidebarOpen"
     [isUserMenuOpen]="isUserMenuOpen"
     (toggleSidebar)="toggleSidebar()"
     (toggleUserMenu)="toggleUserMenu()"
@@ -8,6 +9,7 @@
     (navigate)="onHeaderNavigate($event)"
     (logout)="logout()">
   </app-header>
+
 
   <!-- Overlay para cerrar menús en móvil -->
   <div

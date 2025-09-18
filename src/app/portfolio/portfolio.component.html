@@ -1,0 +1,569 @@
+<div class="dashboard-layout">
+  <!-- Sidebar Component -->
+  <app-sidebar
+    [isOpen]="isSidebarOpen"
+    (navigate)="onSidebarNavigate($event)"
+    (close)="onSidebarClose()">
+  </app-sidebar>
+
+  <!-- Overlay para móvil -->
+  <div class="overlay" [class.active]="isSidebarOpen" (click)="closeSidebar()"></div>
+
+  <!-- Header Component -->
+  <app-header
+    [isSidebarOpen]="isSidebarOpen"
+    (toggleSidebar)="toggleSidebar()"
+    (navigate)="onHeaderNavigate($event)"
+    (logout)="logout()">
+  </app-header>
+
+  <!-- Contenido Principal -->
+  <main class="main-content">
+    <!-- Header de la página -->
+    <div class="content-header">
+      <h2>Cargue de Cartera</h2>
+      <p class="welcome-message">
+        Administre los registros de cartera mediante formulario manual o carga masiva de archivos
+      </p>
+    </div>
+
+    <!-- Navegación por pestañas -->
+    <div class="tabs-container">
+      <div class="tabs-nav">
+        <button
+          class="tab-btn"
+          [class.active]="activeTab === 'form'"
+          (click)="setActiveTab('form')">
+          <span class="tab-icon">📝</span>
+          <span class="tab-text">Formulario Manual</span>
+        </button>
+        <button
+          class="tab-btn"
+          [class.active]="activeTab === 'upload'"
+          (click)="setActiveTab('upload')">
+          <span class="tab-icon">📂</span>
+          <span class="tab-text">Carga Masiva</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Contenido de pestañas -->
+    <div class="tab-content">
+
+      <!-- Pestaña: Formulario Manual -->
+      <div class="tab-panel" [class.active]="activeTab === 'form'">
+        <div class="form-container">
+          <div class="form-header">
+            <h3>Nuevo Registro de Cartera</h3>
+            <p>Complete todos los campos obligatorios para agregar un nuevo registro</p>
+          </div>
+
+          <form [formGroup]="portfolioForm" (ngSubmit)="onSubmitForm()" class="portfolio-form">
+
+            <!-- Sección: Información del Cliente -->
+            <div class="form-section">
+              <div class="section-header">
+                <h4>Información del Cliente</h4>
+              </div>
+
+              <div class="form-grid">
+                <!-- Obligación -->
+                <div class="form-group">
+                  <label for="obligacion" class="form-label">
+                    Obligación <span class="required">*</span>
+                  </label>
+                  <input
+                    id="obligacion"
+                    type="text"
+                    formControlName="obligacion"
+                    class="form-control"
+                    placeholder="Ej: OBL-2025-0001"
+                    [class.error]="getFieldError('obligacion')">
+                  <div class="error-message" *ngIf="getFieldError('obligacion')">
+                    {{ getFieldError('obligacion') }}
+                  </div>
+                </div>
+
+                <!-- Tipo de Documento -->
+                <div class="form-group">
+                  <label for="tipoDocumento" class="form-label">
+                    Tipo de Documento <span class="required">*</span>
+                  </label>
+                  <select
+                    id="tipoDocumento"
+                    formControlName="tipoDocumento"
+                    class="form-control"
+                    [class.error]="getFieldError('tipoDocumento')">
+                    <option value="">Seleccione tipo</option>
+                    <option *ngFor="let type of documentTypes" [value]="type.value">
+                      {{ type.label }}
+                    </option>
+                  </select>
+                  <div class="error-message" *ngIf="getFieldError('tipoDocumento')">
+                    {{ getFieldError('tipoDocumento') }}
+                  </div>
+                </div>
+
+                <!-- Número de Documento -->
+                <div class="form-group">
+                  <label for="numeroDocumento" class="form-label">
+                    Número de Documento <span class="required">*</span>
+                  </label>
+                  <input
+                    id="numeroDocumento"
+                    type="text"
+                    formControlName="numeroDocumento"
+                    class="form-control"
+                    placeholder="Solo números"
+                    [class.error]="getFieldError('numeroDocumento')">
+                  <div class="error-message" *ngIf="getFieldError('numeroDocumento')">
+                    {{ getFieldError('numeroDocumento') }}
+                  </div>
+                </div>
+
+                <!-- Nombres -->
+                <div class="form-group">
+                  <label for="nombres" class="form-label">
+                    Nombres <span class="required">*</span>
+                  </label>
+                  <input
+                    id="nombres"
+                    type="text"
+                    formControlName="nombres"
+                    class="form-control"
+                    placeholder="Nombres completos"
+                    [class.error]="getFieldError('nombres')">
+                  <div class="error-message" *ngIf="getFieldError('nombres')">
+                    {{ getFieldError('nombres') }}
+                  </div>
+                </div>
+
+                <!-- Apellidos -->
+                <div class="form-group">
+                  <label for="apellidos" class="form-label">
+                    Apellidos <span class="required">*</span>
+                  </label>
+                  <input
+                    id="apellidos"
+                    type="text"
+                    formControlName="apellidos"
+                    class="form-control"
+                    placeholder="Apellidos completos"
+                    [class.error]="getFieldError('apellidos')">
+                  <div class="error-message" *ngIf="getFieldError('apellidos')">
+                    {{ getFieldError('apellidos') }}
+                  </div>
+                </div>
+
+                <!-- Tipo Cliente -->
+                <div class="form-group">
+                  <label for="tipoCliente" class="form-label">
+                    Tipo de Cliente <span class="required">*</span>
+                  </label>
+                  <select
+                    id="tipoCliente"
+                    formControlName="tipoCliente"
+                    class="form-control"
+                    [class.error]="getFieldError('tipoCliente')">
+                    <option value="">Seleccione tipo</option>
+                    <option *ngFor="let type of clientTypes" [value]="type.value">
+                      {{ type.label }}
+                    </option>
+                  </select>
+                  <div class="error-message" *ngIf="getFieldError('tipoCliente')">
+                    {{ getFieldError('tipoCliente') }}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Sección: Información Financiera -->
+            <div class="form-section">
+              <div class="section-header">
+                <h4>Información Financiera</h4>
+              </div>
+
+              <div class="form-grid">
+                <!-- Fecha Desembolso -->
+                <div class="form-group">
+                  <label for="fechaDesembolso" class="form-label">
+                    Fecha de Desembolso <span class="required">*</span>
+                  </label>
+                  <input
+                    id="fechaDesembolso"
+                    type="date"
+                    formControlName="fechaDesembolso"
+                    class="form-control"
+                    [class.error]="getFieldError('fechaDesembolso')">
+                  <div class="error-message" *ngIf="getFieldError('fechaDesembolso')">
+                    {{ getFieldError('fechaDesembolso') }}
+                  </div>
+                </div>
+
+                <!-- Plazo Inicial -->
+                <div class="form-group">
+                  <label for="plazoInicial" class="form-label">
+                    Plazo Inicial (días) <span class="required">*</span>
+                  </label>
+                  <input
+                    id="plazoInicial"
+                    type="number"
+                    formControlName="plazoInicial"
+                    class="form-control"
+                    placeholder="Ej: 360"
+                    min="1"
+                    max="360"
+                    [class.error]="getFieldError('plazoInicial')">
+                  <div class="error-message" *ngIf="getFieldError('plazoInicial')">
+                    {{ getFieldError('plazoInicial') }}
+                  </div>
+                </div>
+
+                <!-- Valor Desembolso -->
+                <div class="form-group">
+                  <label for="valorDesembolso" class="form-label">
+                    Valor Desembolso <span class="required">*</span>
+                  </label>
+                  <input
+                    id="valorDesembolso"
+                    type="number"
+                    formControlName="valorDesembolso"
+                    class="form-control"
+                    placeholder="0.00"
+                    step="0.01"
+                    min="0.01"
+                    [class.error]="getFieldError('valorDesembolso')">
+                  <div class="error-message" *ngIf="getFieldError('valorDesembolso')">
+                    {{ getFieldError('valorDesembolso') }}
+                  </div>
+                </div>
+
+                <!-- Valor Aval -->
+                <div class="form-group">
+                  <label for="valorAval" class="form-label">
+                    Valor Aval <span class="required">*</span>
+                  </label>
+                  <input
+                    id="valorAval"
+                    type="number"
+                    formControlName="valorAval"
+                    class="form-control"
+                    placeholder="0.00"
+                    step="0.01"
+                    min="0"
+                    [class.error]="getFieldError('valorAval')">
+                  <div class="error-message" *ngIf="getFieldError('valorAval')">
+                    {{ getFieldError('valorAval') }}
+                  </div>
+                </div>
+
+                <!-- Interés -->
+                <div class="form-group">
+                  <label for="interes" class="form-label">
+                    Interés <span class="required">*</span>
+                  </label>
+                  <input
+                    id="interes"
+                    type="number"
+                    formControlName="interes"
+                    class="form-control"
+                    placeholder="0.00"
+                    step="0.01"
+                    min="0"
+                    [class.error]="getFieldError('interes')">
+                  <div class="error-message" *ngIf="getFieldError('interes')">
+                    {{ getFieldError('interes') }}
+                  </div>
+                </div>
+
+                <!-- Tasa Aval -->
+                <div class="form-group">
+                  <label for="tasaAval" class="form-label">
+                    Tasa Aval (%) <span class="required">*</span>
+                  </label>
+                  <input
+                    id="tasaAval"
+                    type="number"
+                    formControlName="tasaAval"
+                    class="form-control"
+                    placeholder="Ej: 18.5"
+                    step="0.1"
+                    min="0"
+                    max="100"
+                    [class.error]="getFieldError('tasaAval')">
+                  <div class="error-message" *ngIf="getFieldError('tasaAval')">
+                    {{ getFieldError('tasaAval') }}
+                  </div>
+                </div>
+
+                <!-- Otros Conceptos -->
+                <div class="form-group">
+                  <label for="otrosConceptos" class="form-label">Otros Conceptos</label>
+                  <input
+                    id="otrosConceptos"
+                    type="number"
+                    formControlName="otrosConceptos"
+                    class="form-control"
+                    placeholder="0.00"
+                    step="0.01"
+                    min="0">
+                </div>
+
+                <!-- Abono Aval -->
+                <div class="form-group">
+                  <label for="abonoAval" class="form-label">Abono Aval</label>
+                  <input
+                    id="abonoAval"
+                    type="number"
+                    formControlName="abonoAval"
+                    class="form-control"
+                    placeholder="0.00"
+                    step="0.01"
+                    min="0">
+                </div>
+
+                <!-- Abono Capital -->
+                <div class="form-group">
+                  <label for="abonoCapital" class="form-label">Abono Capital</label>
+                  <input
+                    id="abonoCapital"
+                    type="number"
+                    formControlName="abonoCapital"
+                    class="form-control"
+                    placeholder="0.00"
+                    step="0.01"
+                    min="0">
+                </div>
+
+                <!-- Total Deuda (calculado automáticamente) -->
+                <div class="form-group">
+                  <label for="totalDeuda" class="form-label">
+                    Total Deuda <span class="required">*</span>
+                  </label>
+                  <input
+                    id="totalDeuda"
+                    type="number"
+                    formControlName="totalDeuda"
+                    class="form-control auto-calculated"
+                    placeholder="0.00"
+                    readonly
+                    [class.error]="getFieldError('totalDeuda')">
+                  <small class="form-hint">Se calcula automáticamente</small>
+                  <div class="error-message" *ngIf="getFieldError('totalDeuda')">
+                    {{ getFieldError('totalDeuda') }}
+                  </div>
+                </div>
+
+                <!-- Fecha Vencimiento -->
+                <div class="form-group">
+                  <label for="fechaVencimiento" class="form-label">
+                    Fecha de Vencimiento <span class="required">*</span>
+                  </label>
+                  <input
+                    id="fechaVencimiento"
+                    type="date"
+                    formControlName="fechaVencimiento"
+                    class="form-control"
+                    [class.error]="getFieldError('fechaVencimiento')">
+                  <div class="error-message" *ngIf="getFieldError('fechaVencimiento')">
+                    {{ getFieldError('fechaVencimiento') }}
+                  </div>
+                </div>
+
+                <!-- Días de Mora -->
+                <div class="form-group">
+                  <label for="diasMora" class="form-label">Días de Mora</label>
+                  <input
+                    id="diasMora"
+                    type="number"
+                    formControlName="diasMora"
+                    class="form-control"
+                    placeholder="0"
+                    min="0">
+                </div>
+
+                <!-- Fecha de Pago -->
+                <div class="form-group">
+                  <label for="fechaPago" class="form-label">Fecha de Pago</label>
+                  <input
+                    id="fechaPago"
+                    type="date"
+                    formControlName="fechaPago"
+                    class="form-control">
+                </div>
+
+                <!-- Estado del Crédito -->
+                <div class="form-group">
+                  <label for="estadoCredito" class="form-label">
+                    Estado del Crédito <span class="required">*</span>
+                  </label>
+                  <select
+                    id="estadoCredito"
+                    formControlName="estadoCredito"
+                    class="form-control"
+                    [class.error]="getFieldError('estadoCredito')">
+                    <option value="">Seleccione estado</option>
+                    <option *ngFor="let state of creditStates" [value]="state.value">
+                      {{ state.label }}
+                    </option>
+                  </select>
+                  <div class="error-message" *ngIf="getFieldError('estadoCredito')">
+                    {{ getFieldError('estadoCredito') }}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Sección: Observaciones -->
+            <div class="form-section">
+              <div class="section-header">
+                <h4>Observaciones</h4>
+              </div>
+
+              <div class="form-group full-width">
+                <label for="observaciones" class="form-label">Observaciones</label>
+                <textarea
+                  id="observaciones"
+                  formControlName="observaciones"
+                  class="form-control textarea"
+                  placeholder="Información adicional sobre el registro..."
+                  rows="4"
+                  maxlength="500"
+                  [class.error]="getFieldError('observaciones')">
+                </textarea>
+                <div class="char-count">
+                  {{ portfolioForm.get('observaciones')?.value?.length || 0 }}/500 caracteres
+                </div>
+                <div class="error-message" *ngIf="getFieldError('observaciones')">
+                  {{ getFieldError('observaciones') }}
+                </div>
+              </div>
+            </div>
+
+            <!-- Botones de acción -->
+            <div class="form-actions">
+              <button
+                type="button"
+                class="btn-secondary"
+                (click)="portfolioForm.reset()"
+                [disabled]="isLoading">
+                Limpiar Formulario
+              </button>
+              <button
+                type="submit"
+                class="btn-primary"
+                [disabled]="isLoading || portfolioForm.invalid">
+                <span *ngIf="isLoading" class="loading-spinner"></span>
+                {{ isLoading ? 'Guardando...' : 'Guardar Registro' }}
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <!-- Pestaña: Carga Masiva -->
+      <div class="tab-panel" [class.active]="activeTab === 'upload'">
+        <div class="upload-container">
+          <div class="upload-header">
+            <h3>Carga Masiva de Registros</h3>
+            <p>Cargue múltiples registros de cartera usando archivos Excel o CSV</p>
+          </div>
+
+          <!-- Instrucciones -->
+          <div class="upload-instructions">
+            <h4>📋 Instrucciones de Carga</h4>
+            <ul>
+              <li>Descargue la plantilla oficial para evitar errores de formato</li>
+              <li>Complete todos los campos obligatorios en el archivo</li>
+              <li>Formatos soportados: Excel (.xls, .xlsx) y CSV (.csv)</li>
+              <li>Tamaño máximo del archivo: 10MB</li>
+              <li>Máximo 5,000 registros por archivo</li>
+            </ul>
+          </div>
+
+          <!-- Descargar plantilla -->
+          <div class="template-section">
+            <button
+              type="button"
+              class="btn-template"
+              (click)="downloadTemplate()">
+              <span class="btn-icon">📥</span>
+              Descargar Plantilla Excel
+            </button>
+          </div>
+
+          <!-- Área de carga de archivos -->
+          <div class="upload-area">
+            <div class="file-input-container">
+              <input
+                id="fileInput"
+                type="file"
+                accept=".xls,.xlsx,.csv"
+                (change)="onFileSelected($event)"
+                class="file-input">
+              <label for="fileInput" class="file-input-label">
+                <div class="upload-icon">📂</div>
+                <div class="upload-text">
+                  <span class="primary-text">
+                    {{ uploadedFile ? uploadedFile.name : 'Seleccionar archivo' }}
+                  </span>
+                  <span class="secondary-text">
+                    Arrastra un archivo aquí o haz clic para seleccionar
+                  </span>
+                </div>
+              </label>
+            </div>
+
+            <!-- Información del archivo seleccionado -->
+            <div class="file-info" *ngIf="uploadedFile">
+              <div class="file-details">
+                <span class="file-name">{{ uploadedFile.name }}</span>
+                <span class="file-size">{{ (uploadedFile.size / 1024 / 1024).toFixed(2) }} MB</span>
+              </div>
+            </div>
+
+            <!-- Botón de carga -->
+            <div class="upload-actions" *ngIf="uploadedFile">
+              <button
+                type="button"
+                class="btn-primary btn-upload"
+                (click)="onUploadFile()"
+                [disabled]="isLoading">
+                <span *ngIf="isLoading" class="loading-spinner"></span>
+                {{ isLoading ? 'Procesando archivo...' : 'Cargar Archivo' }}
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Resultado de la operación -->
+    <div class="result-container" *ngIf="uploadResult">
+      <div class="result-card" [ngClass]="uploadResult.success ? 'success' : 'error'">
+        <div class="result-icon">
+          {{ uploadResult.success ? '✅' : '❌' }}
+        </div>
+        <div class="result-content">
+          <h4>{{ uploadResult.success ? 'Operación Exitosa' : 'Error en la Operación' }}</h4>
+          <p>{{ uploadResult.message }}</p>
+          <div class="result-details" *ngIf="uploadResult.records">
+            <span>Registros procesados: <strong>{{ uploadResult.records }}</strong></span>
+          </div>
+          <div class="error-list" *ngIf="uploadResult.errors && uploadResult.errors.length > 0">
+            <h5>Errores encontrados:</h5>
+            <ul>
+              <li *ngFor="let error of uploadResult.errors">{{ error }}</li>
+            </ul>
+          </div>
+        </div>
+        <button
+          type="button"
+          class="result-close"
+          (click)="uploadResult = null">
+          ✕
+        </button>
+      </div>
+    </div>
+  </main>
+</div>
