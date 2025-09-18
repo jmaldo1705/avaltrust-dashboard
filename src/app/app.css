@@ -1,0 +1,35 @@
+/* Reset básico */
+* {
+  box-sizing: border-box;
+}
+
+/* Estilos globales */
+html, body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+}
+
+body {
+  overflow-x: hidden; /* Prevenir scroll horizontal */
+}
+
+/* Asegurar que no haya desbordamiento horizontal */
+#root, app-root {
+  width: 100%;
+  max-width: 100vw;
+  overflow-x: hidden;
+}
+
+/* Mejorar el rendimiento de las transiciones */
+* {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Mejorar la accesibilidad */
+:focus-visible {
+  outline: 2px solid #3b82f6;
+  outline-offset: 2px;
+}

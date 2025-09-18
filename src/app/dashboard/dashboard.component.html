@@ -26,88 +26,225 @@
   <!-- Contenido principal -->
   <main class="main-content">
     <div class="content-header">
-      <h2>Bienvenido al Sistema</h2>
-      <p *ngIf="userProfile() as profile" class="welcome-message">
-        Hola <strong>{{ profile.username }}</strong>, tienes acceso como
-        <span class="role-badge" [class.admin-badge]="profile.isAdmin" [class.user-badge]="!profile.isAdmin">
-          {{ profile.isAdmin ? 'Administrador' : 'Usuario' }}
-        </span>
+      <h2>Dashboard de Cartera Crediticia</h2>
+      <p class="welcome-message">
+        Resumen estadístico del cargue de cartera -
+        <span class="last-update">Última actualización: {{ getLastUpdateTime() }}</span>
       </p>
     </div>
 
-    <!-- Cards de resumen -->
-    <div class="dashboard-cards">
-      <!-- Card de estadísticas -->
-      <div class="dashboard-card stats-card">
-        <div class="card-icon stats-icon">📊</div>
-        <div class="card-content">
-          <h3>Estadísticas</h3>
-          <p>Revisa tu actividad y estadísticas de uso del sistema.</p>
-          <button class="card-button" (click)="navigateTo('/dashboard/stats')">Ver Estadísticas</button>
+    <!-- Métricas principales -->
+    <div class="metrics-grid">
+      <!-- Total de cartera -->
+      <div class="metric-card total-portfolio">
+        <div class="metric-icon">💰</div>
+        <div class="metric-content">
+          <h3>Cartera Total</h3>
+          <div class="metric-value">{{ portfolioStats.totalPortfolio | currency:'COP':'symbol':'1.0-0' }}</div>
+          <div class="metric-change positive">
+            <span class="change-icon">↗</span>
+            +{{ portfolioStats.portfolioGrowth }}% vs mes anterior
+          </div>
         </div>
       </div>
 
-      <!-- Card de documentos -->
-      <div class="dashboard-card user-card">
-        <div class="card-icon user-icon">📄</div>
-        <div class="card-content">
-          <h3>Mis Documentos</h3>
-          <p>Accede a tus documentos y archivos personales.</p>
-          <button class="card-button" (click)="navigateTo('/dashboard/documents')">Ver Documentos</button>
+      <!-- Usuarios activos -->
+      <div class="metric-card active-users">
+        <div class="metric-icon">👥</div>
+        <div class="metric-content">
+          <h3>Usuarios Activos</h3>
+          <div class="metric-value">{{ portfolioStats.activeUsers | number }}</div>
+          <div class="metric-subtitle">Con obligaciones crediticias</div>
         </div>
       </div>
 
-      <!-- Card de soporte -->
-      <div class="dashboard-card support-card">
-        <div class="card-icon support-icon">📞</div>
-        <div class="card-content">
-          <h3>Soporte</h3>
-          <p>¿Necesitas ayuda? Contacta con nuestro equipo de soporte.</p>
-          <button class="card-button" (click)="navigateTo('/dashboard/support')">Contactar</button>
+      <!-- Días de mora promedio -->
+      <div class="metric-card average-days">
+        <div class="metric-icon">📅</div>
+        <div class="metric-content">
+          <h3>Días de Mora Promedio</h3>
+          <div class="metric-value">{{ portfolioStats.averageDelayDays }}</div>
+          <div class="metric-change" [class.positive]="portfolioStats.delayDaysChange < 0" [class.negative]="portfolioStats.delayDaysChange > 0">
+            <span class="change-icon">{{ portfolioStats.delayDaysChange > 0 ? '↗' : '↘' }}</span>
+            {{ portfolioStats.delayDaysChange > 0 ? '+' : '' }}{{ portfolioStats.delayDaysChange }} días
+          </div>
         </div>
       </div>
 
-      <!-- Card adicional para administradores -->
-      <div class="dashboard-card admin-card" *appHasRole="'ROLE_ADMIN'">
-        <div class="card-icon admin-icon">⚙️</div>
-        <div class="card-content">
-          <h3>Herramientas de Admin</h3>
-          <p>Accede a las funciones administrativas del sistema.</p>
-          <button class="card-button" (click)="navigateTo('/dashboard/admin-tools')">Ver Herramientas</button>
+      <!-- Tasa de aval -->
+      <div class="metric-card guarantee-rate">
+        <div class="metric-icon">📊</div>
+        <div class="metric-content">
+          <h3>Tasa de Aval</h3>
+          <div class="metric-value">{{ portfolioStats.guaranteeRate }}%</div>
+          <div class="metric-subtitle">Promedio ponderado</div>
         </div>
       </div>
     </div>
 
-    <!-- Sección de acciones rápidas -->
-    <div class="quick-actions">
-      <h3>Acciones Rápidas</h3>
-      <div class="actions-grid">
-        <!-- Acciones generales -->
-        <div class="action-group">
-          <button class="action-btn user-action" (click)="navigateTo('/dashboard/requests')">
+    <!-- Gráficos y estadísticas detalladas -->
+    <div class="charts-grid">
+      <!-- Distribución por mora -->
+      <div class="chart-card">
+        <div class="chart-header">
+          <h3>Distribución por Días de Mora</h3>
+          <div class="chart-controls">
+            <button class="chart-btn active" (click)="setMoraView('distribution')">Distribución</button>
+            <button class="chart-btn" (click)="setMoraView('timeline')">Timeline</button>
+          </div>
+        </div>
+        <div class="chart-content">
+          <!-- Aquí iría tu componente de gráfico -->
+          <div class="mora-distribution">
+            <div class="mora-category" *ngFor="let category of moraDistribution">
+              <div class="category-header">
+                <span class="category-name">{{ category.name }}</span>
+                <span class="category-count">{{ category.count }} usuarios</span>
+              </div>
+              <div class="category-bar">
+                <div class="bar-fill" [style.width.%]="category.percentage" [class]="category.severity"></div>
+              </div>
+              <div class="category-amount">{{ category.amount | currency:'COP':'symbol':'1.0-0' }}</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Abonos e intereses -->
+      <div class="chart-card">
+        <div class="chart-header">
+          <h3>Abonos e Intereses</h3>
+          <div class="chart-period">
+            <select [(ngModel)]="selectedPeriod" (change)="loadPaymentData()">
+              <option value="month">Último mes</option>
+              <option value="quarter">Último trimestre</option>
+              <option value="year">Último año</option>
+            </select>
+          </div>
+        </div>
+        <div class="chart-content">
+          <div class="payment-summary">
+            <div class="payment-item">
+              <div class="payment-label">Total Abonos</div>
+              <div class="payment-value positive">{{ paymentStats.totalPayments | currency:'COP':'symbol':'1.0-0' }}</div>
+            </div>
+            <div class="payment-item">
+              <div class="payment-label">Intereses Generados</div>
+              <div class="payment-value">{{ paymentStats.totalInterest | currency:'COP':'symbol':'1.0-0' }}</div>
+            </div>
+            <div class="payment-item">
+              <div class="payment-label">Mora Acumulada</div>
+              <div class="payment-value negative">{{ paymentStats.totalPenalties | currency:'COP':'symbol':'1.0-0' }}</div>
+            </div>
+          </div>
+          <!-- Timeline de pagos -->
+          <div class="payment-timeline">
+            <div class="timeline-item" *ngFor="let payment of recentPayments">
+              <div class="timeline-date">{{ payment.date | date:'dd/MM' }}</div>
+              <div class="timeline-amount">{{ payment.amount | currency:'COP':'symbol':'1.0-0' }}</div>
+              <div class="timeline-type" [class]="payment.type">{{ payment.typeName }}</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Alertas y acciones -->
+    <div class="alerts-actions-grid">
+      <!-- Alertas importantes -->
+      <div class="alerts-card">
+        <div class="card-header">
+          <h3>Alertas Importantes</h3>
+          <span class="alert-count">{{ alerts.length }}</span>
+        </div>
+        <div class="alerts-list">
+          <div class="alert-item" *ngFor="let alert of alerts" [class]="alert.severity">
+            <div class="alert-icon">{{ getAlertIcon(alert.type) }}</div>
+            <div class="alert-content">
+              <div class="alert-title">{{ alert.title }}</div>
+              <div class="alert-description">{{ alert.description }}</div>
+              <div class="alert-time">{{ alert.timestamp | date:'short' }}</div>
+            </div>
+            <button class="alert-action" (click)="handleAlert(alert)">Ver</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Acciones rápidas -->
+      <div class="quick-actions-card">
+        <h3>Acciones Rápidas</h3>
+        <div class="actions-list">
+          <button class="action-btn primary" (click)="navigateTo('/portfolio/upload')">
+            <span class="action-icon">📤</span>
+            <div class="action-text">
+              <div class="action-title">Cargar Cartera</div>
+              <div class="action-subtitle">Subir nuevo archivo</div>
+            </div>
+          </button>
+
+          <button class="action-btn secondary" (click)="navigateTo('/portfolio/reports')">
             <span class="action-icon">📋</span>
-            Nueva Solicitud
+            <div class="action-text">
+              <div class="action-title">Generar Reporte</div>
+              <div class="action-subtitle">Exportar estadísticas</div>
+            </div>
           </button>
-          <button class="action-btn user-action" (click)="navigateTo('/dashboard/profile')">
-            <span class="action-icon">🔧</span>
-            Editar Perfil
+
+          <button class="action-btn secondary" (click)="navigateTo('/portfolio/search')">
+            <span class="action-icon">🔍</span>
+            <div class="action-text">
+              <div class="action-title">Buscar Usuario</div>
+              <div class="action-subtitle">Consultar obligaciones</div>
+            </div>
           </button>
-          <button class="action-btn user-action" (click)="navigateTo('/dashboard/settings')">
-            <span class="action-icon">⚡</span>
-            Configuración
+
+          <button class="action-btn tertiary" *appHasRole="'ROLE_ADMIN'" (click)="navigateTo('/admin/settings')">
+            <span class="action-icon">⚙️</span>
+            <div class="action-text">
+              <div class="action-title">Configuración</div>
+              <div class="action-subtitle">Parámetros del sistema</div>
+            </div>
           </button>
         </div>
+      </div>
+    </div>
 
-        <!-- Acciones adicionales para administradores -->
-        <div *appHasRole="'ROLE_ADMIN'" class="action-group">
-          <button class="action-btn admin-action" (click)="navigateTo('/dashboard/manage-users')">
-            <span class="action-icon">👥</span>
-            Gestionar Usuarios
-          </button>
-          <button class="action-btn admin-action" (click)="navigateTo('/dashboard/reports')">
-            <span class="action-icon">📈</span>
-            Ver Reportes
-          </button>
+    <!-- Top usuarios con mayor mora -->
+    <div class="top-delinquents-card">
+      <div class="card-header">
+        <h3>Usuarios con Mayor Mora</h3>
+        <button class="export-btn" (click)="exportTopDelinquents()">
+          <span>📊</span> Exportar
+        </button>
+      </div>
+      <div class="delinquents-table">
+        <div class="table-header">
+          <div class="col-name">Usuario</div>
+          <div class="col-amount">Monto Adeudado</div>
+          <div class="col-days">Días de Mora</div>
+          <div class="col-rate">Tasa Aval</div>
+          <div class="col-actions">Acciones</div>
+        </div>
+        <div class="table-row" *ngFor="let user of topDelinquentUsers; trackBy: trackByUserId">
+          <div class="col-name">
+            <div class="user-info">
+              <div class="user-name">{{ user.name }}</div>
+              <div class="user-id">{{ user.identification }}</div>
+            </div>
+          </div>
+          <div class="col-amount">
+            <span class="amount-value">{{ user.debtAmount | currency:'COP':'symbol':'1.0-0' }}</span>
+          </div>
+          <div class="col-days">
+            <span class="days-badge" [class]="getDaysSeverity(user.delayDays)">
+              {{ user.delayDays }} días
+            </span>
+          </div>
+          <div class="col-rate">{{ user.guaranteeRate }}%</div>
+          <div class="col-actions">
+            <button class="action-btn-small" (click)="viewUserDetail(user.id)">Ver</button>
+            <button class="action-btn-small contact" (click)="contactUser(user.id)">Contactar</button>
+          </div>
         </div>
       </div>
     </div>
