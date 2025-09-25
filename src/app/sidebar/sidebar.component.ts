@@ -12,20 +12,87 @@ import { HasRoleDirective } from '../auth/has-role.directive';
   styleUrls: ['./sidebar.component.css']
 })
 export class SidebarComponent {
-  private auth = inject(AuthService);
+  protected auth = inject(AuthService);
   private router = inject(Router);
 
   @Input() isSidebarOpen = false;
-  @Input() isOpen = false; // ✅ Agregamos esta propiedad para compatibilidad
+  @Input() isOpen = false;
   @Output() sidebarClose = new EventEmitter<void>();
   @Output() navigate = new EventEmitter<string>();
-  @Output() close = new EventEmitter<void>(); // ✅ Agregamos este output para compatibilidad
+  @Output() close = new EventEmitter<void>();
 
   userProfile = this.auth.userProfile;
 
-  // Getter para determinar si el sidebar está abierto usando cualquiera de las dos propiedades
   get isMenuOpen(): boolean {
     return this.isSidebarOpen || this.isOpen;
+  }
+
+  ngOnInit() {
+    console.log('SidebarComponent initialized');
+    console.log('UserProfile:', this.userProfile());
+    console.log('IsAdmin:', this.auth.isAdmin());
+    console.log('Roles:', this.userProfile()?.roles);
+  }
+
+  /**
+   * Obtiene el texto a mostrar basado en el rol del usuario
+   */
+  getUserRoleDisplay(): string {
+    const profile = this.userProfile();
+
+    if (!profile) {
+      return 'Usuario';
+    }
+
+    // Verificar roles específicos
+    if (this.auth.hasRole('ROLE_ADMIN') || profile.isAdmin) {
+      return 'Administrador';
+    }
+
+    if (this.auth.hasRole('ROLE_MANAGER')) {
+      return 'Gerente';
+    }
+
+    if (this.auth.hasRole('ROLE_SUPERVISOR')) {
+      return 'Supervisor';
+    }
+
+    if (this.auth.hasRole('ROLE_ANALYST')) {
+      return 'Analista';
+    }
+
+    if (this.auth.hasRole('ROLE_USER')) {
+      return 'Usuario';
+    }
+
+    // Fallback: usar el primer rol disponible y formatearlo
+    if (profile.roles && profile.roles.length > 0) {
+      const primaryRole = profile.roles[0];
+      return this.formatRoleName(primaryRole);
+    }
+
+    return 'Usuario';
+  }
+
+  /**
+   * Formatea el nombre del rol para mostrarlo de manera amigable
+   */
+  private formatRoleName(role: string): string {
+    // Remover prefijo ROLE_ si existe
+    const cleanRole = role.replace('ROLE_', '');
+
+    // Convertir a formato legible
+    switch (cleanRole.toLowerCase()) {
+      case 'admin': return 'Administrador';
+      case 'manager': return 'Gerente';
+      case 'supervisor': return 'Supervisor';
+      case 'analyst': return 'Analista';
+      case 'user': return 'Usuario';
+      case 'guest': return 'Invitado';
+      default:
+        // Capitalizar primera letra y reemplazar guiones bajos con espacios
+        return cleanRole.charAt(0).toUpperCase() + cleanRole.slice(1).toLowerCase().replace(/_/g, ' ');
+    }
   }
 
   isActive(route: string): boolean {

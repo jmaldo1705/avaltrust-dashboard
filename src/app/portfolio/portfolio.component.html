@@ -1,9 +1,11 @@
 <div class="dashboard-layout">
   <!-- Sidebar Component -->
   <app-sidebar
+    [isSidebarOpen]="isSidebarOpen"
     [isOpen]="isSidebarOpen"
     (navigate)="onSidebarNavigate($event)"
-    (close)="onSidebarClose()">
+    (close)="onSidebarClose()"
+    (sidebarClose)="closeSidebar()">
   </app-sidebar>
 
   <!-- Overlay para móvil -->
@@ -207,7 +209,7 @@
                 <!-- Plazo Inicial -->
                 <div class="form-group">
                   <label for="plazoInicial" class="form-label">
-                    Plazo Inicial (días) <span class="required">*</span>
+                    Cuotas <span class="required">*</span>
                   </label>
                   <input
                     id="plazoInicial"
@@ -415,31 +417,24 @@
                     {{ getFieldError('estadoCredito') }}
                   </div>
                 </div>
-              </div>
-            </div>
 
-            <!-- Sección: Observaciones -->
-            <div class="form-section">
-              <div class="section-header">
-                <h4>Observaciones</h4>
-              </div>
-
-              <div class="form-group full-width">
-                <label for="observaciones" class="form-label">Observaciones</label>
-                <textarea
-                  id="observaciones"
-                  formControlName="observaciones"
-                  class="form-control textarea"
-                  placeholder="Información adicional sobre el registro..."
-                  rows="4"
-                  maxlength="500"
-                  [class.error]="getFieldError('observaciones')">
-                </textarea>
-                <div class="char-count">
-                  {{ portfolioForm.get('observaciones')?.value?.length || 0 }}/500 caracteres
-                </div>
-                <div class="error-message" *ngIf="getFieldError('observaciones')">
-                  {{ getFieldError('observaciones') }}
+                <div class="form-group">
+                  <label for="periodicidad" class="form-label">
+                    Periodicidad <span class="required">*</span>
+                  </label>
+                  <select
+                    id="periodicidad"
+                    formControlName="periodicidad"
+                    class="form-control"
+                    [class.error]="getFieldError('periodicidad')">
+                    <option value="">Seleccione estado</option>
+                    <option *ngFor="let state of creditStates" [value]="state.value">
+                      {{ state.label }}
+                    </option>
+                  </select>
+                  <div class="error-message" *ngIf="getFieldError('periodicidad')">
+                    {{ getFieldError('periodicidad') }}
+                  </div>
                 </div>
               </div>
             </div>

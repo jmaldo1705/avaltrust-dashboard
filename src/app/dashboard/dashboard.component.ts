@@ -1,11 +1,13 @@
 import { Component, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
+import { FormsModule } from '@angular/forms';
+
 import { AuthService } from '../auth/auth.service';
-import { HasRoleDirective } from '../auth/has-role.directive';
-import { SidebarComponent } from '../sidebar/sidebar.component';
+import { UiStateService } from '../ui-state.service';
 import { HeaderComponent } from '../header/header.component';
+import { SidebarComponent } from '../sidebar/sidebar.component';
+import { HasRoleDirective } from '../auth/has-role.directive';
 
 // Interfaces para tipado
 interface PortfolioStats {
@@ -40,7 +42,7 @@ interface RecentPayment {
 
 interface Alert {
   id: string;
-  type: 'high_mora' | 'payment_delay' | 'system' | 'user_contact';
+  type: string;
   severity: 'info' | 'warning' | 'error';
   title: string;
   description: string;
@@ -59,17 +61,26 @@ interface DelinquentUser {
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [CommonModule, HasRoleDirective, SidebarComponent, HeaderComponent, FormsModule],
+  imports: [CommonModule, FormsModule, HeaderComponent, SidebarComponent, HasRoleDirective],
   templateUrl: './dashboard.component.html',
   styleUrls: ['./dashboard.component.css']
 })
 export class DashboardComponent implements OnInit {
-  auth = inject(AuthService);
-  private readonly router = inject(Router);
+  private router = inject(Router);
+  private auth = inject(AuthService);
+  private uiState = inject(UiStateService);
 
   userProfile = this.auth.userProfile;
-  isSidebarOpen = false;
-  isUserMenuOpen = false;
+
+  // Estados de UI usando el servicio compartido
+  get isSidebarOpen() {
+    return this.uiState.isSidebarOpen();
+  }
+
+  get isUserMenuOpen() {
+    return this.uiState.isUserMenuOpen();
+  }
+
   selectedPeriod = 'month';
   moraView = 'distribution';
 
@@ -207,41 +218,49 @@ export class DashboardComponent implements OnInit {
     return user.id;
   }
 
-  // Métodos existentes...
+  // Métodos para controlar el sidebar usando UiStateService
   toggleSidebar() {
-    this.isSidebarOpen = !this.isSidebarOpen;
-  }
-
-  toggleUserMenu() {
-    this.isUserMenuOpen = !this.isUserMenuOpen;
+    this.uiState.toggleSidebar();
   }
 
   closeSidebar() {
-    this.isSidebarOpen = false;
+    this.uiState.closeSidebar();
+  }
+
+  // Métodos para controlar el menú de usuario usando UiStateService
+  toggleUserMenu() {
+    this.uiState.toggleUserMenu();
   }
 
   closeUserMenu() {
-    this.isUserMenuOpen = false;
+    this.uiState.closeUserMenu();
   }
 
+  // Navegación principal
   navigateTo(route: string) {
     this.router.navigate([route]);
-    this.closeSidebar();
+    // No cerrar sidebar automáticamente para mantener estado
+    // Solo cerrar en móvil si es necesario
+    // this.uiState.closeSidebar();
   }
 
+  // Métodos de navegación del sidebar
   onSidebarNavigate(route: string) {
     this.navigateTo(route);
   }
 
   onSidebarClose() {
-    this.closeSidebar();
+    this.uiState.closeSidebar();
   }
 
+  // Métodos de navegación del header
   onHeaderNavigate(route: string) {
     this.navigateTo(route);
   }
 
+  // Método de logout
   logout() {
+    this.uiState.closeAllMenus();
     this.auth.logout(true);
   }
 }

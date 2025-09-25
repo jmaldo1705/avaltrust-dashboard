@@ -20,8 +20,8 @@
           </div>
         </div>
         <div class="brand-text">
-          <span class="brand-name">Avaltrust</span>
-          <span class="brand-subtitle">Dashboard</span>
+          <span class="brand-name">{{ getUserRoleDisplay() }}</span>
+          <span class="brand-subtitle">{{ userProfile()?.username || 'Usuario' }}</span>
         </div>
       </div>
     </div>
@@ -74,7 +74,7 @@
         </a>
 
         <!-- Gestión Usuarios - Solo Admin -->
-        <a class="nav-link"
+        <a class="nav-link admin-only"
            *appHasRole="'ROLE_ADMIN'"
            [class.active]="isActive('/admin/users')"
            (click)="navigateTo('/admin/users')">
@@ -96,6 +96,14 @@
           </div>
           <div class="nav-accent"></div>
         </a>
+
+        <!-- Debug info (temporal para depuración) -->
+        <!-- Quitar esto después de confirmar que funciona -->
+        <div class="debug-info" style="color: white; font-size: 12px; padding: 1rem; border-top: 1px solid rgba(255,255,255,0.1);">
+          <div>Profile: {{ userProfile() ? 'Loaded' : 'Not loaded' }}</div>
+          <div>IsAdmin: {{ auth.isAdmin() }}</div>
+          <div>Roles: {{ userProfile()?.roles | json }}</div>
+        </div>
 
       </div>
     </nav>

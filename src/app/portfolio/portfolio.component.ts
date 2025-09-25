@@ -1,340 +1,218 @@
 import { Component, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ReactiveFormsModule, FormBuilder, FormGroup, Validators, FormArray } from '@angular/forms';
 import { Router } from '@angular/router';
-import { HttpClient } from '@angular/common/http';
+import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
+
 import { AuthService } from '../auth/auth.service';
-import { HasRoleDirective } from '../auth/has-role.directive';
-import { SidebarComponent } from '../sidebar/sidebar.component';
+import { UiStateService } from '../ui-state.service';
 import { HeaderComponent } from '../header/header.component';
-
-// Interfaces para el formulario de cartera
-interface PortfolioRecord {
-  obligacion: string;
-  tipoDocumento: string;
-  numeroDocumento: string;
-  nombres: string;
-  apellidos: string;
-  fechaDesembolso: string;
-  plazoInicial: number;
-  valorDesembolso: number;
-  valorAval: number;
-  interes: number;
-  otrosConceptos: number;
-  abonoAval: number;
-  abonoCapital: number;
-  totalDeuda: number;
-  fechaVencimiento: string;
-  diasMora: number;
-  fechaPago?: string;
-  estadoCredito: string;
-  tipoCliente: string;
-  tasaAval: number;
-  observaciones?: string;
-}
-
-interface UploadResult {
-  success: boolean;
-  message: string;
-  records?: number;
-  errors?: string[];
-}
+import { SidebarComponent } from '../sidebar/sidebar.component';
 
 @Component({
   selector: 'app-portfolio',
   standalone: true,
-  imports: [
-    CommonModule,
-    ReactiveFormsModule,
-    HasRoleDirective,
-    SidebarComponent,
-    HeaderComponent
-  ],
+  imports: [CommonModule, ReactiveFormsModule, HeaderComponent, SidebarComponent],
   templateUrl: './portfolio.component.html',
   styleUrls: ['./portfolio.component.css']
 })
 export class PortfolioComponent implements OnInit {
-  private fb = inject(FormBuilder);
-  private http = inject(HttpClient);
   private router = inject(Router);
   private auth = inject(AuthService);
+  private fb = inject(FormBuilder);
+  private uiState = inject(UiStateService);
 
-  userProfile = this.auth.userProfile;
-  isSidebarOpen = false;
-  isUserMenuOpen = false;
+  // Estados de UI usando el servicio compartido
+  get isSidebarOpen() {
+    return this.uiState.isSidebarOpen();
+  }
+
+  get isUserMenuOpen() {
+    return this.uiState.isUserMenuOpen();
+  }
+
+  // Propiedades del componente
   activeTab: 'form' | 'upload' = 'form';
+  portfolioForm!: FormGroup;
   isLoading = false;
-
-  portfolioForm: FormGroup = this.fb.group({});
   uploadedFile: File | null = null;
-  uploadResult: UploadResult | null = null;
+  uploadResult: any = null;
 
-
-  // Opciones para campos select
+  // Opciones para los selects
   documentTypes = [
     { value: 'CC', label: 'Cédula de Ciudadanía' },
     { value: 'CE', label: 'Cédula de Extranjería' },
-    { value: 'PA', label: 'Pasaporte' },
-    { value: 'TI', label: 'Tarjeta de Identidad' },
-    { value: 'NIT', label: 'NIT' }
+    { value: 'NIT', label: 'NIT' },
+    { value: 'TI', label: 'Tarjeta de Identidad' }
+  ];
+
+  clientTypes = [
+    { value: 'NATURAL', label: 'Persona Natural' },
+    { value: 'JURIDICA', label: 'Persona Jurídica' }
   ];
 
   creditStates = [
     { value: 'VIGENTE', label: 'Vigente' },
-    { value: 'EN_MORA', label: 'En Mora' },
+    { value: 'VENCIDO', label: 'Vencido' },
     { value: 'CANCELADO', label: 'Cancelado' },
-    { value: 'CASTIGADO', label: 'Castigado' },
-    { value: 'RENOVADO', label: 'Renovado' }
-  ];
-
-  clientTypes = [
-    { value: 'PERSONA_NATURAL', label: 'Persona Natural' },
-    { value: 'PERSONA_JURIDICA', label: 'Persona Jurídica' },
-    { value: 'MICROEMPRESA', label: 'Microempresa' },
-    { value: 'PYME', label: 'PYME' }
+    { value: 'CASTIGADO', label: 'Castigado' }
   ];
 
   ngOnInit() {
     this.initializeForm();
-
-    if (!this.userProfile()) {
-      this.auth.getUserProfile().subscribe();
-    }
+    this.loadFormOptions();
   }
 
-  private initializeForm() {
-    this.portfolioForm = this.fb.group({
-      obligacion: ['', [Validators.required, Validators.minLength(3)]],
-      tipoDocumento: ['', Validators.required],
-      numeroDocumento: ['', [Validators.required, Validators.pattern(/^\d+$/)]],
-      nombres: ['', [Validators.required, Validators.minLength(2)]],
-      apellidos: ['', [Validators.required, Validators.minLength(2)]],
-      fechaDesembolso: ['', Validators.required],
-      plazoInicial: ['', [Validators.required, Validators.min(1), Validators.max(360)]],
-      valorDesembolso: ['', [Validators.required, Validators.min(0.01)]],
-      valorAval: ['', [Validators.required, Validators.min(0)]],
-      interes: ['', [Validators.required, Validators.min(0)]],
-      otrosConceptos: [0, [Validators.min(0)]],
-      abonoAval: [0, [Validators.min(0)]],
-      abonoCapital: [0, [Validators.min(0)]],
-      totalDeuda: ['', [Validators.required, Validators.min(0.01)]],
-      fechaVencimiento: ['', Validators.required],
-      diasMora: [0, [Validators.min(0)]],
-      fechaPago: [''],
-      estadoCredito: ['', Validators.required],
-      tipoCliente: ['', Validators.required],
-      tasaAval: ['', [Validators.required, Validators.min(0), Validators.max(100)]],
-      observaciones: ['', Validators.maxLength(500)]
-    });
-
-    // Auto-calcular total deuda cuando cambian los valores
-    this.portfolioForm.get('valorDesembolso')?.valueChanges.subscribe(() => this.calculateTotalDebt());
-    this.portfolioForm.get('interes')?.valueChanges.subscribe(() => this.calculateTotalDebt());
-    this.portfolioForm.get('otrosConceptos')?.valueChanges.subscribe(() => this.calculateTotalDebt());
-    this.portfolioForm.get('abonoAval')?.valueChanges.subscribe(() => this.calculateTotalDebt());
-    this.portfolioForm.get('abonoCapital')?.valueChanges.subscribe(() => this.calculateTotalDebt());
-  }
-
-  private calculateTotalDebt() {
-    const valorDesembolso = this.portfolioForm.get('valorDesembolso')?.value || 0;
-    const interes = this.portfolioForm.get('interes')?.value || 0;
-    const otrosConceptos = this.portfolioForm.get('otrosConceptos')?.value || 0;
-    const abonoAval = this.portfolioForm.get('abonoAval')?.value || 0;
-    const abonoCapital = this.portfolioForm.get('abonoCapital')?.value || 0;
-
-    const totalDeuda = (valorDesembolso + interes + otrosConceptos) - (abonoAval + abonoCapital);
-    this.portfolioForm.get('totalDeuda')?.setValue(Math.max(0, totalDeuda), { emitEvent: false });
-  }
-
-  setActiveTab(tab: 'form' | 'upload') {
-    this.activeTab = tab;
-    this.uploadResult = null;
-  }
-
-  getFieldError(fieldName: string): string | null {
-    const field = this.portfolioForm.get(fieldName);
-    if (!field || !field.errors || !field.touched) {
-      return null;
-    }
-
-    const errors = field.errors;
-    if (errors['required']) return 'Este campo es requerido';
-    if (errors['minlength']) return `Mínimo ${errors['minlength'].requiredLength} caracteres`;
-    if (errors['maxlength']) return `Máximo ${errors['maxlength'].requiredLength} caracteres`;
-    if (errors['min']) return `Valor mínimo: ${errors['min'].min}`;
-    if (errors['max']) return `Valor máximo: ${errors['max'].max}`;
-    if (errors['pattern']) return 'Formato inválido';
-
-    return 'Campo inválido';
-  }
-
-  onSubmitForm() {
-    if (this.portfolioForm.invalid) {
-      this.portfolioForm.markAllAsTouched();
-      return;
-    }
-
-    this.isLoading = true;
-    const formData = this.portfolioForm.value as PortfolioRecord;
-
-    // Simular llamada al backend
-    this.http.post<{ success: boolean, message: string }>('/api/portfolio/create', formData)
-      .subscribe({
-        next: (response) => {
-          this.isLoading = false;
-          if (response.success) {
-            this.uploadResult = {
-              success: true,
-              message: 'Registro de cartera creado exitosamente',
-              records: 1
-            };
-            this.portfolioForm.reset();
-          } else {
-            this.uploadResult = {
-              success: false,
-              message: response.message
-            };
-          }
-        },
-        error: (error) => {
-          this.isLoading = false;
-          this.uploadResult = {
-            success: false,
-            message: 'Error al crear el registro. Por favor intente nuevamente.'
-          };
-          console.error('Error creating portfolio record:', error);
-        }
-      });
-  }
-
-  onFileSelected(event: Event) {
-    const input = event.target as HTMLInputElement;
-    if (!input.files || input.files.length === 0) {
-      return;
-    }
-
-    const file = input.files[0];
-    const allowedTypes = [
-      'application/vnd.ms-excel',
-      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-      'text/csv'
-    ];
-
-    if (!allowedTypes.includes(file.type)) {
-      this.uploadResult = {
-        success: false,
-        message: 'Por favor seleccione un archivo Excel (.xls, .xlsx) o CSV (.csv)'
-      };
-      return;
-    }
-
-    if (file.size > 10 * 1024 * 1024) { // 10MB limit
-      this.uploadResult = {
-        success: false,
-        message: 'El archivo no debe exceder 10MB'
-      };
-      return;
-    }
-
-    this.uploadedFile = file;
-    this.uploadResult = null;
-  }
-
-  onUploadFile() {
-    if (!this.uploadedFile) {
-      this.uploadResult = {
-        success: false,
-        message: 'Por favor seleccione un archivo'
-      };
-      return;
-    }
-
-    this.isLoading = true;
-    const formData = new FormData();
-    formData.append('file', this.uploadedFile);
-
-    // Simular llamada al backend
-    this.http.post<UploadResult>('/api/portfolio/upload', formData)
-      .subscribe({
-        next: (result) => {
-          this.isLoading = false;
-          this.uploadResult = result;
-          if (result.success) {
-            this.uploadedFile = null;
-            // Reset file input
-            const fileInput = document.getElementById('fileInput') as HTMLInputElement;
-            if (fileInput) fileInput.value = '';
-          }
-        },
-        error: (error) => {
-          this.isLoading = false;
-          this.uploadResult = {
-            success: false,
-            message: 'Error al procesar el archivo. Por favor intente nuevamente.'
-          };
-          console.error('Error uploading file:', error);
-        }
-      });
-  }
-
-  downloadTemplate() {
-    // Crear template de Excel con las columnas requeridas
-    const templateData = [
-      [
-        'Obligación', 'Tipo Documento', 'Número Documento', 'Nombres', 'Apellidos',
-        'Fecha Desembolso', 'Plazo Inicial', 'Valor Desembolso', 'Valor Aval', 'Interés',
-        'Otros Conceptos', 'Abono Aval', 'Abono Capital', 'Total Deuda', 'Fecha Vencimiento',
-        'Días Mora', 'Fecha Pago', 'Estado Crédito', 'Tipo Cliente', 'Tasa Aval', 'Observaciones'
-      ]
-    ];
-
-    // Simular descarga (en implementación real usarías una librería como SheetJS)
-    const csvContent = templateData.map(row => row.join(',')).join('\n');
-    const blob = new Blob([csvContent], { type: 'text/csv' });
-    const url = window.URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = 'plantilla_cartera.csv';
-    a.click();
-    window.URL.revokeObjectURL(url);
-  }
-
-  toggleUserMenu() {
-    this.isUserMenuOpen = !this.isUserMenuOpen;
-  }
-
-  closeUserMenu() {
-    this.isUserMenuOpen = false;
-  }
-
-  // Navigation methods
-  toggleSidebar() {
-    this.isSidebarOpen = !this.isSidebarOpen;
-  }
-
-  closeSidebar() {
-    this.isSidebarOpen = false;
-    this.closeUserMenu();
-  }
-
-  navigateTo(route: string) {
-    this.router.navigate([route]);
-    this.closeSidebar();
-  }
-
+  // Métodos de navegación del sidebar
   onSidebarNavigate(route: string) {
     this.navigateTo(route);
   }
 
   onSidebarClose() {
-    this.closeSidebar();
+    this.uiState.closeSidebar();
   }
 
+  // Métodos de navegación del header
   onHeaderNavigate(route: string) {
     this.navigateTo(route);
   }
 
+  // Métodos para controlar el sidebar
+  toggleSidebar() {
+    this.uiState.toggleSidebar();
+  }
+
+  closeSidebar() {
+    this.uiState.closeSidebar();
+  }
+
+  // Métodos para controlar el menú de usuario
+  toggleUserMenu() {
+    this.uiState.toggleUserMenu();
+  }
+
+  closeUserMenu() {
+    this.uiState.closeUserMenu();
+  }
+
+  // Navegación principal
+  navigateTo(route: string) {
+    this.router.navigate([route]);
+  }
+
   logout() {
-    this.auth.logout(true);
+    this.uiState.closeAllMenus();
+    this.auth.logout();
+    this.router.navigate(['/login']);
+  }
+
+  // Métodos específicos del componente
+  initializeForm() {
+    this.portfolioForm = this.fb.group({
+      obligacion: ['', [Validators.required]],
+      tipoDocumento: ['', [Validators.required]],
+      numeroDocumento: ['', [Validators.required, Validators.pattern(/^\d+$/)]],
+      nombres: ['', [Validators.required]],
+      apellidos: ['', [Validators.required]],
+      tipoCliente: ['', [Validators.required]],
+      fechaDesembolso: ['', [Validators.required]],
+      plazoInicial: ['', [Validators.required, Validators.min(1), Validators.max(360)]],
+      valorDesembolso: ['', [Validators.required, Validators.min(0.01)]],
+      valorAval: ['', [Validators.required, Validators.min(0)]],
+      interes: ['', [Validators.required, Validators.min(0)]],
+      tasaAval: ['', [Validators.required, Validators.min(0), Validators.max(100)]],
+      otrosConceptos: [0],
+      abonoAval: [0],
+      abonoCapital: [0],
+      totalDeuda: ['', [Validators.required]],
+      fechaVencimiento: ['', [Validators.required]],
+      diasMora: [0],
+      fechaPago: [''],
+      estadoCredito: ['', [Validators.required]],
+      periodicidad: ['', [Validators.required]]
+    });
+
+    // Calcular total deuda automáticamente
+    this.portfolioForm.valueChanges.subscribe(() => {
+      this.calculateTotalDebt();
+    });
+  }
+
+  loadFormOptions() {
+    // Cargar opciones adicionales si es necesario
+  }
+
+  calculateTotalDebt() {
+    const formValue = this.portfolioForm.value;
+    const valorDesembolso = Number(formValue.valorDesembolso) || 0;
+    const valorAval = Number(formValue.valorAval) || 0;
+    const interes = Number(formValue.interes) || 0;
+    const otrosConceptos = Number(formValue.otrosConceptos) || 0;
+    const abonoAval = Number(formValue.abonoAval) || 0;
+    const abonoCapital = Number(formValue.abonoCapital) || 0;
+
+    const totalDeuda = valorDesembolso + valorAval + interes + otrosConceptos - abonoAval - abonoCapital;
+
+    this.portfolioForm.patchValue({ totalDeuda: totalDeuda }, { emitEvent: false });
+  }
+
+  setActiveTab(tab: 'form' | 'upload') {
+    this.activeTab = tab;
+  }
+
+  getFieldError(fieldName: string): string | null {
+    const field = this.portfolioForm.get(fieldName);
+    if (field && field.invalid && (field.dirty || field.touched)) {
+      if (field.errors?.['required']) return 'Este campo es obligatorio';
+      if (field.errors?.['pattern']) return 'Formato inválido';
+      if (field.errors?.['min']) return `Valor mínimo: ${field.errors['min'].min}`;
+      if (field.errors?.['max']) return `Valor máximo: ${field.errors['max'].max}`;
+    }
+    return null;
+  }
+
+  onSubmitForm() {
+    if (this.portfolioForm.valid) {
+      this.isLoading = true;
+
+      // Simular envío
+      setTimeout(() => {
+        console.log('Form submitted:', this.portfolioForm.value);
+        this.isLoading = false;
+        this.uploadResult = {
+          success: true,
+          message: 'Registro guardado exitosamente',
+          records: 1
+        };
+      }, 2000);
+    }
+  }
+
+  onFileSelected(event: any) {
+    const file = event.target.files[0];
+    if (file) {
+      this.uploadedFile = file;
+    }
+  }
+
+  onUploadFile() {
+    if (this.uploadedFile) {
+      this.isLoading = true;
+
+      // Simular procesamiento
+      setTimeout(() => {
+        console.log('File uploaded:', this.uploadedFile);
+        this.isLoading = false;
+        this.uploadResult = {
+          success: true,
+          message: 'Archivo procesado exitosamente',
+          records: 150
+        };
+      }, 3000);
+    }
+  }
+
+  downloadTemplate() {
+    console.log('Downloading template...');
+    // Implementar descarga de plantilla
   }
 }
