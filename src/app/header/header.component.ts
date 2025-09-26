@@ -1,12 +1,12 @@
 import { Component, inject, Input, Output, EventEmitter } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import {CommonModule, NgOptimizedImage} from '@angular/common';
 import { AuthService } from '../auth/auth.service';
 import { UiStateService } from '../ui-state.service';
 
 @Component({
   selector: 'app-header',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, NgOptimizedImage],
   templateUrl: './header.component.html',
   styleUrls: ['./header.component.css']
 })
