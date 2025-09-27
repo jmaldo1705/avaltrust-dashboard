@@ -32,6 +32,33 @@
       </p>
     </div>
 
+    <!-- Resultado de la operación -->
+    <div class="result-container" *ngIf="uploadResult">
+      <div class="result-card" [ngClass]="uploadResult.success ? 'success' : 'error'">
+        <div class="result-icon">
+          {{ uploadResult.success ? '✅' : '❌' }}
+        </div>
+        <div class="result-content">
+          <h4>{{ uploadResult.success ? 'Operación Exitosa' : 'Error en la Operación' }}</h4>
+          <p>{{ uploadResult.message }}</p>
+          <div class="result-details" *ngIf="uploadResult.records">
+            <span>Registros procesados: <strong>{{ uploadResult.records }}</strong></span>
+          </div>
+          <div class="error-list" *ngIf="uploadResult.errors && uploadResult.errors.length > 0">
+            <h5>Errores encontrados:</h5>
+            <ul>
+              <li *ngFor="let error of uploadResult.errors">{{ error }}</li>
+            </ul>
+          </div>
+        </div>
+        <button
+          type="button"
+          class="result-close"
+          (click)="uploadResult = null">
+          ✕
+        </button>
+      </div>
+    </div>
 
     <!-- Navegación por pestañas -->
     <div class="tabs-container">
@@ -418,6 +445,7 @@
                   </div>
                 </div>
 
+                <!-- Periodicidad -->
                 <div class="form-group">
                   <label for="periodicidad" class="form-label">
                     Periodicidad <span class="required">*</span>
@@ -427,9 +455,9 @@
                     formControlName="periodicidad"
                     class="form-control"
                     [class.error]="getFieldError('periodicidad')">
-                    <option value="">Seleccione estado</option>
-                    <option *ngFor="let state of creditStates" [value]="state.value">
-                      {{ state.label }}
+                    <option value="">Seleccione periodicidad</option>
+                    <option *ngFor="let option of periodicityOptions" [value]="option.value">
+                      {{ option.label }}
                     </option>
                   </select>
                   <div class="error-message" *ngIf="getFieldError('periodicidad')">
@@ -534,34 +562,6 @@
             </div>
           </div>
         </div>
-      </div>
-    </div>
-
-    <!-- Resultado de la operación -->
-    <div class="result-container" *ngIf="uploadResult">
-      <div class="result-card" [ngClass]="uploadResult.success ? 'success' : 'error'">
-        <div class="result-icon">
-          {{ uploadResult.success ? '✅' : '❌' }}
-        </div>
-        <div class="result-content">
-          <h4>{{ uploadResult.success ? 'Operación Exitosa' : 'Error en la Operación' }}</h4>
-          <p>{{ uploadResult.message }}</p>
-          <div class="result-details" *ngIf="uploadResult.records">
-            <span>Registros procesados: <strong>{{ uploadResult.records }}</strong></span>
-          </div>
-          <div class="error-list" *ngIf="uploadResult.errors && uploadResult.errors.length > 0">
-            <h5>Errores encontrados:</h5>
-            <ul>
-              <li *ngFor="let error of uploadResult.errors">{{ error }}</li>
-            </ul>
-          </div>
-        </div>
-        <button
-          type="button"
-          class="result-close"
-          (click)="uploadResult = null">
-          ✕
-        </button>
       </div>
     </div>
   </main>
