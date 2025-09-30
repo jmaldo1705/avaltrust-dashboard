@@ -95,10 +95,10 @@ export class DashboardComponent implements OnInit {
   };
 
   moraDistribution: MoraCategory[] = [
-    { name: '0-30 días', count: 1245, percentage: 45, amount: 5500000000, severity: 'low' },
-    { name: '31-60 días', count: 852, percentage: 30, amount: 4200000000, severity: 'medium' },
-    { name: '61-90 días', count: 456, percentage: 16, amount: 3100000000, severity: 'high' },
-    { name: '90+ días', count: 294, percentage: 9, amount: 2950000000, severity: 'critical' }
+    { name: '0-60 días', count: 1245, percentage: 45, amount: 5500000000, severity: 'low' },
+    { name: '61-120 días', count: 852, percentage: 30, amount: 4200000000, severity: 'medium' },
+    { name: '121-180 días', count: 456, percentage: 16, amount: 3100000000, severity: 'high' },
+    { name: '181+ días', count: 294, percentage: 9, amount: 2950000000, severity: 'critical' }
   ];
 
   paymentStats: PaymentStats = {
@@ -121,15 +121,15 @@ export class DashboardComponent implements OnInit {
       type: 'high_mora',
       severity: 'error',
       title: 'Mora Crítica Detectada',
-      description: '15 usuarios superan los 120 días de mora',
+      description: '15 usuarios superan los 180 días de mora',
       timestamp: new Date('2025-01-15T10:30:00')
     },
     {
       id: '2',
       type: 'payment_delay',
       severity: 'warning',
-      title: 'Reducción en Pagos',
-      description: 'Los pagos han disminuido 8% esta semana',
+      title: 'Tasa De Impagos',
+      description: 'Los créditos que están en dudoso recaudo o en mora 180 / total de créditos',
       timestamp: new Date('2025-01-15T09:15:00')
     },
     {

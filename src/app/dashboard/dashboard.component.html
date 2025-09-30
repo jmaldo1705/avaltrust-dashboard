@@ -73,13 +73,12 @@
         </div>
       </div>
 
-      <!-- Tasa de aval -->
+      <!-- Cobertura -->
       <div class="metric-card guarantee-rate">
         <div class="metric-icon">📊</div>
         <div class="metric-content">
-          <h3>Tasa de Aval</h3>
-          <div class="metric-value">{{ portfolioStats.guaranteeRate }}%</div>
-          <div class="metric-subtitle">Promedio ponderado</div>
+          <h3>cobertura</h3>
+          <div class="metric-value">Total valor abono del aval / 1.19*95%</div>
         </div>
       </div>
     </div>
@@ -112,10 +111,10 @@
         </div>
       </div>
 
-      <!-- Abonos e intereses -->
+      <!-- Siniestros -->
       <div class="chart-card">
         <div class="chart-header">
-          <h3>Abonos e Intereses</h3>
+          <h3>Siniestros</h3>
           <div class="chart-period">
             <select [(ngModel)]="selectedPeriod" (change)="loadPaymentData()">
               <option value="month">Último mes</option>
@@ -127,24 +126,16 @@
         <div class="chart-content">
           <div class="payment-summary">
             <div class="payment-item">
-              <div class="payment-label">Total Abonos</div>
-              <div class="payment-value positive">{{ paymentStats.totalPayments | currency:'COP':'symbol':'1.0-0' }}</div>
+              <div class="payment-label">Total Capital</div>
+              <div class="payment-value positive">C</div>
             </div>
             <div class="payment-item">
-              <div class="payment-label">Intereses Generados</div>
-              <div class="payment-value">{{ paymentStats.totalInterest | currency:'COP':'symbol':'1.0-0' }}</div>
+              <div class="payment-label">Total Intereses</div>
+              <div class="payment-value">D</div>
             </div>
             <div class="payment-item">
-              <div class="payment-label">Mora Acumulada</div>
-              <div class="payment-value negative">{{ paymentStats.totalPenalties | currency:'COP':'symbol':'1.0-0' }}</div>
-            </div>
-          </div>
-          <!-- Timeline de pagos -->
-          <div class="payment-timeline">
-            <div class="timeline-item" *ngFor="let payment of recentPayments">
-              <div class="timeline-date">{{ payment.date | date:'dd/MM' }}</div>
-              <div class="timeline-amount">{{ payment.amount | currency:'COP':'symbol':'1.0-0' }}</div>
-              <div class="timeline-type" [class]="payment.type">{{ payment.typeName }}</div>
+              <div class="payment-label">Siniestros Por Mes</div>
+              <div class="payment-value negative">Suma C+D+E+F</div>
             </div>
           </div>
         </div>
