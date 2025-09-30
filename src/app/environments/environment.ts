@@ -1,4 +1,4 @@
 export const environment = {
   production: false,
-  apiUrl: 'https://avaltrustback-production.up.railway.app'
+  apiUrl: 'http://localhost:8080' // Cambia por tu URL del backend
 };
