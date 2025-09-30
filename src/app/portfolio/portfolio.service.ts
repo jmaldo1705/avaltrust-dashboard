@@ -2,6 +2,7 @@ import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../environments/environment';
+import {AuthService} from '../auth/auth.service';
 
 export interface PortfolioRequest {
   obligacion: string;
@@ -25,6 +26,8 @@ export interface PortfolioRequest {
   fechaPago?: string;
   estadoCredito: 'VIGENTE' | 'VENCIDO' | 'CANCELADO' | 'CASTIGADO';
   periodicidad: string;
+  creadoPor?: string;
+  modificadoPor?: string;
 }
 
 export interface PortfolioResponse {
@@ -47,6 +50,7 @@ export interface FileUploadResponse {
 })
 export class PortfolioService {
   private http = inject(HttpClient);
+  private authService = inject(AuthService);
   private baseUrl = `${environment.apiUrl}/api/portfolio`;
 
   /**
@@ -57,9 +61,17 @@ export class PortfolioService {
       'Content-Type': 'application/json'
     });
 
+    // Agregar el usuario logueado a los datos de auditoría
+    const user = this.authService.user();
+    const dataWithAudit: PortfolioRequest = {
+      ...portfolioData,
+      creadoPor: user?.username || 'sistema',
+      modificadoPor: user?.username || 'sistema'
+    };
+
     return this.http.post<PortfolioResponse>(
       `${this.baseUrl}/create`,
-      portfolioData,
+      dataWithAudit,
       { headers }
     );
   }
@@ -70,6 +82,12 @@ export class PortfolioService {
   uploadPortfolioFile(file: File): Observable<FileUploadResponse> {
     const formData = new FormData();
     formData.append('file', file);
+
+    // Agregar el usuario logueado como parámetro
+    const user = this.authService.user();
+    if (user?.username) {
+      formData.append('creadoPor', user.username);
+    }
 
     return this.http.post<FileUploadResponse>(
       `${this.baseUrl}/upload`,

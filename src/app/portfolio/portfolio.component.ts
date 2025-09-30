@@ -188,6 +188,10 @@ export class PortfolioComponent implements OnInit {
       this.isLoading = true;
       this.uploadResult = null;
 
+      // Obtener el usuario logueado
+      const currentUser = this.auth.user();
+      const username = currentUser?.username || 'sistema';
+
       // Preparar datos para envío
       const portfolioData: PortfolioRequest = {
         ...this.portfolioForm.value,
@@ -201,10 +205,13 @@ export class PortfolioComponent implements OnInit {
         abonoAval: Number(this.portfolioForm.value.abonoAval) || 0,
         abonoCapital: Number(this.portfolioForm.value.abonoCapital) || 0,
         totalDeuda: Number(this.portfolioForm.value.totalDeuda),
-        diasMora: Number(this.portfolioForm.value.diasMora) || 0
+        diasMora: Number(this.portfolioForm.value.diasMora) || 0,
+        // Campos de auditoría
+        creadoPor: username,
+        modificadoPor: username
       };
 
-      console.log('Enviando datos al backend:', portfolioData);
+      console.log('Enviando datos al backend (con usuario):', portfolioData);
 
       // Enviar al backend
       this.portfolioService.createPortfolioRecord(portfolioData)
@@ -284,7 +291,8 @@ export class PortfolioComponent implements OnInit {
       this.isLoading = true;
       this.uploadResult = null;
 
-      console.log('Subiendo archivo al backend:', this.uploadedFile.name);
+      const currentUser = this.auth.user();
+      console.log(`Subiendo archivo al backend: ${this.uploadedFile.name} (Usuario: ${currentUser?.username || 'sistema'})`);
 
       this.portfolioService.uploadPortfolioFile(this.uploadedFile)
         .pipe(
