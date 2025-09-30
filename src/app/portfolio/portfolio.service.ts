@@ -87,6 +87,7 @@ export class PortfolioService {
     const user = this.authService.user();
     if (user?.username) {
       formData.append('creadoPor', user.username);
+      formData.append('modificadoPor', user.username);
     }
 
     return this.http.post<FileUploadResponse>(
@@ -99,8 +100,17 @@ export class PortfolioService {
    * Descargar plantilla de Excel
    */
   downloadTemplate(): Observable<Blob> {
+    // Incluir el usuario logueado en los parámetros de la plantilla
+    const user = this.authService.user();
+    const params: any = {};
+
+    if (user?.username) {
+      params.generadaPor = user.username;
+    }
+
     return this.http.get(`${this.baseUrl}/template/download`, {
-      responseType: 'blob'
+      responseType: 'blob',
+      params: params
     });
   }
 

@@ -10,6 +10,7 @@ import { UiStateService } from '../ui-state.service';
 import { HeaderComponent } from '../header/header.component';
 import { SidebarComponent } from '../sidebar/sidebar.component';
 import { PortfolioService, PortfolioRequest } from './portfolio.service';
+import { ExcelTemplateService } from './excel-template.service';
 
 @Component({
   selector: 'app-portfolio',
@@ -24,6 +25,7 @@ export class PortfolioComponent implements OnInit {
   private fb = inject(FormBuilder);
   private uiState = inject(UiStateService);
   private portfolioService = inject(PortfolioService);
+  private excelTemplateService = inject(ExcelTemplateService);
 
   // Estados de UI usando el servicio compartido
   get isSidebarOpen() {
@@ -298,11 +300,32 @@ export class PortfolioComponent implements OnInit {
         .pipe(
           catchError(error => {
             console.error('Error al subir archivo:', error);
+
+            // Manejo detallado de errores
+            let errorMessage = 'Error al procesar el archivo.';
+            let errors: string[] = [];
+
+            if (error.error) {
+              if (error.error.message) {
+                errorMessage = error.error.message;
+              }
+              if (error.error.errors) {
+                errors = Array.isArray(error.error.errors) ? error.error.errors : [error.error.errors];
+              }
+              if (error.error.validationErrors) {
+                errors = [...errors, ...(Array.isArray(error.error.validationErrors) ? error.error.validationErrors : [error.error.validationErrors])];
+              }
+            }
+
+            if (errors.length === 0) {
+              errors = ['Error de conexión con el servidor'];
+            }
+
             return of({
               success: false,
-              message: 'Error al procesar el archivo. Por favor, verifique el formato y vuelva a intentar.',
+              message: errorMessage,
               processedRecords: 0,
-              errors: error.error?.errors || ['Error de conexión con el servidor'],
+              errors: errors,
               validationErrors: []
             });
           }),
@@ -313,7 +336,9 @@ export class PortfolioComponent implements OnInit {
         .subscribe(response => {
           this.uploadResult = {
             success: response.success,
-            message: response.message,
+            message: response.success ?
+              `Se procesaron exitosamente ${response.processedRecords || 0} registros` :
+              response.message,
             records: response.processedRecords || 0,
             errors: response.errors || response.validationErrors || []
           };
@@ -327,6 +352,10 @@ export class PortfolioComponent implements OnInit {
             }
             // Scroll to top to show result
             window.scrollTo({ top: 0, behavior: 'smooth' });
+
+            console.log(`Carga masiva completada: ${response.processedRecords} registros procesados`);
+          } else {
+            console.error('Error en carga masiva:', response.errors);
           }
         });
     }
@@ -334,15 +363,17 @@ export class PortfolioComponent implements OnInit {
 
   downloadTemplate() {
     console.log('Descargando plantilla...');
+
+    // Opción 1: Descargar desde el backend (recomendado)
     this.portfolioService.downloadTemplate()
       .pipe(
         catchError(error => {
-          console.error('Error al descargar plantilla:', error);
-          this.uploadResult = {
-            success: false,
-            message: 'Error al descargar la plantilla. Inténtelo nuevamente.',
-            errors: ['Error de conexión']
-          };
+          console.error('Error al descargar plantilla del backend:', error);
+
+          // Fallback: generar plantilla del lado del cliente
+          console.log('Generando plantilla localmente como respaldo...');
+          this.excelTemplateService.generatePortfolioTemplate();
+
           return of(null);
         })
       )
@@ -351,11 +382,13 @@ export class PortfolioComponent implements OnInit {
           const url = window.URL.createObjectURL(blob);
           const link = document.createElement('a');
           link.href = url;
-          link.download = 'plantilla_cartera.xlsx';
+          link.download = `Plantilla_Cartera_${new Date().toISOString().split('T')[0]}.xlsx`;
           document.body.appendChild(link);
           link.click();
           document.body.removeChild(link);
           window.URL.revokeObjectURL(url);
+
+          console.log('Plantilla descargada exitosamente desde el backend');
         }
       });
   }
