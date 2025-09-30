@@ -54,8 +54,8 @@ export type RefreshResponse = {
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
-  private readonly API_URL = 'http://localhost:8080/api/auth';
-  private readonly USER_API_URL = 'http://localhost:8080/api/user';
+  private readonly API_URL = 'https://avaltrustback-production.up.railway.app/api/auth';
+  private readonly USER_API_URL = 'https://avaltrustback-production.up.railway.app/api/user';
   private readonly storageKey = 'avaltrust.auth';
   private readonly _user = signal<AuthUser | null>(this.readFromStorage());
   private readonly _userProfile = signal<UserProfile | null>(null);
