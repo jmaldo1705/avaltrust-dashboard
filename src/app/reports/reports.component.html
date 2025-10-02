@@ -1,0 +1,200 @@
+<div class="app-layout">
+  <!-- Header -->
+  <app-header
+    [isUserMenuOpen]="isUserMenuOpen"
+    (toggleSidebar)="toggleSidebar()"
+    (toggleUserMenu)="toggleUserMenu()"
+    (closeUserMenu)="closeUserMenu()"
+    (navigate)="onHeaderNavigate($event)"
+    (logout)="logout()">
+  </app-header>
+
+  <!-- Sidebar -->
+  <app-sidebar
+    [isOpen]="isSidebarOpen"
+    (navigate)="onSidebarNavigate($event)"
+    (close)="onSidebarClose()">
+  </app-sidebar>
+
+  <!-- Main Content -->
+  <main class="main-content" [class.sidebar-open]="isSidebarOpen">
+    <div class="content-wrapper">
+      <div class="page-header">
+        <div class="page-header-content">
+          <h1 class="page-title">
+            Informes Personalizados
+          </h1>
+          <p class="page-description">Genera reportes personalizados según tus necesidades específicas</p>
+        </div>
+      </div>
+
+      <div class="reports-container">
+        <form [formGroup]="reportsForm" class="reports-form">
+
+          <!-- Selección de Tipo de Reporte -->
+          <div class="form-section">
+            <h2 class="section-title">Tipo de Reporte</h2>
+            <div class="report-types-grid">
+              <div
+                *ngFor="let reportType of reportTypes"
+                class="report-type-card"
+                [class.selected]="selectedReportType === reportType.value"
+                (click)="onReportTypeChange(reportType.value)">
+                <div class="report-type-icon">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M9 17H7A5 5 0 0 1 7 7h2m8 10h2a5 5 0 0 0 0-10h-2"/>
+                    <line x1="7" y1="12" x2="17" y2="12"/>
+                  </svg>
+                </div>
+                <h3>{{ reportType.label }}</h3>
+                <div class="selection-indicator"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Filtros de Tiempo -->
+          <div class="form-section" *ngIf="selectedReportType">
+            <h2 class="section-title">Período de Tiempo</h2>
+            <div class="form-row">
+              <div class="form-group">
+                <label for="timeRange">Rango de Tiempo</label>
+                <select id="timeRange" formControlName="timeRange" class="form-control">
+                  <option *ngFor="let range of timeRanges" [value]="range.value">
+                    {{ range.label }}
+                  </option>
+                </select>
+              </div>
+            </div>
+
+            <div class="form-row" *ngIf="reportsForm.get('timeRange')?.value === 'custom'">
+              <div class="form-group">
+                <label for="startDate">Fecha Inicio</label>
+                <input type="date" id="startDate" formControlName="startDate" class="form-control">
+              </div>
+              <div class="form-group">
+                <label for="endDate">Fecha Fin</label>
+                <input type="date" id="endDate" formControlName="endDate" class="form-control">
+              </div>
+            </div>
+          </div>
+
+          <!-- Filtros Específicos -->
+          <div class="form-section" *ngIf="selectedReportType">
+            <h2 class="section-title">Filtros Específicos</h2>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label for="documentType">Tipo de Documento</label>
+                <select id="documentType" formControlName="documentType" class="form-control">
+                  <option value="">Todos los tipos</option>
+                  <option *ngFor="let type of documentTypes" [value]="type.value">
+                    {{ type.label }}
+                  </option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label for="clientType">Tipo de Cliente</label>
+                <select id="clientType" formControlName="clientType" class="form-control">
+                  <option value="">Todos los tipos</option>
+                  <option *ngFor="let type of clientTypes" [value]="type.value">
+                    {{ type.label }}
+                  </option>
+                </select>
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label for="creditState">Estado del Crédito</label>
+                <select id="creditState" formControlName="creditState" class="form-control">
+                  <option value="">Todos los estados</option>
+                  <option *ngFor="let state of creditStates" [value]="state.value">
+                    {{ state.label }}
+                  </option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label for="specificClient">Cliente Específico</label>
+                <input
+                  type="text"
+                  id="specificClient"
+                  formControlName="specificClient"
+                  class="form-control"
+                  placeholder="Nombre o documento del cliente">
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label for="minAmount">Monto Mínimo</label>
+                <input
+                  type="number"
+                  id="minAmount"
+                  formControlName="minAmount"
+                  class="form-control"
+                  placeholder="0">
+              </div>
+              <div class="form-group">
+                <label for="maxAmount">Monto Máximo</label>
+                <input
+                  type="number"
+                  id="maxAmount"
+                  formControlName="maxAmount"
+                  class="form-control"
+                  placeholder="Sin límite">
+              </div>
+            </div>
+          </div>
+
+          <!-- Opciones de Formato -->
+          <div class="form-section" *ngIf="selectedReportType">
+            <h2 class="section-title">Opciones del Reporte</h2>
+            <div class="checkbox-group">
+              <label class="checkbox-label">
+                <input type="checkbox" formControlName="includeCharts">
+                <span class="checkmark"></span>
+                Incluir gráficos
+              </label>
+              <label class="checkbox-label">
+                <input type="checkbox" formControlName="includeDetails">
+                <span class="checkmark"></span>
+                Incluir detalles
+              </label>
+              <label class="checkbox-label">
+                <input type="checkbox" formControlName="includeMetrics">
+                <span class="checkmark"></span>
+                Incluir métricas
+              </label>
+            </div>
+          </div>
+
+          <!-- Botones de Acción -->
+          <div class="form-actions" *ngIf="selectedReportType">
+            <button
+              type="button"
+              class="btn btn-secondary"
+              (click)="previewReport()"
+              [disabled]="isLoading">
+              Vista Previa
+            </button>
+            <button
+              type="button"
+              class="btn btn-outline"
+              (click)="resetForm()"
+              [disabled]="isLoading">
+              Limpiar
+            </button>
+            <button
+              type="button"
+              class="btn btn-primary"
+              (click)="generateReport()"
+              [disabled]="isLoading || !selectedReportType">
+              <span *ngIf="isLoading" class="loading-spinner"></span>
+              {{ isLoading ? 'Generando...' : 'Generar PDF' }}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </main>
+</div>

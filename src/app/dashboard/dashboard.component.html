@@ -215,7 +215,7 @@
           <div class="col-name">Usuario</div>
           <div class="col-amount">Monto Adeudado</div>
           <div class="col-days">Días de Mora</div>
-          <div class="col-rate">Tasa Aval</div>
+          <div class="col-rate">Obligación</div>
           <div class="col-actions">Acciones</div>
         </div>
         <div class="table-row" *ngFor="let user of topDelinquentUsers; trackBy: trackByUserId">
@@ -233,7 +233,7 @@
               {{ user.delayDays }} días
             </span>
           </div>
-          <div class="col-rate">{{ user.guaranteeRate }}%</div>
+          <div class="col-rate">{{ user.guaranteeRate }}</div>
           <div class="col-actions">
             <button class="action-btn-small" (click)="viewUserDetail(user.id)">Ver</button>
             <button class="action-btn-small contact" (click)="contactUser(user.id)">Contactar</button>

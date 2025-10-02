@@ -1,0 +1,7 @@
+/* Usar los mismos estilos que portfolio.component.css */
+@import '../portfolio/portfolio.component.css';
+
+/* Ajustes específicos para siniestros si son necesarios */
+.claims-form {
+  /* Estilos adicionales específicos */
+}

@@ -55,7 +55,7 @@ interface DelinquentUser {
   identification: string;
   debtAmount: number;
   delayDays: number;
-  guaranteeRate: number;
+  guaranteeRate: string;
 }
 
 @Component({
@@ -143,11 +143,11 @@ export class DashboardComponent implements OnInit {
   ];
 
   topDelinquentUsers: DelinquentUser[] = [
-    { id: '1', name: 'Carlos Rodriguez', identification: '12345678', debtAmount: 85000000, delayDays: 125, guaranteeRate: 22.5 },
-    { id: '2', name: 'María González', identification: '87654321', debtAmount: 67000000, delayDays: 98, guaranteeRate: 19.8 },
-    { id: '3', name: 'Juan Pérez', identification: '11223344', debtAmount: 54000000, delayDays: 87, guaranteeRate: 21.2 },
-    { id: '4', name: 'Ana Martínez', identification: '99887766', debtAmount: 48000000, delayDays: 76, guaranteeRate: 18.5 },
-    { id: '5', name: 'Luis Silva', identification: '55443322', debtAmount: 42000000, delayDays: 69, guaranteeRate: 20.1 }
+    { id: '1', name: 'Carlos Rodriguez', identification: '12345678', debtAmount: 85000000, delayDays: 125, guaranteeRate: 'Obl-123' },
+    { id: '2', name: 'María González', identification: '87654321', debtAmount: 67000000, delayDays: 98, guaranteeRate: 'Obl-123' },
+    { id: '3', name: 'Juan Pérez', identification: '11223344', debtAmount: 54000000, delayDays: 87, guaranteeRate: 'Obl-123' },
+    { id: '4', name: 'Ana Martínez', identification: '99887766', debtAmount: 48000000, delayDays: 76, guaranteeRate: 'Obl-123' },
+    { id: '5', name: 'Luis Silva', identification: '55443322', debtAmount: 42000000, delayDays: 69, guaranteeRate: 'Obl-123' }
   ];
 
   ngOnInit() {
