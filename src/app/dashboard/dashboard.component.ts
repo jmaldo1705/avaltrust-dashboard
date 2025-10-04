@@ -48,6 +48,7 @@ interface Alert {
   title: string;
   description: string;
   timestamp: Date;
+  userId?: string;
 }
 
 interface DelinquentUser {
@@ -135,6 +136,9 @@ export class DashboardComponent implements OnInit {
   userModalLoading = false;
   userModalError: string | null = null;
 
+  // Reintentos para resolver usuario desde alertas cuando aún no cargan los morosos
+  private alertRetryCount: Record<string, number> = {};
+
   ngOnInit() {
     // Cargar datos del usuario si no están disponibles
     if (!this.userProfile()) {
@@ -161,10 +165,14 @@ export class DashboardComponent implements OnInit {
     // Alertas
     this.dashboardService.getAlerts().subscribe({
       next: (data: any[]) => {
-        this.alerts = data.map(a => ({
-          ...a,
-          timestamp: new Date(a.timestamp)
-        }));
+        this.alerts = data.map(a => {
+          const userId = (a as any).userId ?? (a as any).user_id ?? (a as any).userID ?? (a as any).usuarioId ?? (a as any).usuario_id ?? (a as any).clienteId ?? (a as any).cliente_id;
+          return {
+            ...a,
+            userId,
+            timestamp: new Date(a.timestamp)
+          };
+        });
       },
       error: (err) => console.error('Error cargando alertas', err)
     });
@@ -242,8 +250,103 @@ export class DashboardComponent implements OnInit {
   }
 
   handleAlert(alert: Alert) {
-    console.log('Manejando alerta:', alert);
-    // Implementar lógica para manejar alertas
+    // 1) Si la alerta trae userId explícito
+    if (alert.userId) {
+      this.viewUserDetail(alert.userId);
+      return;
+    }
+
+    // Si aún no han cargado los morosos, reintentar brevemente antes de fallar
+    if (!this.topDelinquentUsers || this.topDelinquentUsers.length === 0) {
+      const key = alert.id || `${alert.title}|${alert.description}`;
+      const count = this.alertRetryCount[key] ?? 0;
+      if (count < 5) {
+        this.alertRetryCount[key] = count + 1;
+        // Mostrar estado de carga en el modal mientras resolvemos
+        this.isUserModalOpen = true;
+        this.userModalLoading = true;
+        this.userModalError = null;
+        setTimeout(() => this.handleAlert(alert), 300);
+        return;
+      }
+    }
+
+    // Texto completo para heurísticas
+    const text = `${alert.title ?? ''} ${alert.description ?? ''}`.trim();
+    const lowerText = text.toLowerCase();
+
+    // Extraer nombre probable desde el título (ej: "Mora alta: Pepito Perez")
+    const titleName = (alert.title || '').replace(/^[^:]*:\s*/, '').trim().toLowerCase();
+
+    // Helper: normalizar documentos (remover puntos, espacios, guiones)
+    const normalizeId = (s: string) => (s || '').replace(/\D+/g, '');
+
+    // 2) Buscar identificaciones numéricas (permitiendo puntos/guiones) y compararlas normalizadas
+    const digitTokens = text.replace(/\D+/g, ' ').split(/\s+/).filter(t => t && t.length >= 6);
+    // Ordenar por longitud desc para priorizar documentos largos (evitar confundir montos)
+    digitTokens.sort((a,b) => b.length - a.length);
+
+    for (const token of digitTokens) {
+      const normToken = normalizeId(token);
+
+      // Candidatos en top morosos por identificación
+      const candidates = this.topDelinquentUsers.filter(u => normalizeId(u.identification) === normToken);
+
+      if (candidates.length === 1) {
+        // Si tenemos nombre en título y no coincide, preferimos buscar directo por identificación
+        if (titleName && !candidates[0].name?.toLowerCase().includes(titleName)) {
+          this.viewUserDetailByIdentification(normToken);
+          return;
+        }
+        this.viewUserDetail(candidates[0].id);
+        return;
+      }
+
+      if (candidates.length > 1) {
+        // Desambiguar por nombre si es posible; si no, ir directo por identificación
+        const byName = titleName ? candidates.find(c => c.name?.toLowerCase().includes(titleName)) : undefined;
+        if (byName) {
+          this.viewUserDetail(byName.id);
+          return;
+        }
+        this.viewUserDetailByIdentification(normToken);
+        return;
+      }
+
+      // Si no hay candidatos en top morosos, intentar directo por identificación
+      if (candidates.length === 0) {
+        this.viewUserDetailByIdentification(normToken);
+        return;
+      }
+    }
+
+    // 3) Intentar coincidir por nombre (si el texto incluye el nombre del usuario)
+    const byName = this.topDelinquentUsers.find(u => lowerText.includes((u.name || '').toLowerCase()))
+      || (titleName ? this.topDelinquentUsers.find(u => u.name?.toLowerCase().includes(titleName)) : undefined);
+    if (byName) {
+      this.viewUserDetail(byName.id);
+      return;
+    }
+
+    // 4) Intentar coincidir por id exacto
+    const byUserId = this.topDelinquentUsers.find(u => u.id === alert.id);
+    if (byUserId) {
+      this.viewUserDetail(byUserId.id);
+      return;
+    }
+
+    // 5) Heurística adicional: si el texto trae la obligación y coincide con la columna mostrada
+    const byObligation = this.topDelinquentUsers.find(u => u.guaranteeRate && text.includes(u.guaranteeRate));
+    if (byObligation) {
+      this.viewUserDetail(byObligation.id);
+      return;
+    }
+
+    // Si no fue posible determinar el usuario, mostrar modal con error
+    this.userModalError = 'No se pudo determinar el usuario asociado a esta alerta.';
+    this.userModalLoading = false;
+    this.selectedUserDetail = null;
+    this.isUserModalOpen = true;
   }
 
   exportTopDelinquents() {
@@ -263,6 +366,24 @@ export class DashboardComponent implements OnInit {
       error: (err) => {
         console.error('Error cargando detalle de usuario', err);
         this.userModalError = 'No fue posible cargar el detalle del usuario.';
+        this.userModalLoading = false;
+      }
+    });
+  }
+
+  // Abrir detalle cuando solo tenemos la identificación (desde alertas)
+  viewUserDetailByIdentification(identification: string) {
+    this.userModalError = null;
+    this.userModalLoading = true;
+    this.isUserModalOpen = true;
+    this.dashboardService.getUserDetailByIdentification(identification).subscribe({
+      next: (detail: any) => {
+        this.selectedUserDetail = detail;
+        this.userModalLoading = false;
+      },
+      error: (err) => {
+        console.error('Error cargando detalle por identificación', err);
+        this.userModalError = 'No fue posible cargar el detalle del usuario por identificación.';
         this.userModalLoading = false;
       }
     });

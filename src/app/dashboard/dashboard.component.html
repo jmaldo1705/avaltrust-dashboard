@@ -282,5 +282,101 @@
         </div>
       </div>
     </div>
+
+    <!-- Modal Detalle de Usuario -->
+    <div class="modal-backdrop" *ngIf="isUserModalOpen" (click)="closeUserModal()">
+      <div class="modal" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+          <h3>Detalle del Usuario</h3>
+          <button class="modal-close" (click)="closeUserModal()">✕</button>
+        </div>
+        <div class="modal-body">
+          <div *ngIf="userModalLoading" class="modal-loading">Cargando detalle...</div>
+          <div *ngIf="userModalError && !userModalLoading" class="modal-error">{{ userModalError }}</div>
+
+          <div *ngIf="!userModalLoading && !userModalError && selectedUserDetail" class="detail-grid">
+            <div class="detail-row">
+              <div class="detail-label">Obligación</div>
+              <div class="detail-value">{{ selectedUserDetail.obligacion }}</div>
+            </div>
+            <div class="detail-row">
+              <div class="detail-label">Documento</div>
+              <div class="detail-value">{{ selectedUserDetail.tipoDocumento }} {{ selectedUserDetail.numeroDocumento }}</div>
+            </div>
+            <div class="detail-row">
+              <div class="detail-label">Nombres</div>
+              <div class="detail-value">{{ selectedUserDetail.nombres }} {{ selectedUserDetail.apellidos }}</div>
+            </div>
+            <div class="detail-row">
+              <div class="detail-label">Tipo Cliente</div>
+              <div class="detail-value">{{ selectedUserDetail.tipoCliente }}</div>
+            </div>
+            <div class="detail-row">
+              <div class="detail-label">Fecha Desembolso</div>
+              <div class="detail-value">{{ selectedUserDetail.fechaDesembolso | date:'shortDate' }}</div>
+            </div>
+            <div class="detail-row">
+              <div class="detail-label">Plazo Inicial</div>
+              <div class="detail-value">{{ selectedUserDetail.plazoInicial }} meses</div>
+            </div>
+            <div class="detail-row">
+              <div class="detail-label">Valor Desembolso</div>
+              <div class="detail-value">{{ selectedUserDetail.valorDesembolso | currency:'COP':'symbol':'1.0-0' }}</div>
+            </div>
+            <div class="detail-row">
+              <div class="detail-label">Valor Aval</div>
+              <div class="detail-value">{{ selectedUserDetail.valorAval | currency:'COP':'symbol':'1.0-0' }}</div>
+            </div>
+            <div class="detail-row">
+              <div class="detail-label">Interés</div>
+              <div class="detail-value">{{ selectedUserDetail.interes }}%</div>
+            </div>
+            <div class="detail-row">
+              <div class="detail-label">Tasa Aval</div>
+              <div class="detail-value">{{ selectedUserDetail.tasaAval }}%</div>
+            </div>
+            <div class="detail-row" *ngIf="selectedUserDetail.otrosConceptos != null">
+              <div class="detail-label">Otros Conceptos</div>
+              <div class="detail-value">{{ selectedUserDetail.otrosConceptos | currency:'COP':'symbol':'1.0-0' }}</div>
+            </div>
+            <div class="detail-row" *ngIf="selectedUserDetail.abonoAval != null">
+              <div class="detail-label">Abono Aval</div>
+              <div class="detail-value">{{ selectedUserDetail.abonoAval | currency:'COP':'symbol':'1.0-0' }}</div>
+            </div>
+            <div class="detail-row" *ngIf="selectedUserDetail.abonoCapital != null">
+              <div class="detail-label">Abono Capital</div>
+              <div class="detail-value">{{ selectedUserDetail.abonoCapital | currency:'COP':'symbol':'1.0-0' }}</div>
+            </div>
+            <div class="detail-row highlight">
+              <div class="detail-label">Total Deuda</div>
+              <div class="detail-value">{{ selectedUserDetail.totalDeuda | currency:'COP':'symbol':'1.0-0' }}</div>
+            </div>
+            <div class="detail-row">
+              <div class="detail-label">Fecha Vencimiento</div>
+              <div class="detail-value">{{ selectedUserDetail.fechaVencimiento | date:'shortDate' }}</div>
+            </div>
+            <div class="detail-row" *ngIf="selectedUserDetail.diasMora != null">
+              <div class="detail-label">Días de Mora</div>
+              <div class="detail-value">{{ selectedUserDetail.diasMora }}</div>
+            </div>
+            <div class="detail-row" *ngIf="selectedUserDetail.fechaPago">
+              <div class="detail-label">Fecha de Último Pago</div>
+              <div class="detail-value">{{ selectedUserDetail.fechaPago | date:'shortDate' }}</div>
+            </div>
+            <div class="detail-row">
+              <div class="detail-label">Estado del Crédito</div>
+              <div class="detail-value">{{ selectedUserDetail.estadoCredito }}</div>
+            </div>
+            <div class="detail-row">
+              <div class="detail-label">Periodicidad</div>
+              <div class="detail-value">{{ selectedUserDetail.periodicidad }}</div>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="primary-btn" (click)="closeUserModal()">Cerrar</button>
+        </div>
+      </div>
+    </div>
   </main>
 </div>

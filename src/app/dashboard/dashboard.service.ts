@@ -41,6 +41,7 @@ export interface AlertDto {
   title: string;
   description: string;
   timestamp: string; // ISO string
+  userId?: string; // opcional: id del usuario asociado a la alerta
 }
 
 export interface DelinquentUserDto {
@@ -126,6 +127,11 @@ export class DashboardService {
 
   getUserDetail(userId: string): Observable<UserDetailDto> {
     return this.http.get<UserDetailDto>(`${this.baseUrl}/api/users/${userId}/detail`);
+  }
+
+  // Obtener detalle por identificación/documento (cuando la alerta no trae userId)
+  getUserDetailByIdentification(identification: string): Observable<UserDetailDto> {
+    return this.http.get<UserDetailDto>(`${this.baseUrl}/api/users/detail`, { params: { identification } });
   }
 
   // Siniestros
