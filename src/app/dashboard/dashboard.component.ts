@@ -8,6 +8,7 @@ import { UiStateService } from '../ui-state.service';
 import { HeaderComponent } from '../header/header.component';
 import { SidebarComponent } from '../sidebar/sidebar.component';
 import { HasRoleDirective } from '../auth/has-role.directive';
+import { DashboardService } from './dashboard.service';
 
 // Interfaces para tipado
 interface PortfolioStats {
@@ -69,6 +70,7 @@ export class DashboardComponent implements OnInit {
   private router = inject(Router);
   private auth = inject(AuthService);
   private uiState = inject(UiStateService);
+  private dashboardService = inject(DashboardService);
 
   userProfile = this.auth.userProfile;
 
@@ -86,69 +88,52 @@ export class DashboardComponent implements OnInit {
 
   // Datos del dashboard
   portfolioStats: PortfolioStats = {
-    totalPortfolio: 15750000000,
-    portfolioGrowth: 12.5,
-    activeUsers: 2847,
-    averageDelayDays: 45,
-    delayDaysChange: -3,
-    guaranteeRate: 18.5
+    totalPortfolio: 0,
+    portfolioGrowth: 0,
+    activeUsers: 0,
+    averageDelayDays: 0,
+    delayDaysChange: 0,
+    guaranteeRate: 0
   };
 
-  moraDistribution: MoraCategory[] = [
-    { name: '0-60 días', count: 1245, percentage: 45, amount: 5500000000, severity: 'low' },
-    { name: '61-120 días', count: 852, percentage: 30, amount: 4200000000, severity: 'medium' },
-    { name: '121-180 días', count: 456, percentage: 16, amount: 3100000000, severity: 'high' },
-    { name: '181+ días', count: 294, percentage: 9, amount: 2950000000, severity: 'critical' }
-  ];
+  moraDistribution: MoraCategory[] = [];
 
   paymentStats: PaymentStats = {
-    totalPayments: 8750000000,
-    totalInterest: 2100000000,
-    totalPenalties: 650000000
+    totalPayments: 0,
+    totalInterest: 0,
+    totalPenalties: 0
   };
 
-  recentPayments: RecentPayment[] = [
-    { date: new Date('2025-01-15'), amount: 125000000, type: 'payment', typeName: 'Abono' },
-    { date: new Date('2025-01-14'), amount: 85000000, type: 'payment', typeName: 'Abono' },
-    { date: new Date('2025-01-13'), amount: 15000000, type: 'interest', typeName: 'Interés' },
-    { date: new Date('2025-01-12'), amount: 95000000, type: 'payment', typeName: 'Abono' },
-    { date: new Date('2025-01-11'), amount: 8000000, type: 'penalty', typeName: 'Mora' }
-  ];
+  recentPayments: RecentPayment[] = [];
 
-  alerts: Alert[] = [
-    {
-      id: '1',
-      type: 'high_mora',
-      severity: 'error',
-      title: 'Mora Crítica Detectada',
-      description: '15 usuarios superan los 180 días de mora',
-      timestamp: new Date('2025-01-15T10:30:00')
-    },
-    {
-      id: '2',
-      type: 'payment_delay',
-      severity: 'warning',
-      title: 'Tasa De Impagos',
-      description: 'Los créditos que están en dudoso recaudo o en mora 180 / total de créditos',
-      timestamp: new Date('2025-01-15T09:15:00')
-    },
-    {
-      id: '3',
-      type: 'system',
-      severity: 'info',
-      title: 'Carga Exitosa',
-      description: 'Nueva cartera cargada con 1,247 registros',
-      timestamp: new Date('2025-01-15T08:00:00')
-    }
-  ];
+  alerts: Alert[] = [];
 
-  topDelinquentUsers: DelinquentUser[] = [
-    { id: '1', name: 'Carlos Rodriguez', identification: '12345678', debtAmount: 85000000, delayDays: 125, guaranteeRate: 'Obl-123' },
-    { id: '2', name: 'María González', identification: '87654321', debtAmount: 67000000, delayDays: 98, guaranteeRate: 'Obl-123' },
-    { id: '3', name: 'Juan Pérez', identification: '11223344', debtAmount: 54000000, delayDays: 87, guaranteeRate: 'Obl-123' },
-    { id: '4', name: 'Ana Martínez', identification: '99887766', debtAmount: 48000000, delayDays: 76, guaranteeRate: 'Obl-123' },
-    { id: '5', name: 'Luis Silva', identification: '55443322', debtAmount: 42000000, delayDays: 69, guaranteeRate: 'Obl-123' }
-  ];
+  topDelinquentUsers: DelinquentUser[] = [];
+
+  // Siniestros (resumen y recientes)
+  claimsSummary = {
+    totalCapital: 0,
+    totalInterest: 0,
+    monthlyClaimsAmount: 0,
+    openClaims: 0,
+    closedClaims: 0,
+    avgResolutionDays: 0
+  };
+
+  recentClaims: {
+    id: string;
+    userName: string;
+    identification: string;
+    amount: number;
+    status: string;
+    date: Date;
+  }[] = [];
+
+  // Modal detalle de usuario moroso
+  isUserModalOpen = false;
+  selectedUserDetail: any = null;
+  userModalLoading = false;
+  userModalError: string | null = null;
 
   ngOnInit() {
     // Cargar datos del usuario si no están disponibles
@@ -161,9 +146,37 @@ export class DashboardComponent implements OnInit {
   }
 
   private loadDashboardData() {
-    // Aquí harías las llamadas a los servicios para cargar los datos reales
-    // Por ejemplo: this.portfolioService.getStats().subscribe(stats => this.portfolioStats = stats);
-    console.log('Cargando datos del dashboard...');
+    // Cargar estadísticas generales de la cartera
+    this.dashboardService.getPortfolioStats().subscribe({
+      next: (data: any) => this.portfolioStats = data,
+      error: (err) => console.error('Error cargando portfolioStats', err)
+    });
+
+    // Distribución por categorías de mora
+    this.dashboardService.getMoraDistribution().subscribe({
+      next: (data: any) => this.moraDistribution = data,
+      error: (err) => console.error('Error cargando moraDistribution', err)
+    });
+
+    // Alertas
+    this.dashboardService.getAlerts().subscribe({
+      next: (data: any[]) => {
+        this.alerts = data.map(a => ({
+          ...a,
+          timestamp: new Date(a.timestamp)
+        }));
+      },
+      error: (err) => console.error('Error cargando alertas', err)
+    });
+
+    // Top usuarios morosos
+    this.dashboardService.getTopDelinquents().subscribe({
+      next: (data: any) => this.topDelinquentUsers = data,
+      error: (err) => console.error('Error cargando top morosos', err)
+    });
+
+    // Datos dependientes del período seleccionado
+    this.loadPaymentData();
   }
 
   getLastUpdateTime(): string {
@@ -175,8 +188,40 @@ export class DashboardComponent implements OnInit {
   }
 
   loadPaymentData() {
-    // Cargar datos según el período seleccionado
-    console.log('Cargando datos de pagos para:', this.selectedPeriod);
+    const period = this.selectedPeriod as 'month' | 'quarter' | 'year';
+
+    // Resumen de pagos
+    this.dashboardService.getPaymentStats(period).subscribe({
+      next: (data: any) => this.paymentStats = data,
+      error: (err) => console.error('Error cargando paymentStats', err)
+    });
+
+    // Pagos recientes
+    this.dashboardService.getRecentPayments(period).subscribe({
+      next: (data: any[]) => {
+        this.recentPayments = data.map(p => ({
+          ...p,
+          date: new Date(p.date)
+        }));
+      },
+      error: (err) => console.error('Error cargando recentPayments', err)
+    });
+
+    // Siniestros: resumen y recientes
+    this.dashboardService.getClaimsSummary(period).subscribe({
+      next: (data: any) => this.claimsSummary = data,
+      error: (err) => console.error('Error cargando claimsSummary', err)
+    });
+
+    this.dashboardService.getRecentClaims(period).subscribe({
+      next: (data: any[]) => {
+        this.recentClaims = data.map(c => ({
+          ...c,
+          date: new Date(c.date)
+        }));
+      },
+      error: (err) => console.error('Error cargando recentClaims', err)
+    });
   }
 
   getAlertIcon(type: string): string {
@@ -207,7 +252,30 @@ export class DashboardComponent implements OnInit {
   }
 
   viewUserDetail(userId: string) {
-    this.navigateTo(`/portfolio/user/${userId}`);
+    this.userModalError = null;
+    this.userModalLoading = true;
+    this.isUserModalOpen = true;
+    this.dashboardService.getUserDetail(userId).subscribe({
+      next: (detail: any) => {
+        this.selectedUserDetail = detail;
+        this.userModalLoading = false;
+      },
+      error: (err) => {
+        console.error('Error cargando detalle de usuario', err);
+        this.userModalError = 'No fue posible cargar el detalle del usuario.';
+        this.userModalLoading = false;
+      }
+    });
+  }
+
+  closeUserModal() {
+    this.isUserModalOpen = false;
+    this.selectedUserDetail = null;
+  }
+
+  navigateToClaim(claimId: string) {
+    // Ajustar cuando exista ruta específica de detalle de siniestro
+    this.navigateTo('/claims');
   }
 
   contactUser(userId: string) {

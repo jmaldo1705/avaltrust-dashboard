@@ -127,15 +127,56 @@
           <div class="payment-summary">
             <div class="payment-item">
               <div class="payment-label">Total Capital</div>
-              <div class="payment-value positive">C</div>
+              <div class="payment-value positive">{{ claimsSummary.totalCapital | currency:'COP':'symbol':'1.0-0' }}</div>
             </div>
             <div class="payment-item">
               <div class="payment-label">Total Intereses</div>
-              <div class="payment-value">D</div>
+              <div class="payment-value">{{ claimsSummary.totalInterest | currency:'COP':'symbol':'1.0-0' }}</div>
             </div>
             <div class="payment-item">
-              <div class="payment-label">Siniestros Por Mes</div>
-              <div class="payment-value negative">Suma C+D+E+F</div>
+              <div class="payment-label">Monto Mensual</div>
+              <div class="payment-value negative">{{ claimsSummary.monthlyClaimsAmount | currency:'COP':'symbol':'1.0-0' }}</div>
+            </div>
+            <div class="payment-item">
+              <div class="payment-label">Abiertos</div>
+              <div class="payment-value">{{ claimsSummary.openClaims | number }}</div>
+            </div>
+            <div class="payment-item">
+              <div class="payment-label">Cerrados</div>
+              <div class="payment-value">{{ claimsSummary.closedClaims | number }}</div>
+            </div>
+            <div class="payment-item">
+              <div class="payment-label">Días Prom. Resolución</div>
+              <div class="payment-value">{{ claimsSummary.avgResolutionDays | number }}</div>
+            </div>
+          </div>
+
+          <div class="recent-claims">
+            <div class="table-header">
+              <div class="col-id">ID</div>
+              <div class="col-user">Usuario</div>
+              <div class="col-amount">Monto</div>
+              <div class="col-status">Estado</div>
+              <div class="col-date">Fecha</div>
+              <div class="col-actions">Acciones</div>
+            </div>
+            <div class="table-row" *ngFor="let claim of recentClaims">
+              <div class="col-id">{{ claim.id }}</div>
+              <div class="col-user">
+                <div class="user-info">
+                  <div class="user-name">{{ claim.userName }}</div>
+                  <div class="user-id">{{ claim.identification }}</div>
+                </div>
+              </div>
+              <div class="col-amount">{{ claim.amount | currency:'COP':'symbol':'1.0-0' }}</div>
+              <div class="col-status">{{ claim.status }}</div>
+              <div class="col-date">{{ claim.date | date:'shortDate' }}</div>
+              <div class="col-actions">
+                <button class="action-btn-small" (click)="navigateToClaim(claim.id)">Ver</button>
+              </div>
+            </div>
+            <div class="empty-state" *ngIf="recentClaims.length === 0">
+              No hay siniestros recientes para el período seleccionado.
             </div>
           </div>
         </div>
