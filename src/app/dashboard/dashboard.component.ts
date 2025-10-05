@@ -397,7 +397,35 @@ export class DashboardComponent implements OnInit {
     // Helper: normalizar documentos (remover puntos, espacios, guiones)
     const normalizeId = (s: string) => (s || '').replace(/\D+/g, '');
 
-    // 2) Buscar identificaciones numéricas (permitiendo puntos/guiones) y compararlas normalizadas
+    // 2) Primero, intentar capturar documento junto a CC/NIT (evita confundir montos como identificación)
+    const idFromLabelMatch = /(\bCC\b|\bNIT\b)\s*([0-9.\-]+)/i.exec(text);
+    if (idFromLabelMatch?.[2]) {
+      const normToken = normalizeId(idFromLabelMatch[2]);
+      const candidates = this.topDelinquentUsers.filter(u => normalizeId(u.identification) === normToken);
+      if (candidates.length === 1) {
+        // Si tenemos nombre en título y no coincide, preferimos buscar directo por identificación
+        if (titleName && !candidates[0].name?.toLowerCase().includes(titleName)) {
+          this.viewUserDetailByIdentification(normToken);
+          return;
+        }
+        this.viewUserDetail(candidates[0].id);
+        return;
+      }
+      if (candidates.length > 1) {
+        const byName = titleName ? candidates.find(c => c.name?.toLowerCase().includes(titleName)) : undefined;
+        if (byName) {
+          this.viewUserDetail(byName.id);
+          return;
+        }
+        this.viewUserDetailByIdentification(normToken);
+        return;
+      }
+      // Sin candidatos en top morosos, intentar directo por identificación
+      this.viewUserDetailByIdentification(normToken);
+      return;
+    }
+
+    // 2-b) Buscar identificaciones numéricas (permitiendo puntos/guiones) y compararlas normalizadas
     const digitTokens = text.replace(/\D+/g, ' ').split(/\s+/).filter(t => t && t.length >= 6);
     // Ordenar por longitud desc para priorizar documentos largos (evitar confundir montos)
     digitTokens.sort((a,b) => b.length - a.length);
