@@ -394,6 +394,42 @@
   overflow: hidden;
 }
 
+/* Barra de herramientas de la tabla */
+.table-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.table-toolbar .left,
+.table-toolbar .right {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.search-input {
+  padding: 0.5rem 0.75rem;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  min-width: 220px;
+}
+
+.page-size-select {
+  padding: 0.4rem 0.5rem;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+}
+
+.result-count {
+  color: #64748b;
+  font-size: 0.85rem;
+}
+
 .export-btn {
   display: flex;
   align-items: center;
@@ -416,6 +452,35 @@
   width: 100%;
   overflow-x: auto;
   box-sizing: border-box;
+}
+
+/* Cabecera ordenable */
+.sortable {
+  cursor: pointer;
+  user-select: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.sort-icon {
+  font-size: 0.7rem;
+  color: #94a3b8;
+}
+
+.sortable.active {
+  color: #0f172a;
+}
+
+.sortable.active .sort-icon {
+  color: #0f172a;
+}
+
+/* Columna de obligación con estilo uniforme */
+.col-rate {
+  color: #1e293b;
+  font-weight: 600;
+  font-size: 0.9rem;
 }
 
 .table-header, .table-row {
@@ -533,6 +598,38 @@
   background: #2563eb;
 }
 
+/* Paginación */
+.pagination {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.75rem 1rem;
+  border-top: 1px solid #e2e8f0;
+}
+
+.page-controls {
+  display: flex;
+  gap: 0.25rem;
+  flex-wrap: wrap;
+}
+
+.page-btn {
+  padding: 0.35rem 0.6rem;
+  border: 1px solid #d1d5db;
+  background: #fff;
+  border-radius: 6px;
+  font-size: 0.8rem;
+  cursor: pointer;
+}
+
+.page-btn.active {
+  background: #2563eb;
+  color: #fff;
+  border-color: #2563eb;
+}
+
+.page-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+
 /* Responsive Design - CORREGIDO */
 @media (min-width: 768px) {
   .alerts-actions-grid {
@@ -573,7 +670,7 @@
   .col-name::before { content: "Usuario: "; font-weight: 600; color: #64748b; }
   .col-amount::before { content: "Monto: "; font-weight: 600; color: #64748b; }
   .col-days::before { content: "Días de mora: "; font-weight: 600; color: #64748b; }
-  .col-rate::before { content: "Tasa aval: "; font-weight: 600; color: #64748b; }
+  .col-rate::before { content: "Obligación: "; font-weight: 600; color: #64748b; }
   .col-actions::before { content: "Acciones: "; font-weight: 600; color: #64748b; }
 
   .action-btn {

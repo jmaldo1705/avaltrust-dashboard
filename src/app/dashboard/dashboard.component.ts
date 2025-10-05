@@ -111,6 +111,13 @@ export class DashboardComponent implements OnInit {
 
   topDelinquentUsers: DelinquentUser[] = [];
 
+  // Controles de tabla: filtro, orden y paginación (Usuarios con Mayor Mora)
+  delinquentsFilter: string = '';
+  delinquentsSortBy: 'name' | 'debtAmount' | 'delayDays' | 'guaranteeRate' = 'delayDays';
+  delinquentsSortDir: 'asc' | 'desc' = 'desc';
+  delinquentsPageSize: number = 10;
+  delinquentsCurrentPage: number = 1;
+
   // Siniestros (resumen y recientes)
   claimsSummary = {
     totalCapital: 0,
@@ -247,6 +254,115 @@ export class DashboardComponent implements OnInit {
     if (days <= 60) return 'medium';
     if (days <= 90) return 'high';
     return 'critical';
+  }
+
+  // ===== Tabla "Usuarios con Mayor Mora" — Filtro, Orden y Paginación =====
+  get processedDelinquents(): DelinquentUser[] {
+    let arr = [...(this.topDelinquentUsers || [])];
+
+    const q = (this.delinquentsFilter || '').trim().toLowerCase();
+    if (q) {
+      const normDigits = q.replace(/\D+/g, '');
+      arr = arr.filter(u => {
+        const name = (u.name || '').toLowerCase();
+        const id = (u.identification || '').replace(/\D+/g, '');
+        const oblig = (u.guaranteeRate || '').toLowerCase();
+        return name.includes(q) || (!!normDigits && id.includes(normDigits)) || oblig.includes(q);
+      });
+    }
+
+    const dir = this.delinquentsSortDir === 'asc' ? 1 : -1;
+    const field = this.delinquentsSortBy;
+    arr.sort((a: any, b: any) => {
+      let va = a[field];
+      let vb = b[field];
+      if (field === 'name' || field === 'guaranteeRate') {
+        va = (va || '').toString().toLowerCase();
+        vb = (vb || '').toString().toLowerCase();
+        if (va < vb) return -1 * dir;
+        if (va > vb) return 1 * dir;
+        return 0;
+      } else {
+        va = Number(va) || 0;
+        vb = Number(vb) || 0;
+        return (va - vb) * dir;
+      }
+    });
+
+    return arr;
+  }
+
+  get delinquentsTotalPages(): number {
+    const total = this.processedDelinquents.length;
+    return total === 0 ? 1 : Math.ceil(total / this.delinquentsPageSize);
+  }
+
+  get visibleDelinquentUsers(): DelinquentUser[] {
+    const totalPages = this.delinquentsTotalPages;
+    if (this.delinquentsCurrentPage > totalPages) {
+      this.delinquentsCurrentPage = totalPages;
+    }
+    const start = (this.delinquentsCurrentPage - 1) * this.delinquentsPageSize;
+    const end = start + this.delinquentsPageSize;
+    return this.processedDelinquents.slice(start, end);
+  }
+
+  get delinquentsRangeStart(): number {
+    return (this.delinquentsCurrentPage - 1) * this.delinquentsPageSize;
+  }
+
+  get delinquentsRangeEnd(): number {
+    const end = this.delinquentsRangeStart + this.delinquentsPageSize;
+    return Math.min(end, this.processedDelinquents.length);
+  }
+
+  get delinquentsPagesArray(): number[] {
+    const total = this.delinquentsTotalPages;
+    const current = this.delinquentsCurrentPage;
+    const windowSize = 7;
+    let start = Math.max(1, current - Math.floor(windowSize / 2));
+    let end = Math.min(total, start + windowSize - 1);
+    start = Math.max(1, end - windowSize + 1);
+    const pages: number[] = [];
+    for (let p = start; p <= end; p++) pages.push(p);
+    return pages;
+  }
+
+  onDelinquentsFilterChange() {
+    this.delinquentsCurrentPage = 1;
+  }
+
+  onDelinquentsPageSizeChange(_event?: any) {
+    this.delinquentsCurrentPage = 1;
+  }
+
+  changeDelinquentsSort(field: 'name' | 'debtAmount' | 'delayDays' | 'guaranteeRate') {
+    if (this.delinquentsSortBy === field) {
+      this.delinquentsSortDir = this.delinquentsSortDir === 'asc' ? 'desc' : 'asc';
+    } else {
+      this.delinquentsSortBy = field;
+      this.delinquentsSortDir = (field === 'delayDays' || field === 'debtAmount') ? 'desc' : 'asc';
+    }
+    this.delinquentsCurrentPage = 1;
+  }
+
+  getDelinquentsSortIcon(field: 'name' | 'debtAmount' | 'delayDays' | 'guaranteeRate'): string {
+    if (this.delinquentsSortBy !== field) return '↕';
+    return this.delinquentsSortDir === 'asc' ? '▲' : '▼';
+  }
+
+  prevDelinquentsPage() {
+    if (this.delinquentsCurrentPage > 1) this.delinquentsCurrentPage--;
+  }
+
+  nextDelinquentsPage() {
+    if (this.delinquentsCurrentPage < this.delinquentsTotalPages) this.delinquentsCurrentPage++;
+  }
+
+  goToDelinquentsPage(p: number) {
+    if (p >= 1 && p <= this.delinquentsTotalPages) {
+      this.delinquentsCurrentPage = p;
+    }
   }
 
   handleAlert(alert: Alert) {

@@ -78,7 +78,7 @@
         <div class="metric-icon">📊</div>
         <div class="metric-content">
           <h3>cobertura</h3>
-          <div class="metric-value">Total valor abono del aval / 1.19*95%</div>
+          <div class="metric-value">{{portfolioStats.totalPortfolio/1.19*95/100 | currency:'COP':'symbol':'1.0-0'}}</div>
         </div>
       </div>
     </div>
@@ -251,15 +251,48 @@
           <span>📊</span> Exportar
         </button>
       </div>
+
+      <div class="table-toolbar">
+        <div class="left">
+          <input class="search-input" type="text" [(ngModel)]="delinquentsFilter" (ngModelChange)="onDelinquentsFilterChange()" placeholder="Filtrar por nombre, documento u obligación">
+          <span class="result-count">{{ processedDelinquents.length }} resultados</span>
+        </div>
+        <div class="right">
+          <span>Por página:</span>
+          <select class="page-size-select" [(ngModel)]="delinquentsPageSize" (change)="onDelinquentsPageSizeChange($event)">
+            <option [ngValue]="5">5</option>
+            <option [ngValue]="10">10</option>
+            <option [ngValue]="20">20</option>
+            <option [ngValue]="50">50</option>
+          </select>
+        </div>
+      </div>
+
       <div class="delinquents-table">
         <div class="table-header">
-          <div class="col-name">Usuario</div>
-          <div class="col-amount">Monto Adeudado</div>
-          <div class="col-days">Días de Mora</div>
-          <div class="col-rate">Obligación</div>
+          <div class="col-name">
+            <span class="sortable" [class.active]="delinquentsSortBy==='name'" (click)="changeDelinquentsSort('name')">
+              Usuario <span class="sort-icon">{{ getDelinquentsSortIcon('name') }}</span>
+            </span>
+          </div>
+          <div class="col-amount">
+            <span class="sortable" [class.active]="delinquentsSortBy==='debtAmount'" (click)="changeDelinquentsSort('debtAmount')">
+              Monto Adeudado <span class="sort-icon">{{ getDelinquentsSortIcon('debtAmount') }}</span>
+            </span>
+          </div>
+          <div class="col-days">
+            <span class="sortable" [class.active]="delinquentsSortBy==='delayDays'" (click)="changeDelinquentsSort('delayDays')">
+              Días de Mora <span class="sort-icon">{{ getDelinquentsSortIcon('delayDays') }}</span>
+            </span>
+          </div>
+          <div class="col-rate">
+            <span class="sortable" [class.active]="delinquentsSortBy==='guaranteeRate'" (click)="changeDelinquentsSort('guaranteeRate')">
+              Obligación <span class="sort-icon">{{ getDelinquentsSortIcon('guaranteeRate') }}</span>
+            </span>
+          </div>
           <div class="col-actions">Acciones</div>
         </div>
-        <div class="table-row" *ngFor="let user of topDelinquentUsers; trackBy: trackByUserId">
+        <div class="table-row" *ngFor="let user of visibleDelinquentUsers; trackBy: trackByUserId">
           <div class="col-name">
             <div class="user-info">
               <div class="user-name">{{ user.name }}</div>
@@ -279,6 +312,20 @@
             <button class="action-btn-small" (click)="viewUserDetail(user.id)">Ver</button>
             <button class="action-btn-small contact" (click)="contactUser(user.id)">Contactar</button>
           </div>
+        </div>
+        <div class="empty-state" *ngIf="processedDelinquents.length === 0">
+          No hay usuarios para mostrar.
+        </div>
+      </div>
+
+      <div class="pagination" *ngIf="processedDelinquents.length > 0">
+        <div class="result-count">
+          Mostrando {{ delinquentsRangeStart + 1 }}–{{ delinquentsRangeEnd }} de {{ processedDelinquents.length }}
+        </div>
+        <div class="page-controls">
+          <button class="page-btn" (click)="prevDelinquentsPage()" [disabled]="delinquentsCurrentPage === 1">«</button>
+          <button class="page-btn" *ngFor="let p of delinquentsPagesArray" [class.active]="p === delinquentsCurrentPage" (click)="goToDelinquentsPage(p)">{{ p }}</button>
+          <button class="page-btn" (click)="nextDelinquentsPage()" [disabled]="delinquentsCurrentPage === delinquentsTotalPages">»</button>
         </div>
       </div>
     </div>
