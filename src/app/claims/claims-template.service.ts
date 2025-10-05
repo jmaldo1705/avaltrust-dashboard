@@ -90,12 +90,7 @@ export class ClaimsTemplateService {
     // Crear el libro de trabajo
     const wb = XLSX.utils.book_new();
 
-    // Hoja de instrucciones
-    const wsInstructions = XLSX.utils.aoa_to_sheet(instructions);
-    wsInstructions['!cols'] = [{ wch: 80 }];
-    XLSX.utils.book_append_sheet(wb, wsInstructions, 'Instrucciones');
-
-    // Hoja de datos con encabezados y ejemplos
+    // Hoja de datos con encabezados y ejemplos (primera hoja)
     const wsData = XLSX.utils.aoa_to_sheet([headers, ...exampleData]);
 
     // Configurar anchos de columna
@@ -115,7 +110,13 @@ export class ClaimsTemplateService {
       { wch: 15 }   // Nit Empresa
     ];
 
+    // Aseguramos que la primera hoja sea 'Datos' (algunos backends leen solo la hoja 1)
     XLSX.utils.book_append_sheet(wb, wsData, 'Datos');
+
+    // Hoja de instrucciones
+    const wsInstructions = XLSX.utils.aoa_to_sheet(instructions);
+    wsInstructions['!cols'] = [{ wch: 80 }];
+    XLSX.utils.book_append_sheet(wb, wsInstructions, 'Instrucciones');
 
     // Generar archivo
     const fileName = `Plantilla_Siniestros_${new Date().toISOString().split('T')[0]}.xlsx`;
