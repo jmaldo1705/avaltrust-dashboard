@@ -108,9 +108,15 @@ export class PortfolioService {
       params.generadaPor = user.username;
     }
 
+    // Forzar cabecera Accept para evitar negociaciones de contenido que causen errores en el backend
+    const headers = new HttpHeaders({
+      'Accept': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/octet-stream'
+    });
+
     return this.http.get(`${this.baseUrl}/template/download`, {
       responseType: 'blob',
-      params: params
+      params: params,
+      headers
     });
   }
 

@@ -11,6 +11,7 @@ import { HeaderComponent } from '../header/header.component';
 import { SidebarComponent } from '../sidebar/sidebar.component';
 import { PortfolioService, PortfolioRequest } from './portfolio.service';
 import { ExcelTemplateService } from './excel-template.service';
+import * as XLSX from 'xlsx';
 
 @Component({
   selector: 'app-portfolio',
@@ -140,7 +141,7 @@ export class PortfolioComponent implements OnInit {
       totalDeuda: ['', [Validators.required]],
       fechaVencimiento: ['', [Validators.required]],
       diasMora: [0],
-      fechaPago: [''],
+      fechaPago: ['', [Validators.required]],
       estadoCredito: ['', [Validators.required]],
       periodicidad: ['', [Validators.required]]
     });
@@ -361,6 +362,43 @@ export class PortfolioComponent implements OnInit {
     }
   }
 
+  private sanitizeText(value: string): string {
+    if (!value) return '';
+    // Normalizar y quitar diacriticos
+    let clean = value.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+    // Remplazos especificos
+    clean = clean.replace(/ñ/g, 'n').replace(/Ñ/g, 'N');
+    // Quitar caracteres no ASCII excepto basicos
+    clean = clean.replace(/[^A-Za-z0-9 %()_\-.,\/ ]+/g, '');
+    // Colapsar espacios
+    clean = clean.replace(/\s+/g, ' ').trim();
+    return clean;
+  }
+
+  private sanitizeWorkbookHeadersAndSheets(wb: XLSX.WorkBook): XLSX.WorkBook {
+    // Renombrar hojas
+    wb.SheetNames = wb.SheetNames.map(name => this.sanitizeText(name) || 'Hoja');
+
+    // Limpiar encabezados de cada hoja (primera fila)
+    for (const sheetName of wb.SheetNames) {
+      const ws = wb.Sheets[sheetName];
+      if (!ws || !ws['!ref']) continue;
+      const range = XLSX.utils.decode_range(ws['!ref']);
+      const headerRow = range.s.r; // primera fila
+      for (let c = range.s.c; c <= range.e.c; c++) {
+        const cellAddr = XLSX.utils.encode_cell({ r: headerRow, c });
+        const cell = ws[cellAddr];
+        if (cell && typeof cell.v === 'string') {
+          const sanitized = this.sanitizeText(cell.v);
+          cell.v = sanitized;
+          cell.w = sanitized;
+          cell.t = 's';
+        }
+      }
+    }
+    return wb;
+  }
+
   downloadTemplate() {
     console.log('Descargando plantilla...');
 
@@ -379,16 +417,39 @@ export class PortfolioComponent implements OnInit {
       )
       .subscribe(blob => {
         if (blob) {
-          const url = window.URL.createObjectURL(blob);
-          const link = document.createElement('a');
-          link.href = url;
-          link.download = `Plantilla_Cartera_${new Date().toISOString().split('T')[0]}.xlsx`;
-          document.body.appendChild(link);
-          link.click();
-          document.body.removeChild(link);
-          window.URL.revokeObjectURL(url);
+          // Sanitizar el contenido de la plantilla descargada (encabezados y nombres de hojas)
+          const reader = new FileReader();
+          reader.onload = () => {
+            try {
+              const data = new Uint8Array(reader.result as ArrayBuffer);
+              const wb = XLSX.read(data, { type: 'array' });
+              const cleanWb = this.sanitizeWorkbookHeadersAndSheets(wb);
+              const out = XLSX.write(cleanWb, { bookType: 'xlsx', type: 'array' });
+              const cleanBlob = new Blob([out], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
 
-          console.log('Plantilla descargada exitosamente desde el backend');
+              const url = window.URL.createObjectURL(cleanBlob);
+              const link = document.createElement('a');
+              link.href = url;
+              link.download = `Plantilla_Cartera_${new Date().toISOString().split('T')[0]}.xlsx`;
+              document.body.appendChild(link);
+              link.click();
+              document.body.removeChild(link);
+              window.URL.revokeObjectURL(url);
+
+              console.log('Plantilla descargada y sanitizada exitosamente');
+            } catch (e) {
+              console.warn('No fue posible sanitizar la plantilla, se descargara el archivo original.', e);
+              const url = window.URL.createObjectURL(blob);
+              const link = document.createElement('a');
+              link.href = url;
+              link.download = `Plantilla_Cartera_${new Date().toISOString().split('T')[0]}.xlsx`;
+              document.body.appendChild(link);
+              link.click();
+              document.body.removeChild(link);
+              window.URL.revokeObjectURL(url);
+            }
+          };
+          reader.readAsArrayBuffer(blob);
         }
       });
   }

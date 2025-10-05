@@ -12,9 +12,9 @@ export class ExcelTemplateService {
   generatePortfolioTemplate(): void {
     // Definir las columnas basadas en el formulario
     const headers = [
-      'Obligación',
+      'Obligacion',
       'Tipo Documento',
-      'Número Documento',
+      'Numero Documento',
       'Nombres',
       'Apellidos',
       'Tipo Cliente',
@@ -22,16 +22,16 @@ export class ExcelTemplateService {
       'Cuotas',
       'Valor Desembolso',
       'Valor Aval',
-      'Interés',
+      'Interes',
       'Tasa Aval (%)',
       'Otros Conceptos',
       'Abono Aval',
       'Abono Capital',
       'Total Deuda',
       'Fecha Vencimiento',
-      'Días Mora',
+      'Dias Mora',
       'Fecha Pago',
-      'Estado Crédito',
+      'Estado Credito',
       'Periodicidad'
     ];
 
@@ -42,7 +42,7 @@ export class ExcelTemplateService {
         'CC',
         '12345678',
         'Juan Carlos',
-        'Pérez González',
+        'Perez Gonzalez',
         'NATURAL',
         '2025-01-15',
         '360',
@@ -56,7 +56,7 @@ export class ExcelTemplateService {
         '57500000',
         '2025-12-31',
         '0',
-        '',
+        '2025-12-31',
         'VIGENTE',
         'MENSUAL'
       ],
@@ -79,8 +79,8 @@ export class ExcelTemplateService {
         '112500000',
         '2026-07-20',
         '5',
-        '2025-01-25',
-        'VIGENTE',
+        '2026-07-20',
+        'VENCIDO',
         'TRIMESTRAL'
       ]
     ];
@@ -91,22 +91,25 @@ export class ExcelTemplateService {
       [''],
       ['1. Complete todos los campos obligatorios'],
       ['2. Respete el formato de fechas: YYYY-MM-DD (Ej: 2025-01-15)'],
-      ['3. Para números decimales use punto como separador (Ej: 18.5)'],
-      ['4. Valores permitidos para campos específicos:'],
+      ['3. Para numeros decimales use punto como separador (Ej: 18.5)'],
+      ['4. Valores permitidos para campos especificos:'],
       ['   - Tipo Documento: CC, CE, NIT, TI'],
       ['   - Tipo Cliente: NATURAL, JURIDICA'],
-      ['   - Estado Crédito: VIGENTE, VENCIDO, CANCELADO, CASTIGADO'],
+      ['   - Estado Credito: VIGENTE, VENCIDO, CANCELADO, CASTIGADO'],
       ['   - Periodicidad: MENSUAL, BIMESTRAL, TRIMESTRAL, SEMESTRAL, ANUAL'],
       [''],
       ['5. Los siguientes campos son OBLIGATORIOS:'],
-      ['   Obligación, Tipo Documento, Número Documento, Nombres, Apellidos,'],
+      ['   Obligacion, Tipo Documento, Numero Documento, Nombres, Apellidos,'],
       ['   Tipo Cliente, Fecha Desembolso, Cuotas, Valor Desembolso,'],
-      ['   Valor Aval, Interés, Tasa Aval, Total Deuda, Fecha Vencimiento,'],
-      ['   Estado Crédito, Periodicidad'],
+      ['   Valor Aval, Interes, Tasa Aval, Total Deuda, Fecha Vencimiento,'],
+      ['   Fecha Pago, Estado Credito, Periodicidad'],
       [''],
       ['6. Los campos opcionales son:'],
-      ['   Otros Conceptos, Abono Aval, Abono Capital, Días Mora, Fecha Pago'],
-      ['']
+      ['   Otros Conceptos, Abono Aval, Abono Capital, Dias Mora'],
+      [''],
+      ['7. Coherencia de estado y mora:'],
+      ['   - Si "Dias Mora" > 0, "Estado Credito" no puede ser VIGENTE (use VENCIDO o CASTIGADO).'],
+      ['   - Si "Dias Mora" = 0, use "Estado Credito" = VIGENTE.']
     ];
 
     // Crear el workbook

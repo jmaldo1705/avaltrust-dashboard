@@ -9,6 +9,7 @@ import { HeaderComponent } from '../header/header.component';
 import { SidebarComponent } from '../sidebar/sidebar.component';
 import { HasRoleDirective } from '../auth/has-role.directive';
 import { DashboardService } from './dashboard.service';
+import * as XLSX from 'xlsx';
 
 // Interfaces para tipado
 interface PortfolioStats {
@@ -494,8 +495,47 @@ export class DashboardComponent implements OnInit {
   }
 
   exportTopDelinquents() {
-    console.log('Exportando datos de morosos...');
-    // Implementar lógica de exportación
+    try {
+      const data = this.processedDelinquents || [];
+      if (!data.length) {
+        alert('No hay datos para exportar.');
+        return;
+      }
+
+      // Preparar filas con encabezados legibles en español
+      const rows = data.map(u => ({
+        'Nombre': u.name,
+        'Documento': u.identification,
+        'Monto Adeudado': u.debtAmount,
+        'Días de Mora': u.delayDays,
+        'Obligación': u.guaranteeRate
+      }));
+
+      const ws = XLSX.utils.json_to_sheet(rows, {
+        header: ['Nombre', 'Documento', 'Monto Adeudado', 'Días de Mora', 'Obligación']
+      });
+
+      // Ajustar anchos de columna básicos
+      (ws as any)['!cols'] = [
+        { wch: 28 }, // Nombre
+        { wch: 18 }, // Documento
+        { wch: 18 }, // Monto Adeudado
+        { wch: 14 }, // Días de Mora
+        { wch: 16 }  // Obligación
+      ];
+
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, 'Mayor mora');
+
+      const pad = (n: number) => n.toString().padStart(2, '0');
+      const now = new Date();
+      const fileName = `usuarios_mayor_mora_${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}_${pad(now.getHours())}-${pad(now.getMinutes())}.xlsx`;
+
+      XLSX.writeFile(wb, fileName);
+    } catch (e) {
+      console.error('Error exportando a Excel', e);
+      alert('Ocurrió un error al exportar el archivo.');
+    }
   }
 
   viewUserDetail(userId: string) {
