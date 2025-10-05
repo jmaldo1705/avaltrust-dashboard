@@ -335,16 +335,10 @@ export class PortfolioComponent implements OnInit {
           })
         )
         .subscribe(response => {
-          this.uploadResult = {
-            success: response.success,
-            message: response.success ?
-              `Se procesaron exitosamente ${response.processedRecords || 0} registros` :
-              response.message,
-            records: response.processedRecords || 0,
-            errors: response.errors || response.validationErrors || []
-          };
+          const friendly = this.toUserFriendlyUploadResult(response);
+          this.uploadResult = friendly;
 
-          if (response.success) {
+          if (friendly.success) {
             this.uploadedFile = null;
             // Reset file input
             const fileInput = document.getElementById('fileInput') as HTMLInputElement;
@@ -354,9 +348,9 @@ export class PortfolioComponent implements OnInit {
             // Scroll to top to show result
             window.scrollTo({ top: 0, behavior: 'smooth' });
 
-            console.log(`Carga masiva completada: ${response.processedRecords} registros procesados`);
+            console.log(`Carga masiva completada: ${friendly.records} registros procesados`);
           } else {
-            console.error('Error en carga masiva:', response.errors);
+            console.error('Error en carga masiva:', friendly.errors);
           }
         });
     }
@@ -397,6 +391,76 @@ export class PortfolioComponent implements OnInit {
       }
     }
     return wb;
+  }
+
+  private toUserFriendlyUploadResult(response: any): { success: boolean; message: string; records: number; errors: string[] } {
+    if (response?.success) {
+      return {
+        success: true,
+        message: `Se procesaron exitosamente ${response.processedRecords || 0} registros`,
+        records: response.processedRecords || 0,
+        errors: []
+      };
+    }
+
+    const rawErrors: any[] = [];
+    if (Array.isArray(response?.errors)) rawErrors.push(...response.errors);
+    if (Array.isArray(response?.validationErrors)) rawErrors.push(...response.validationErrors);
+
+    const duplicateValuesSet = new Set<string>();
+    const otherErrors: string[] = [];
+
+    for (const err of rawErrors) {
+      if (typeof err === 'string') {
+        const m = err.match(/Obligaci[óo]n duplicada en BD:\s*(.+)$/i);
+        if (m && m[1]) {
+          duplicateValuesSet.add(String(m[1]).trim());
+        } else {
+          otherErrors.push(err);
+        }
+      } else if (err && typeof err === 'object') {
+        const field = (err.field || '').toString().toLowerCase();
+        const isDup = field === 'obligacion' && /duplicad/i.test(String(err.error || ''));
+        if (isDup && err.value != null) {
+          duplicateValuesSet.add(String(err.value).trim());
+        } else {
+          const row = (typeof err.row === 'number' && err.row > 0) ? `Fila ${err.row}: ` : '';
+          const fld = err.field ? `${err.field}` : 'Campo';
+          const msg = err.error ? `${err.error}` : 'Error de validación';
+          const val = (err.value !== undefined && err.value !== null && err.value !== '') ? ` (Valor: ${err.value})` : '';
+          otherErrors.push(`${row}${fld} - ${msg}${val}`);
+        }
+      }
+    }
+
+    const duplicates = Array.from(duplicateValuesSet);
+    const duplicatesCount = duplicates.length;
+    const displayErrors: string[] = [];
+
+    if (duplicatesCount > 0) {
+      if (duplicatesCount <= 5) {
+        for (const v of duplicates) {
+          displayErrors.push(`Obligacion duplicada en BD: ${v}`);
+        }
+      } else {
+        const examples = duplicates.slice(0, 5).join(', ');
+        displayErrors.push(`Obligaciones duplicadas en BD: ${duplicatesCount}. Ejemplos: ${examples}`);
+      }
+    }
+
+    // Agregar otros errores luego del resumen de duplicados
+    displayErrors.push(...otherErrors);
+
+    const friendlyMessage = duplicatesCount > 0 && otherErrors.length === 0
+      ? `Se encontraron ${duplicatesCount} obligaciones duplicadas en el archivo/BD`
+      : (response?.message || 'Se encontraron errores en el archivo');
+
+    return {
+      success: false,
+      message: friendlyMessage,
+      records: response?.processedRecords || 0,
+      errors: displayErrors.length > 0 ? displayErrors : [friendlyMessage]
+    };
   }
 
   downloadTemplate() {
