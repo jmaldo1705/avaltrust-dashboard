@@ -142,4 +142,9 @@ export class DashboardService {
   getRecentClaims(period: 'month' | 'quarter' | 'year'): Observable<ClaimItemDto[]> {
     return this.http.get<ClaimItemDto[]>(`${this.baseUrl}/api/claims/recent`, { params: { period } });
   }
+
+  // Fallback: obtener todos los siniestros usando el endpoint de lista estándar (wrapper { success, message, data })
+  getAllClaimsRaw(): Observable<any> {
+    return this.http.get<any>(`${this.baseUrl}/api/claims`);
+  }
 }

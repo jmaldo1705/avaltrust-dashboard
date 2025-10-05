@@ -1,7 +1,7 @@
 import { Injectable, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
-import {Observable, BehaviorSubject, timer, EMPTY, map} from 'rxjs';
+import {Observable, BehaviorSubject, timer, EMPTY, map, interval} from 'rxjs';
 import { catchError, switchMap, tap } from 'rxjs/operators';
 
 export type AuthUser = {
@@ -54,6 +54,12 @@ export type RefreshResponse = {
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
+  // User activity and keep-alive handling
+  private lastActivityAt = Date.now();
+  private activityListenersBound = false;
+  private keepAliveSub: any;
+  private readonly inactivityThresholdMs = 15 * 60 * 1000; // 15 minutes without user events considered inactive
+  private readonly keepAliveIntervalMs = 4 * 60 * 1000; // check every 4 minutes
   private readonly API_URL = 'http://localhost:8080/api/auth';
   private readonly USER_API_URL = 'http://localhost:8080/api/user';
   private readonly storageKey = 'avaltrust.auth';
@@ -74,6 +80,8 @@ export class AuthService {
     // Iniciar timer de renovación si hay usuario logueado
     if (this.isAuthenticated()) {
       this.startTokenRefreshTimer();
+      this.bindActivityListeners();
+      this.startKeepAliveTimer();
     }
   }
 
@@ -187,6 +195,8 @@ export class AuthService {
           this._user.set(user);
           this.writeToStorage(user);
           this.startTokenRefreshTimer();
+          this.bindActivityListeners();
+          this.startKeepAliveTimer();
 
           // Cargar perfil y permisos después del login exitoso
           this.loadUserData();
@@ -227,6 +237,8 @@ export class AuthService {
   logout(redirectToLogin = true): Observable<any> {
     const user = this._user();
     this.clearTokenRefreshTimer();
+    this.clearKeepAliveTimer();
+    this.unbindActivityListeners();
 
     // Limpiar estado local inmediatamente
     this._user.set(null);
@@ -356,6 +368,59 @@ export class AuthService {
     if (this.refreshTimer) {
       this.refreshTimer.unsubscribe();
       this.refreshTimer = null;
+    }
+  }
+
+  private bindActivityListeners(): void {
+    if (this.activityListenersBound) return;
+    const record = () => this.recordActivity();
+    const events = ['mousemove','mousedown','click','scroll','keydown','touchstart','touchmove'];
+    events.forEach(evt => window.addEventListener(evt as any, record, { passive: true } as any));
+    this.activityListenersBound = true;
+  }
+
+  private unbindActivityListeners(): void {
+    if (!this.activityListenersBound) return;
+    const record = () => this.recordActivity();
+    const events = ['mousemove','mousedown','click','scroll','keydown','touchstart','touchmove'];
+    events.forEach(evt => window.removeEventListener(evt as any, record as any));
+    this.activityListenersBound = false;
+  }
+
+  private recordActivity(): void {
+    this.lastActivityAt = Date.now();
+  }
+
+  private startKeepAliveTimer(): void {
+    this.clearKeepAliveTimer();
+    if (!this._user()) return;
+    // Immediately set last activity to now on start
+    this.lastActivityAt = Date.now();
+    this.keepAliveSub = interval(this.keepAliveIntervalMs).subscribe(() => {
+      const user = this._user();
+      if (!user) return;
+      const now = Date.now();
+      const isActive = (now - this.lastActivityAt) < this.inactivityThresholdMs;
+      if (!isActive) {
+        return; // Do not keep alive while user inactive
+      }
+      const msToExpiry = (user.expiresIn * 1000) - now;
+      // If token is close to expiration (< 5 min), proactively refresh
+      if (msToExpiry < (5 * 60 * 1000)) {
+        this.refreshToken().subscribe();
+        return;
+      }
+      // Otherwise, do a lightweight ping to keep backend session alive
+      this.http.get(`${this.USER_API_URL}/profile`).pipe(
+        catchError(() => EMPTY)
+      ).subscribe();
+    });
+  }
+
+  private clearKeepAliveTimer(): void {
+    if (this.keepAliveSub) {
+      this.keepAliveSub.unsubscribe?.();
+      this.keepAliveSub = null;
     }
   }
 

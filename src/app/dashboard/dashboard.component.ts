@@ -135,8 +135,11 @@ export class DashboardComponent implements OnInit {
     identification: string;
     amount: number;
     status: string;
-    date: Date;
+    date: Date | null;
   }[] = [];
+
+  // Indica si se están mostrando siniestros fuera del período seleccionado
+  claimsFromAllTime: boolean = false;
 
   // Modal detalle de usuario moroso
   isUserModalOpen = false;
@@ -225,19 +228,154 @@ export class DashboardComponent implements OnInit {
 
     // Siniestros: resumen y recientes
     this.dashboardService.getClaimsSummary(period).subscribe({
-      next: (data: any) => this.claimsSummary = data,
-      error: (err) => console.error('Error cargando claimsSummary', err)
+      next: (data: any) => {
+        this.claimsSummary = {
+          totalCapital: data.totalCapital ?? data.valorCapitalTotal ?? 0,
+          totalInterest: data.totalInterest ?? data.totalIntereses ?? 0,
+          monthlyClaimsAmount: data.monthlyClaimsAmount ?? data.montoMensual ?? 0,
+          openClaims: data.openClaims ?? data.abiertos ?? 0,
+          closedClaims: data.closedClaims ?? data.cerrados ?? 0,
+          avgResolutionDays: data.avgResolutionDays ?? data.diasPromedioResolucion ?? 0,
+        };
+        if (this.isClaimsSummaryEmpty()) {
+          this.loadClaimsFallbackUsingAllClaims();
+        }
+      },
+      error: (err) => {
+        console.error('Error cargando claimsSummary', err);
+        this.loadClaimsFallbackUsingAllClaims();
+      }
     });
 
     this.dashboardService.getRecentClaims(period).subscribe({
       next: (data: any[]) => {
-        this.recentClaims = data.map(c => ({
-          ...c,
-          date: new Date(c.date)
-        }));
+        this.recentClaims = data.map((c: any) => {
+          const amount = (c?.amount ?? c?.valor ?? ((c?.valorCapital ?? 0) + (c?.intereses ?? 0) + (c?.otrosConceptos ?? 0))) as number;
+          const dateRaw = c?.date ?? c?.fecha ?? c?.fechaSolicitud ?? c?.fecha_creacion;
+          return {
+            id: (c?.id ?? c?.claimId ?? c?.obligacion ?? c?.obligation ?? '-') + '',
+            userName: c?.userName ?? c?.usuario ?? c?.cliente ?? c?.nombreUsuario ?? c?.obligacion ?? '—',
+            identification: c?.identification ?? c?.numeroDocumento ?? c?.documento ?? c?.nitEmpresa ?? c?.nit ?? '—',
+            amount: amount ?? 0,
+            status: c?.status ?? c?.estado ?? '—',
+            date: dateRaw ? new Date(dateRaw) : null,
+          };
+        });
+        // Datos provienen del endpoint filtrado por período
+        this.claimsFromAllTime = false;
+        if (this.recentClaims.length === 0) {
+          this.loadClaimsFallbackUsingAllClaims();
+        }
       },
-      error: (err) => console.error('Error cargando recentClaims', err)
+      error: (err) => {
+        console.error('Error cargando recentClaims', err);
+        this.loadClaimsFallbackUsingAllClaims();
+      }
     });
+  }
+
+  // Fallback: cargar siniestros desde /api/claims/all y calcular resumen/recientes
+  private loadClaimsFallbackUsingAllClaims() {
+    this.dashboardService.getAllClaimsRaw().subscribe({
+      next: (res: any) => {
+        const rows = Array.isArray(res) ? res : (Array.isArray(res?.data) ? res.data : []);
+        if (!rows.length) {
+          return;
+        }
+        const period = this.selectedPeriod as 'month' | 'quarter' | 'year';
+        const start = this.getPeriodStart(period);
+
+        const mapped = rows.map((c: any) => {
+          const amount = (c?.amount ?? c?.valor ?? ((c?.valorCapital ?? 0) + (c?.intereses ?? 0) + (c?.otrosConceptos ?? 0))) as number;
+          const dateRaw = c?.date ?? c?.fecha ?? c?.fechaSolicitud ?? c?.fecha_creacion;
+          const d = dateRaw ? new Date(dateRaw) : null;
+          const status = c?.status ?? c?.estado ?? 'CARGADO';
+          return {
+            id: (c?.id ?? c?.claimId ?? c?.obligacion ?? c?.obligation ?? '-') + '',
+            userName: c?.userName ?? c?.usuario ?? c?.cliente ?? c?.nombreUsuario ?? c?.obligacion ?? '—',
+            identification: c?.identification ?? c?.numeroDocumento ?? c?.documento ?? c?.nitEmpresa ?? c?.nit ?? '—',
+            amount: amount ?? 0,
+            status,
+            date: d,
+          };
+        });
+
+        // Ordenar por fecha descendente
+        mapped.sort((a: { date: { getTime: () => any; }; }, b: { date: { getTime: () => any; }; }) => {
+          const da = a.date ? a.date.getTime() : 0;
+          const db = b.date ? b.date.getTime() : 0;
+          return db - da;
+        });
+
+        // Tomar registros del período; si no hay, tomar últimos 10 globales
+        if (this.recentClaims.length === 0) {
+          // @ts-ignore
+          const filtered = mapped.filter((m: { date: number; }) => m.date && m.date >= start);
+          if (filtered.length > 0) {
+            this.recentClaims = filtered.slice(0, 10);
+            this.claimsFromAllTime = false;
+          } else if (mapped.length > 0) {
+            this.recentClaims = mapped.slice(0, 10);
+            this.claimsFromAllTime = true;
+          }
+        }
+
+        // Calcular resumen a partir del cargue cuando el backend no lo provee
+        const totalCapital = rows.reduce((sum: number, r: any) => sum + (Number(r?.valorCapital) || 0), 0);
+        const totalInterest = rows.reduce((sum: number, r: any) => sum + (Number(r?.intereses) || 0), 0);
+        const monthlyClaimsAmount = rows.reduce((sum: number, r: any) => {
+          const dateRaw = r?.date ?? r?.fecha ?? r?.fechaSolicitud ?? r?.fecha_creacion;
+          const d = dateRaw ? new Date(dateRaw) : null;
+          if (d && d >= start) {
+            const amount = (r?.amount ?? r?.valor ?? ((r?.valorCapital ?? 0) + (r?.intereses ?? 0) + (r?.otrosConceptos ?? 0))) as number;
+            return sum + (Number(amount) || 0);
+          }
+          return sum;
+        }, 0);
+        const hasEstado = rows.some((r: any) => r?.estado || r?.status);
+        const openClaims = hasEstado ? rows.filter((r: any) => (r?.status ?? r?.estado) !== 'CERRADO').length : rows.length;
+        const closedClaims = hasEstado ? rows.filter((r: any) => (r?.status ?? r?.estado) === 'CERRADO').length : 0;
+
+        if (this.isClaimsSummaryEmpty()) {
+          this.claimsSummary = {
+            totalCapital,
+            totalInterest,
+            monthlyClaimsAmount,
+            openClaims,
+            closedClaims,
+            avgResolutionDays: this.claimsSummary.avgResolutionDays || 0,
+          };
+        }
+      },
+      error: (err) => console.error('Fallback: error cargando siniestros', err)
+    });
+  }
+
+  private isClaimsSummaryEmpty(): boolean {
+    const s = this.claimsSummary as any;
+    return (
+      (s.totalCapital ?? 0) === 0 &&
+      (s.totalInterest ?? 0) === 0 &&
+      (s.monthlyClaimsAmount ?? 0) === 0 &&
+      (s.openClaims ?? 0) === 0 &&
+      (s.closedClaims ?? 0) === 0 &&
+      (s.avgResolutionDays ?? 0) === 0
+    );
+  }
+
+  private getPeriodStart(period: 'month' | 'quarter' | 'year'): Date {
+    const now = new Date();
+    const start = new Date(now);
+    if (period === 'month') {
+      start.setDate(1);
+    } else if (period === 'quarter') {
+      const q = Math.floor(now.getMonth() / 3) * 3;
+      start.setMonth(q, 1);
+    } else {
+      start.setMonth(0, 1);
+    }
+    start.setHours(0, 0, 0, 0);
+    return start;
   }
 
   getAlertIcon(type: string): string {
