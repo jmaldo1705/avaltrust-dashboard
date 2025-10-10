@@ -78,7 +78,7 @@
         <div class="metric-icon">📊</div>
         <div class="metric-content">
           <h3>cobertura</h3>
-          <div class="metric-value">{{portfolioStats.totalPortfolio/1.19*95/100 | currency:'COP':'symbol':'1.0-0'}}</div>
+          <div class="metric-value">{{ totalValorAval | currency:'COP':'symbol':'1.0-0' }}</div>
         </div>
       </div>
     </div>
@@ -111,85 +111,8 @@
         </div>
       </div>
 
-      <!-- Siniestros -->
-      <div class="chart-card">
-        <div class="chart-header">
-          <h3>Siniestros</h3>
-          <div class="chart-period">
-            <select [(ngModel)]="selectedPeriod" (change)="loadPaymentData()">
-              <option value="month">Último mes</option>
-              <option value="quarter">Último trimestre</option>
-              <option value="year">Último año</option>
-            </select>
-          </div>
-        </div>
-        <div class="chart-content">
-          <div class="payment-summary">
-            <div class="payment-item">
-              <div class="payment-label">Total Capital</div>
-              <div class="payment-value positive">{{ claimsSummary.totalCapital | currency:'COP':'symbol':'1.0-0' }}</div>
-            </div>
-            <div class="payment-item">
-              <div class="payment-label">Total Intereses</div>
-              <div class="payment-value">{{ claimsSummary.totalInterest | currency:'COP':'symbol':'1.0-0' }}</div>
-            </div>
-            <div class="payment-item">
-              <div class="payment-label">Monto Mensual</div>
-              <div class="payment-value negative">{{ claimsSummary.monthlyClaimsAmount | currency:'COP':'symbol':'1.0-0' }}</div>
-            </div>
-            <div class="payment-item">
-              <div class="payment-label">Abiertos</div>
-              <div class="payment-value">{{ claimsSummary.openClaims | number }}</div>
-            </div>
-            <div class="payment-item">
-              <div class="payment-label">Cerrados</div>
-              <div class="payment-value">{{ claimsSummary.closedClaims | number }}</div>
-            </div>
-            <div class="payment-item">
-              <div class="payment-label">Días Prom. Resolución</div>
-              <div class="payment-value">{{ claimsSummary.avgResolutionDays | number }}</div>
-            </div>
-          </div>
-
-          <div class="recent-claims">
-            <div class="table-header">
-              <div class="col-id">ID</div>
-              <div class="col-user">Usuario/Obligación</div>
-              <div class="col-amount">Monto</div>
-              <div class="col-status">Estado</div>
-              <div class="col-date">Fecha</div>
-              <div class="col-actions">Acciones</div>
-            </div>
-            <div class="info-note" *ngIf="claimsFromAllTime && recentClaims.length > 0" style="margin:8px 0;color:#555;font-size:12px;">
-              Mostrando los últimos siniestros fuera del período seleccionado
-            </div>
-            <div class="table-row" *ngFor="let claim of recentClaims">
-              <div class="col-id">{{ claim.id }}</div>
-              <div class="col-user">
-                <div class="user-info">
-                  <div class="user-name">{{ claim.userName }}</div>
-                  <div class="user-id">{{ claim.identification }}</div>
-                </div>
-              </div>
-              <div class="col-amount">{{ claim.amount | currency:'COP':'symbol':'1.0-0' }}</div>
-              <div class="col-status">{{ claim.status }}</div>
-              <div class="col-date">{{ claim.date | date:'shortDate' }}</div>
-              <div class="col-actions">
-                <button class="action-btn-small" (click)="navigateToClaim(claim.id)">Ver</button>
-              </div>
-            </div>
-            <div class="empty-state" *ngIf="recentClaims.length === 0">
-              No hay siniestros recientes para el período seleccionado.
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Alertas y acciones -->
-    <div class="alerts-actions-grid">
       <!-- Alertas importantes -->
-      <div class="alerts-card">
+      <div class="chart-card alerts-card">
         <div class="card-header">
           <h3>Alertas Importantes</h3>
           <span class="alert-count">{{ alerts.length }}</span>
@@ -207,43 +130,6 @@
         </div>
       </div>
 
-      <!-- Acciones rápidas -->
-      <div class="quick-actions-card">
-        <h3>Acciones Rápidas</h3>
-        <div class="actions-list">
-          <button class="action-btn primary" (click)="navigateTo('/portfolio/upload')">
-            <span class="action-icon">📤</span>
-            <div class="action-text">
-              <div class="action-title">Cargar Cartera</div>
-              <div class="action-subtitle">Subir nuevo archivo</div>
-            </div>
-          </button>
-
-          <button class="action-btn secondary" (click)="navigateTo('/portfolio/reports')">
-            <span class="action-icon">📋</span>
-            <div class="action-text">
-              <div class="action-title">Generar Reporte</div>
-              <div class="action-subtitle">Exportar estadísticas</div>
-            </div>
-          </button>
-
-          <button class="action-btn secondary" (click)="navigateTo('/portfolio/search')">
-            <span class="action-icon">🔍</span>
-            <div class="action-text">
-              <div class="action-title">Buscar Usuario</div>
-              <div class="action-subtitle">Consultar obligaciones</div>
-            </div>
-          </button>
-
-          <button class="action-btn tertiary" *appHasRole="'ROLE_ADMIN'" (click)="navigateTo('/admin/settings')">
-            <span class="action-icon">⚙️</span>
-            <div class="action-text">
-              <div class="action-title">Configuración</div>
-              <div class="action-subtitle">Parámetros del sistema</div>
-            </div>
-          </button>
-        </div>
-      </div>
     </div>
 
     <!-- Top usuarios con mayor mora -->

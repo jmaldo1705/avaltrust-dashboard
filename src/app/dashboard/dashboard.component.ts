@@ -9,6 +9,7 @@ import { HeaderComponent } from '../header/header.component';
 import { SidebarComponent } from '../sidebar/sidebar.component';
 import { HasRoleDirective } from '../auth/has-role.directive';
 import { DashboardService } from './dashboard.service';
+import { PortfolioService } from '../portfolio/portfolio.service';
 import * as XLSX from 'xlsx';
 
 // Interfaces para tipado
@@ -64,7 +65,7 @@ interface DelinquentUser {
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [CommonModule, FormsModule, HeaderComponent, SidebarComponent, HasRoleDirective],
+  imports: [CommonModule, FormsModule, HeaderComponent, SidebarComponent],
   templateUrl: './dashboard.component.html',
   styleUrls: ['./dashboard.component.css']
 })
@@ -73,6 +74,7 @@ export class DashboardComponent implements OnInit {
   private auth = inject(AuthService);
   private uiState = inject(UiStateService);
   private dashboardService = inject(DashboardService);
+  private portfolioService = inject(PortfolioService);
 
   userProfile = this.auth.userProfile;
 
@@ -98,6 +100,9 @@ export class DashboardComponent implements OnInit {
     guaranteeRate: 0
   };
 
+  // Suma total de los valores de aval de todos los usuarios (cobertura)
+  totalValorAval: number = 0;
+
   moraDistribution: MoraCategory[] = [];
 
   paymentStats: PaymentStats = {
@@ -119,27 +124,6 @@ export class DashboardComponent implements OnInit {
   delinquentsPageSize: number = 10;
   delinquentsCurrentPage: number = 1;
 
-  // Siniestros (resumen y recientes)
-  claimsSummary = {
-    totalCapital: 0,
-    totalInterest: 0,
-    monthlyClaimsAmount: 0,
-    openClaims: 0,
-    closedClaims: 0,
-    avgResolutionDays: 0
-  };
-
-  recentClaims: {
-    id: string;
-    userName: string;
-    identification: string;
-    amount: number;
-    status: string;
-    date: Date | null;
-  }[] = [];
-
-  // Indica si se están mostrando siniestros fuera del período seleccionado
-  claimsFromAllTime: boolean = false;
 
   // Modal detalle de usuario moroso
   isUserModalOpen = false;
@@ -167,6 +151,9 @@ export class DashboardComponent implements OnInit {
       error: (err) => console.error('Error cargando portfolioStats', err)
     });
 
+    // Calcular cobertura como suma de valorAval de todos los usuarios
+    this.loadTotalValorAval();
+
     // Distribución por categorías de mora
     this.dashboardService.getMoraDistribution().subscribe({
       next: (data: any) => this.moraDistribution = data,
@@ -190,12 +177,29 @@ export class DashboardComponent implements OnInit {
 
     // Top usuarios morosos
     this.dashboardService.getTopDelinquents().subscribe({
-      next: (data: any) => this.topDelinquentUsers = data,
+      next: (data: any[]) => {
+        this.topDelinquentUsers = (data || []).map((u: any) => {
+          const uid = u.userId ?? u.user_id ?? u.uid ?? u.userUid ?? u.usuarioUid ?? u.clienteUid ?? u.cliente_id ?? u.id;
+          return { ...u, id: uid } as any;
+        });
+      },
       error: (err) => console.error('Error cargando top morosos', err)
     });
 
     // Datos dependientes del período seleccionado
     this.loadPaymentData();
+  }
+
+  // Cobertura: traer valor desde el servicio (sin cálculos locales)
+  private loadTotalValorAval() {
+    this.totalValorAval = 0;
+    this.portfolioService.getSumValorAval().subscribe({
+      next: (resp: any) => {
+        const value = Number(resp?.sumValorAval ?? resp?.sum_valor_aval ?? resp?.sum ?? 0);
+        this.totalValorAval = isNaN(value) ? 0 : value;
+      },
+      error: (err) => console.error('Error cargando cobertura (sumValorAval)', err)
+    });
   }
 
   getLastUpdateTime(): string {
@@ -226,142 +230,8 @@ export class DashboardComponent implements OnInit {
       error: (err) => console.error('Error cargando recentPayments', err)
     });
 
-    // Siniestros: resumen y recientes
-    this.dashboardService.getClaimsSummary(period).subscribe({
-      next: (data: any) => {
-        this.claimsSummary = {
-          totalCapital: data.totalCapital ?? data.valorCapitalTotal ?? 0,
-          totalInterest: data.totalInterest ?? data.totalIntereses ?? 0,
-          monthlyClaimsAmount: data.monthlyClaimsAmount ?? data.montoMensual ?? 0,
-          openClaims: data.openClaims ?? data.abiertos ?? 0,
-          closedClaims: data.closedClaims ?? data.cerrados ?? 0,
-          avgResolutionDays: data.avgResolutionDays ?? data.diasPromedioResolucion ?? 0,
-        };
-        if (this.isClaimsSummaryEmpty()) {
-          this.loadClaimsFallbackUsingAllClaims();
-        }
-      },
-      error: (err) => {
-        console.error('Error cargando claimsSummary', err);
-        this.loadClaimsFallbackUsingAllClaims();
-      }
-    });
-
-    this.dashboardService.getRecentClaims(period).subscribe({
-      next: (data: any[]) => {
-        this.recentClaims = data.map((c: any) => {
-          const amount = (c?.amount ?? c?.valor ?? ((c?.valorCapital ?? 0) + (c?.intereses ?? 0) + (c?.otrosConceptos ?? 0))) as number;
-          const dateRaw = c?.date ?? c?.fecha ?? c?.fechaSolicitud ?? c?.fecha_creacion;
-          return {
-            id: (c?.id ?? c?.claimId ?? c?.obligacion ?? c?.obligation ?? '-') + '',
-            userName: c?.userName ?? c?.usuario ?? c?.cliente ?? c?.nombreUsuario ?? c?.obligacion ?? '—',
-            identification: c?.identification ?? c?.numeroDocumento ?? c?.documento ?? c?.nitEmpresa ?? c?.nit ?? '—',
-            amount: amount ?? 0,
-            status: c?.status ?? c?.estado ?? '—',
-            date: dateRaw ? new Date(dateRaw) : null,
-          };
-        });
-        // Datos provienen del endpoint filtrado por período
-        this.claimsFromAllTime = false;
-        if (this.recentClaims.length === 0) {
-          this.loadClaimsFallbackUsingAllClaims();
-        }
-      },
-      error: (err) => {
-        console.error('Error cargando recentClaims', err);
-        this.loadClaimsFallbackUsingAllClaims();
-      }
-    });
   }
 
-  // Fallback: cargar siniestros desde /api/claims/all y calcular resumen/recientes
-  private loadClaimsFallbackUsingAllClaims() {
-    this.dashboardService.getAllClaimsRaw().subscribe({
-      next: (res: any) => {
-        const rows = Array.isArray(res) ? res : (Array.isArray(res?.data) ? res.data : []);
-        if (!rows.length) {
-          return;
-        }
-        const period = this.selectedPeriod as 'month' | 'quarter' | 'year';
-        const start = this.getPeriodStart(period);
-
-        const mapped = rows.map((c: any) => {
-          const amount = (c?.amount ?? c?.valor ?? ((c?.valorCapital ?? 0) + (c?.intereses ?? 0) + (c?.otrosConceptos ?? 0))) as number;
-          const dateRaw = c?.date ?? c?.fecha ?? c?.fechaSolicitud ?? c?.fecha_creacion;
-          const d = dateRaw ? new Date(dateRaw) : null;
-          const status = c?.status ?? c?.estado ?? 'CARGADO';
-          return {
-            id: (c?.id ?? c?.claimId ?? c?.obligacion ?? c?.obligation ?? '-') + '',
-            userName: c?.userName ?? c?.usuario ?? c?.cliente ?? c?.nombreUsuario ?? c?.obligacion ?? '—',
-            identification: c?.identification ?? c?.numeroDocumento ?? c?.documento ?? c?.nitEmpresa ?? c?.nit ?? '—',
-            amount: amount ?? 0,
-            status,
-            date: d,
-          };
-        });
-
-        // Ordenar por fecha descendente
-        mapped.sort((a: { date: { getTime: () => any; }; }, b: { date: { getTime: () => any; }; }) => {
-          const da = a.date ? a.date.getTime() : 0;
-          const db = b.date ? b.date.getTime() : 0;
-          return db - da;
-        });
-
-        // Tomar registros del período; si no hay, tomar últimos 10 globales
-        if (this.recentClaims.length === 0) {
-          // @ts-ignore
-          const filtered = mapped.filter((m: { date: number; }) => m.date && m.date >= start);
-          if (filtered.length > 0) {
-            this.recentClaims = filtered.slice(0, 10);
-            this.claimsFromAllTime = false;
-          } else if (mapped.length > 0) {
-            this.recentClaims = mapped.slice(0, 10);
-            this.claimsFromAllTime = true;
-          }
-        }
-
-        // Calcular resumen a partir del cargue cuando el backend no lo provee
-        const totalCapital = rows.reduce((sum: number, r: any) => sum + (Number(r?.valorCapital) || 0), 0);
-        const totalInterest = rows.reduce((sum: number, r: any) => sum + (Number(r?.intereses) || 0), 0);
-        const monthlyClaimsAmount = rows.reduce((sum: number, r: any) => {
-          const dateRaw = r?.date ?? r?.fecha ?? r?.fechaSolicitud ?? r?.fecha_creacion;
-          const d = dateRaw ? new Date(dateRaw) : null;
-          if (d && d >= start) {
-            const amount = (r?.amount ?? r?.valor ?? ((r?.valorCapital ?? 0) + (r?.intereses ?? 0) + (r?.otrosConceptos ?? 0))) as number;
-            return sum + (Number(amount) || 0);
-          }
-          return sum;
-        }, 0);
-        const hasEstado = rows.some((r: any) => r?.estado || r?.status);
-        const openClaims = hasEstado ? rows.filter((r: any) => (r?.status ?? r?.estado) !== 'CERRADO').length : rows.length;
-        const closedClaims = hasEstado ? rows.filter((r: any) => (r?.status ?? r?.estado) === 'CERRADO').length : 0;
-
-        if (this.isClaimsSummaryEmpty()) {
-          this.claimsSummary = {
-            totalCapital,
-            totalInterest,
-            monthlyClaimsAmount,
-            openClaims,
-            closedClaims,
-            avgResolutionDays: this.claimsSummary.avgResolutionDays || 0,
-          };
-        }
-      },
-      error: (err) => console.error('Fallback: error cargando siniestros', err)
-    });
-  }
-
-  private isClaimsSummaryEmpty(): boolean {
-    const s = this.claimsSummary as any;
-    return (
-      (s.totalCapital ?? 0) === 0 &&
-      (s.totalInterest ?? 0) === 0 &&
-      (s.monthlyClaimsAmount ?? 0) === 0 &&
-      (s.openClaims ?? 0) === 0 &&
-      (s.closedClaims ?? 0) === 0 &&
-      (s.avgResolutionDays ?? 0) === 0
-    );
-  }
 
   private getPeriodStart(period: 'month' | 'quarter' | 'year'): Date {
     const now = new Date();
@@ -611,12 +481,8 @@ export class DashboardComponent implements OnInit {
       return;
     }
 
-    // 4) Intentar coincidir por id exacto
-    const byUserId = this.topDelinquentUsers.find(u => u.id === alert.id);
-    if (byUserId) {
-      this.viewUserDetail(byUserId.id);
-      return;
-    }
+    // 4) No usar alert.id para resolver usuario: alert.id es propio de la alerta y no del usuario.
+    //    Esto evitaba confundir IDs y abrir detalles equivocados cuando los usuarios tienen varias obligaciones.
 
     // 5) Heurística adicional: si el texto trae la obligación y coincide con la columna mostrada
     const byObligation = this.topDelinquentUsers.find(u => u.guaranteeRate && text.includes(u.guaranteeRate));

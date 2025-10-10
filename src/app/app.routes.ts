@@ -5,6 +5,7 @@ import { DashboardComponent } from './dashboard/dashboard.component';
 import { PortfolioComponent } from './portfolio/portfolio.component';
 import { ReportsComponent } from './reports/reports.component';
 import { ClaimsComponent } from './claims/claims.component';
+import { UsersComponent } from './admin/users/users.component';
 
 export const routes: Routes = [
   { path: '', pathMatch: 'full', redirectTo: 'dashboard' },
@@ -34,6 +35,12 @@ export const routes: Routes = [
     path: 'claims',
     component: ClaimsComponent,
     canActivate: [authGuard]
+  },
+  {
+    path: 'admin/users',
+    component: UsersComponent,
+    canActivate: [authGuard],
+    title: 'Gestión de Usuarios - Avaltrust'
   },
   // Wildcard to catch-all
   { path: '**', redirectTo: 'dashboard' },
