@@ -24,8 +24,12 @@
     <div class="content-header">
       <div class="title-wrap">
         <h2>Gestión de Usuarios</h2>
-        <p class="subtitle">Administre los roles de los usuarios del sistema</p>
+        <p class="subtitle">Administre los usuarios y roles del sistema</p>
       </div>
+      <button class="btn-create-user" (click)="openCreateModal()">
+        <span class="icon">➕</span>
+        Nuevo Usuario
+      </button>
     </div>
 
     <!-- Messages -->
@@ -156,10 +160,34 @@
               <td class="actions-col">
                 <div class="action-buttons">
                   <button class="action-btn edit-btn" (click)="openEditRoles(u)" title="Editar roles">
-                    ✏️
+                    <span class="btn-icon">✏️</span>
+                    <span class="btn-text">Roles</span>
                   </button>
-                  <button class="action-btn delete-btn" (click)="deleteUser(u)" title="Eliminar usuario">
-                    🗑️
+                  
+                  <button 
+                    *ngIf="u.enabled" 
+                    class="action-btn disable-btn" 
+                    (click)="openDeleteModal(u, 'disable')" 
+                    title="Desactivar usuario">
+                    <span class="btn-icon">⏸️</span>
+                    <span class="btn-text">Desactivar</span>
+                  </button>
+                  
+                  <button 
+                    *ngIf="!u.enabled" 
+                    class="action-btn enable-btn" 
+                    (click)="openDeleteModal(u, 'disable')" 
+                    title="Activar usuario">
+                    <span class="btn-icon">▶️</span>
+                    <span class="btn-text">Activar</span>
+                  </button>
+                  
+                  <button 
+                    class="action-btn delete-btn" 
+                    (click)="openDeleteModal(u, 'permanent')" 
+                    title="Eliminar permanentemente">
+                    <span class="btn-icon">🗑️</span>
+                    <span class="btn-text">Eliminar</span>
                   </button>
                 </div>
               </td>
@@ -188,6 +216,179 @@
           <p>No se encontraron usuarios que coincidan con los filtros aplicados.</p>
         </div>
       </ng-template>
+    </div>
+
+    <!-- Modal para crear usuario -->
+    <div class="modal-overlay" *ngIf="showCreateModal" (click)="closeCreateModal()">
+      <div class="modal-content modal-large" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+          <h3>➕ Crear Nuevo Usuario</h3>
+          <button class="close-btn" (click)="closeCreateModal()">&times;</button>
+        </div>
+        
+        <div class="modal-body">
+          <p class="modal-description">Complete los datos del nuevo usuario:</p>
+          
+          <div class="form-grid">
+            <div class="form-field">
+              <label class="field-label">
+                Nombre de Usuario <span class="required">*</span>
+              </label>
+              <input 
+                type="text" 
+                class="form-input"
+                [(ngModel)]="newUserForm.username"
+                placeholder="usuario123"
+                autocomplete="off"
+              />
+              <span class="field-hint">Mínimo 3 caracteres</span>
+            </div>
+
+            <div class="form-field">
+              <label class="field-label">
+                Correo Electrónico <span class="required">*</span>
+              </label>
+              <input 
+                type="email" 
+                class="form-input"
+                [(ngModel)]="newUserForm.email"
+                placeholder="usuario@ejemplo.com"
+                autocomplete="email"
+              />
+              <span class="field-hint">Debe ser un email válido</span>
+            </div>
+
+            <div class="form-field">
+              <label class="field-label">
+                Contraseña <span class="required">*</span>
+              </label>
+              <input 
+                type="password" 
+                class="form-input"
+                [(ngModel)]="newUserForm.password"
+                placeholder="••••••••"
+                autocomplete="new-password"
+              />
+              <span class="field-hint">Mínimo 6 caracteres</span>
+            </div>
+
+            <div class="form-field">
+              <label class="field-label">
+                Confirmar Contraseña <span class="required">*</span>
+              </label>
+              <input 
+                type="password" 
+                class="form-input"
+                [(ngModel)]="newUserForm.confirmPassword"
+                placeholder="••••••••"
+                autocomplete="new-password"
+              />
+              <span class="field-hint">Debe coincidir con la contraseña</span>
+            </div>
+          </div>
+
+          <div class="info-box">
+            <span class="info-icon">ℹ️</span>
+            <div class="info-text">
+              <strong>Nota:</strong> El nuevo usuario será creado con rol de <strong>Usuario (ROLE_USER)</strong> por defecto. 
+              Puede cambiar sus roles después desde la tabla de usuarios.
+            </div>
+          </div>
+
+          <div class="alert error" *ngIf="errorMessage">{{ errorMessage }}</div>
+        </div>
+        
+        <div class="modal-footer">
+          <button class="btn btn-secondary" (click)="closeCreateModal()" [disabled]="isLoading">
+            Cancelar
+          </button>
+          <button class="btn btn-primary" (click)="createUser()" [disabled]="isLoading">
+            <span *ngIf="!isLoading">✓ Crear Usuario</span>
+            <span *ngIf="isLoading">Creando...</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal de confirmación de eliminación/desactivación -->
+    <div class="modal-overlay" *ngIf="showDeleteModal" (click)="closeDeleteModal()">
+      <div class="modal-content modal-confirm" (click)="$event.stopPropagation()">
+        <div class="modal-header" [class.warning]="deleteMode === 'permanent'">
+          <h3>
+            <span *ngIf="deleteMode === 'disable' && userToDelete?.enabled">⏸️ Desactivar Usuario</span>
+            <span *ngIf="deleteMode === 'disable' && !userToDelete?.enabled">▶️ Activar Usuario</span>
+            <span *ngIf="deleteMode === 'permanent'">⚠️ Eliminar Usuario</span>
+          </h3>
+          <button class="close-btn" (click)="closeDeleteModal()">&times;</button>
+        </div>
+        
+        <div class="modal-body">
+          <!-- Desactivar usuario -->
+          <div *ngIf="deleteMode === 'disable' && userToDelete?.enabled" class="confirm-content">
+            <div class="confirm-icon warning">⏸️</div>
+            <h4>¿Desactivar a "{{ userToDelete?.username }}"?</h4>
+            <p class="confirm-description">
+              El usuario no podrá iniciar sesión, pero sus datos se conservarán en el sistema.
+              Puedes reactivarlo en cualquier momento.
+            </p>
+            <div class="info-box warning">
+              <span class="info-icon">💡</span>
+              <div class="info-text">
+                <strong>Recomendado:</strong> Esta es la opción más segura ya que conserva todos los datos relacionados.
+              </div>
+            </div>
+          </div>
+
+          <!-- Activar usuario -->
+          <div *ngIf="deleteMode === 'disable' && !userToDelete?.enabled" class="confirm-content">
+            <div class="confirm-icon success">▶️</div>
+            <h4>¿Activar a "{{ userToDelete?.username }}"?</h4>
+            <p class="confirm-description">
+              El usuario podrá volver a iniciar sesión en el sistema.
+            </p>
+          </div>
+
+          <!-- Eliminar permanentemente -->
+          <div *ngIf="deleteMode === 'permanent'" class="confirm-content">
+            <div class="confirm-icon danger">🗑️</div>
+            <h4>¿Eliminar permanentemente a "{{ userToDelete?.username }}"?</h4>
+            <p class="confirm-description danger">
+              <strong>¡ATENCIÓN!</strong> Esta acción no se puede deshacer.
+            </p>
+            <div class="warning-box">
+              <span class="warning-icon">⚠️</span>
+              <div class="warning-text">
+                <strong>Importante:</strong>
+                <ul>
+                  <li>Se eliminarán todos los datos del usuario</li>
+                  <li>Si el usuario tiene sesiones activas o datos relacionados, la eliminación fallará</li>
+                  <li>Se recomienda <strong>desactivar</strong> en lugar de eliminar</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+
+          <div class="alert error" *ngIf="errorMessage">{{ errorMessage }}</div>
+        </div>
+        
+        <div class="modal-footer">
+          <button class="btn btn-secondary" (click)="closeDeleteModal()" [disabled]="isLoading">
+            Cancelar
+          </button>
+          <button 
+            class="btn"
+            [class.btn-warning]="deleteMode === 'disable' && userToDelete?.enabled"
+            [class.btn-success]="deleteMode === 'disable' && !userToDelete?.enabled"
+            [class.btn-danger]="deleteMode === 'permanent'"
+            (click)="confirmDelete()" 
+            [disabled]="isLoading">
+            <span *ngIf="!isLoading && deleteMode === 'disable' && userToDelete?.enabled">Desactivar</span>
+            <span *ngIf="!isLoading && deleteMode === 'disable' && !userToDelete?.enabled">Activar</span>
+            <span *ngIf="!isLoading && deleteMode === 'permanent'">Eliminar Definitivamente</span>
+            <span *ngIf="isLoading">Procesando...</span>
+          </button>
+        </div>
+      </div>
     </div>
 
     <!-- Modal para editar roles -->

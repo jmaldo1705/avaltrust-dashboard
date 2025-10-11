@@ -52,6 +52,15 @@ export class UsersComponent implements OnInit {
   selectedUser: AppUser | null = null;
   selectedRoles: string[] = [];
 
+  // Modal para crear usuario
+  showCreateModal = false;
+  newUserForm = {
+    username: '',
+    email: '',
+    password: '',
+    confirmPassword: ''
+  };
+
   // Roles disponibles en el sistema
   availableRoles = [
     { value: 'ROLE_USER', label: 'Usuario' },
@@ -155,6 +164,81 @@ export class UsersComponent implements OnInit {
     });
   }
 
+  openCreateModal() {
+    this.newUserForm = {
+      username: '',
+      email: '',
+      password: '',
+      confirmPassword: ''
+    };
+    this.showCreateModal = true;
+    this.errorMessage = null;
+    this.successMessage = null;
+  }
+
+  closeCreateModal() {
+    this.showCreateModal = false;
+    this.newUserForm = {
+      username: '',
+      email: '',
+      password: '',
+      confirmPassword: ''
+    };
+  }
+
+  createUser() {
+    this.errorMessage = null;
+    this.successMessage = null;
+
+    // Validaciones
+    if (!this.newUserForm.username || !this.newUserForm.email || !this.newUserForm.password) {
+      this.errorMessage = 'Todos los campos son obligatorios';
+      return;
+    }
+
+    if (this.newUserForm.username.length < 3) {
+      this.errorMessage = 'El nombre de usuario debe tener al menos 3 caracteres';
+      return;
+    }
+
+    if (this.newUserForm.password.length < 6) {
+      this.errorMessage = 'La contraseña debe tener al menos 6 caracteres';
+      return;
+    }
+
+    if (this.newUserForm.password !== this.newUserForm.confirmPassword) {
+      this.errorMessage = 'Las contraseñas no coinciden';
+      return;
+    }
+
+    // Validar email básico
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(this.newUserForm.email)) {
+      this.errorMessage = 'El formato del email no es válido';
+      return;
+    }
+
+    this.isLoading = true;
+    const payload = {
+      username: this.newUserForm.username.trim(),
+      email: this.newUserForm.email.trim(),
+      password: this.newUserForm.password
+    };
+
+    this.usersService.createUser(payload).subscribe({
+      next: (response) => {
+        this.successMessage = `Usuario "${response.username}" creado exitosamente`;
+        this.closeCreateModal();
+        this.loadUsers(); // Recargar la lista
+      },
+      error: (err: any) => {
+        console.error('Error creating user', err);
+        this.errorMessage = this.getErrorMessage(err) || 'No se pudo crear el usuario';
+        this.isLoading = false;
+      }
+    });
+  }
+
   openEditRoles(user: AppUser) {
     this.selectedUser = user;
     this.selectedRoles = [...user.roles]; // copia de los roles actuales
@@ -206,21 +290,73 @@ export class UsersComponent implements OnInit {
     });
   }
 
-  deleteUser(user: AppUser) {
-    const confirmed = confirm(`¿Está seguro de eliminar al usuario "${user.username}"?\n\nEsta acción no se puede deshacer.`);
-    if (!confirmed) return;
+  // Modal de confirmación de eliminación
+  showDeleteModal = false;
+  userToDelete: AppUser | null = null;
+  deleteMode: 'disable' | 'permanent' = 'disable';
 
+  openDeleteModal(user: AppUser, mode: 'disable' | 'permanent' = 'disable') {
+    this.userToDelete = user;
+    this.deleteMode = mode;
+    this.showDeleteModal = true;
+    this.errorMessage = null;
+  }
+
+  closeDeleteModal() {
+    this.showDeleteModal = false;
+    this.userToDelete = null;
+    this.deleteMode = 'disable';
+  }
+
+  confirmDelete() {
+    if (!this.userToDelete) return;
+
+    if (this.deleteMode === 'disable') {
+      this.toggleUserStatus(this.userToDelete);
+    } else {
+      this.permanentlyDeleteUser(this.userToDelete);
+    }
+  }
+
+  toggleUserStatus(user: AppUser) {
+    const newStatus = !user.enabled;
+    const action = newStatus ? 'activar' : 'desactivar';
+    
     this.isLoading = true;
     this.errorMessage = null;
-    this.successMessage = null;
+    
+    this.usersService.toggleUserStatus(user.id, newStatus).subscribe({
+      next: (updatedUser: AppUser) => {
+        this.successMessage = `Usuario "${user.username}" ${newStatus ? 'activado' : 'desactivado'} correctamente`;
+        this.closeDeleteModal();
+        this.loadUsers();
+      },
+      error: (err: any) => {
+        console.error('Error toggling user status', err);
+        this.errorMessage = this.getErrorMessage(err) || `No se pudo ${action} el usuario`;
+        this.isLoading = false;
+      }
+    });
+  }
+
+  permanentlyDeleteUser(user: AppUser) {
+    this.isLoading = true;
+    this.errorMessage = null;
+    
     this.usersService.deleteUser(user.id).subscribe({
       next: () => {
-        this.successMessage = `Usuario "${user.username}" eliminado correctamente`;
+        this.successMessage = `Usuario "${user.username}" eliminado permanentemente`;
+        this.closeDeleteModal();
         this.loadUsers();
       },
       error: (err: any) => {
         console.error('Error deleting user', err);
-        this.errorMessage = this.getErrorMessage(err) || 'No se pudo eliminar el usuario';
+        // Verificar si es un error de constraint de base de datos
+        if (err.error?.error && err.error.error.includes('foreign key constraint')) {
+          this.errorMessage = `No se puede eliminar el usuario "${user.username}" porque tiene datos relacionados (tokens de sesión, etc.). Por favor, primero desactívelo.`;
+        } else {
+          this.errorMessage = this.getErrorMessage(err) || 'No se pudo eliminar el usuario';
+        }
         this.isLoading = false;
       }
     });

@@ -15,10 +15,23 @@ export interface UpdateRolesRequest {
   roles: string[];
 }
 
+export interface CreateUserRequest {
+  username: string;
+  password: string;
+  email: string;
+}
+
+export interface CreateUserResponse {
+  username: string;
+  email: string;
+  message: string;
+}
+
 @Injectable({ providedIn: 'root' })
 export class UsersService {
   private http = inject(HttpClient);
   private baseUrl = `${environment.apiUrl}/api/admin`;
+  private authUrl = `${environment.apiUrl}/api/auth`;
 
   /**
    * GET /api/admin/users
@@ -52,5 +65,24 @@ export class UsersService {
    */
   deleteUser(userId: number): Observable<void> {
     return this.http.delete<void>(`${this.baseUrl}/users/${userId}`);
+  }
+
+  /**
+   * POST /api/auth/register
+   * Crea un nuevo usuario en el sistema
+   */
+  createUser(data: CreateUserRequest): Observable<CreateUserResponse> {
+    return this.http.post<CreateUserResponse>(`${this.authUrl}/register`, data);
+  }
+
+  /**
+   * PATCH /api/admin/users/{userId}/status
+   * Activa o desactiva un usuario
+   * Nota: Este endpoint aún no existe en el backend, se debe implementar
+   */
+  toggleUserStatus(userId: number, enabled: boolean): Observable<AppUser> {
+    // Por ahora, como workaround, actualizamos los roles para mantener el estado
+    // El backend debería tener un endpoint específico: PATCH /api/admin/users/{userId}/status
+    return this.http.patch<AppUser>(`${this.baseUrl}/users/${userId}/status`, { enabled });
   }
 }

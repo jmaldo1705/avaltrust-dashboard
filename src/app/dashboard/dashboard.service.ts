@@ -125,6 +125,10 @@ export class DashboardService {
     return this.http.get<DelinquentUserDto[]>(`${this.baseUrl}/api/users/top-delinquents`);
   }
 
+  getPortfolioDetail(portfolioId: string): Observable<UserDetailDto> {
+    return this.http.get<UserDetailDto>(`${this.baseUrl}/api/portfolio/${portfolioId}/detail`);
+  }
+
   getUserDetail(userId: string): Observable<UserDetailDto> {
     return this.http.get<UserDetailDto>(`${this.baseUrl}/api/users/${userId}/detail`);
   }

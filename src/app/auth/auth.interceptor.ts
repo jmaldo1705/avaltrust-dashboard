@@ -30,10 +30,10 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
         console.warn('Token expirado o inválido. Cerrando sesión.');
         authService.logout(true);
       } else if (error.status === 403) {
-        // Sin permisos - mostrar mensaje y redirigir al dashboard
-        console.warn('Acceso denegado. Permisos insuficientes.');
-        alert('No tienes permisos para acceder a este recurso.');
-        router.navigate(['/dashboard']);
+        // Sin permisos - log para debugging
+        console.warn('Acceso denegado (403)');
+        console.log('URL:', req.url);
+        console.log('Token presente:', !!token);
       }
 
       return throwError(() => error);

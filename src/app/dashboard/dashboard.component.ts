@@ -51,6 +51,8 @@ interface Alert {
   description: string;
   timestamp: Date;
   userId?: string;
+  portfolioId?: string;  // ID del portfolio específico
+  obligacion?: string;    // Número de obligación
 }
 
 interface DelinquentUser {
@@ -375,7 +377,13 @@ export class DashboardComponent implements OnInit {
   }
 
   handleAlert(alert: Alert) {
-    // 1) Si la alerta trae userId explícito
+    // 1) Si la alerta trae portfolioId, usarlo directamente (más confiable)
+    if (alert.portfolioId) {
+      this.viewPortfolioDetail(alert.portfolioId);
+      return;
+    }
+
+    // 2) Si la alerta trae userId explícito
     if (alert.userId) {
       this.viewUserDetail(alert.userId);
       return;
@@ -406,7 +414,7 @@ export class DashboardComponent implements OnInit {
     // Helper: normalizar documentos (remover puntos, espacios, guiones)
     const normalizeId = (s: string) => (s || '').replace(/\D+/g, '');
 
-    // 2) Primero, intentar capturar documento junto a CC/NIT (evita confundir montos como identificación)
+    // 3) Primero, intentar capturar documento junto a CC/NIT (evita confundir montos como identificación)
     const idFromLabelMatch = /(\bCC\b|\bNIT\b)\s*([0-9.\-]+)/i.exec(text);
     if (idFromLabelMatch?.[2]) {
       const normToken = normalizeId(idFromLabelMatch[2]);
@@ -434,7 +442,7 @@ export class DashboardComponent implements OnInit {
       return;
     }
 
-    // 2-b) Buscar identificaciones numéricas (permitiendo puntos/guiones) y compararlas normalizadas
+    // 4) Buscar identificaciones numéricas (permitiendo puntos/guiones) y compararlas normalizadas
     const digitTokens = text.replace(/\D+/g, ' ').split(/\s+/).filter(t => t && t.length >= 6);
     // Ordenar por longitud desc para priorizar documentos largos (evitar confundir montos)
     digitTokens.sort((a,b) => b.length - a.length);
@@ -473,7 +481,7 @@ export class DashboardComponent implements OnInit {
       }
     }
 
-    // 3) Intentar coincidir por nombre (si el texto incluye el nombre del usuario)
+    // 5) Intentar coincidir por nombre (si el texto incluye el nombre del usuario)
     const byName = this.topDelinquentUsers.find(u => lowerText.includes((u.name || '').toLowerCase()))
       || (titleName ? this.topDelinquentUsers.find(u => u.name?.toLowerCase().includes(titleName)) : undefined);
     if (byName) {
@@ -481,10 +489,7 @@ export class DashboardComponent implements OnInit {
       return;
     }
 
-    // 4) No usar alert.id para resolver usuario: alert.id es propio de la alerta y no del usuario.
-    //    Esto evitaba confundir IDs y abrir detalles equivocados cuando los usuarios tienen varias obligaciones.
-
-    // 5) Heurística adicional: si el texto trae la obligación y coincide con la columna mostrada
+    // 6) Heurística adicional: si el texto trae la obligación y coincide con la columna mostrada
     const byObligation = this.topDelinquentUsers.find(u => u.guaranteeRate && text.includes(u.guaranteeRate));
     if (byObligation) {
       this.viewUserDetail(byObligation.id);
@@ -540,6 +545,23 @@ export class DashboardComponent implements OnInit {
       console.error('Error exportando a Excel', e);
       alert('Ocurrió un error al exportar el archivo.');
     }
+  }
+
+  viewPortfolioDetail(portfolioId: string) {
+    this.userModalError = null;
+    this.userModalLoading = true;
+    this.isUserModalOpen = true;
+    this.dashboardService.getPortfolioDetail(portfolioId).subscribe({
+      next: (detail: any) => {
+        this.selectedUserDetail = detail;
+        this.userModalLoading = false;
+      },
+      error: (err) => {
+        console.error('Error cargando detalle del portfolio', err);
+        this.userModalError = 'No fue posible cargar el detalle del crédito.';
+        this.userModalLoading = false;
+      }
+    });
   }
 
   viewUserDetail(userId: string) {
