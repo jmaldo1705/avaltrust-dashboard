@@ -1,0 +1,229 @@
+<div class="users-layout">
+  <!-- Header -->
+  <app-header
+    [isSidebarOpen]="isSidebarOpen"
+    [isUserMenuOpen]="isUserMenuOpen"
+    (toggleSidebar)="toggleSidebar()"
+    (toggleUserMenu)="toggleUserMenu()"
+    (closeUserMenu)="closeUserMenu()"
+    (navigate)="onSidebarNavigate($event)"
+    (logout)="logout()"
+  ></app-header>
+
+  <!-- Overlay -->
+  <div class="overlay" [class.active]="isSidebarOpen || isUserMenuOpen" (click)="closeSidebar(); closeUserMenu()"></div>
+
+  <!-- Sidebar -->
+  <app-sidebar
+    [isSidebarOpen]="isSidebarOpen"
+    (sidebarClose)="onSidebarClose()"
+    (navigate)="onSidebarNavigate($event)"></app-sidebar>
+
+  <!-- Main content -->
+  <main class="main-content">
+    <div class="content-header">
+      <div class="title-wrap">
+        <h2>Gestión de Usuarios</h2>
+        <p class="subtitle">Administre los roles de los usuarios del sistema</p>
+      </div>
+    </div>
+
+    <!-- Messages -->
+    <div class="alert error" *ngIf="errorMessage">{{ errorMessage }}</div>
+    <div class="alert success" *ngIf="successMessage">{{ successMessage }}</div>
+
+    <!-- Filtros y resumen -->
+    <div class="toolbar">
+      <div class="filters-container">
+        <div class="search-box">
+          <span class="search-icon">🔍</span>
+          <input 
+            type="text" 
+            class="search-input" 
+            [(ngModel)]="filterTextValue" 
+            placeholder="Buscar por usuario o correo..."
+          />
+        </div>
+        
+        <div class="filter-group">
+          <label class="filter-label">Rol</label>
+          <select class="filter-select" [(ngModel)]="roleFilterValue">
+            <option value="all">Todos los roles</option>
+            <option value="ROLE_ADMIN">Administrador</option>
+            <option value="ROLE_USER">Usuario</option>
+          </select>
+        </div>
+        
+        <div class="filter-group">
+          <label class="filter-label">Estado</label>
+          <select class="filter-select" [(ngModel)]="statusFilterValue">
+            <option value="all">Todos</option>
+            <option value="enabled">Activos</option>
+            <option value="disabled">Inactivos</option>
+          </select>
+        </div>
+      </div>
+      
+      <div class="summary-info">
+        <div class="summary-item">
+          <span class="summary-label">Total:</span>
+          <span class="summary-value">{{ filteredUsers().length }}</span>
+        </div>
+        <div class="summary-divider"></div>
+        <div class="summary-item">
+          <span class="summary-label">Página:</span>
+          <span class="summary-value">{{ page() }} / {{ totalPages() }}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Loading -->
+    <div class="loading-overlay" *ngIf="isLoading">
+      <div class="spinner"></div>
+      <p>Cargando usuarios...</p>
+    </div>
+
+    <!-- Tabla de usuarios -->
+    <div class="users-card">
+      <div class="table-container" *ngIf="pagedUsers().length > 0 && !isLoading; else emptyState">
+        <table class="users-table">
+          <thead>
+            <tr>
+              <th class="sortable" (click)="setSort('id')">
+                <div class="th-content">
+                  ID
+                  <span class="sort-icon" [class.active]="sortBy()==='id'">
+                    {{ sortBy()==='id' ? (sortDir()==='asc'?'↑':'↓') : '↕' }}
+                  </span>
+                </div>
+              </th>
+              <th class="sortable" (click)="setSort('username')">
+                <div class="th-content">
+                  Usuario
+                  <span class="sort-icon" [class.active]="sortBy()==='username'">
+                    {{ sortBy()==='username' ? (sortDir()==='asc'?'↑':'↓') : '↕' }}
+                  </span>
+                </div>
+              </th>
+              <th class="sortable" (click)="setSort('email')">
+                <div class="th-content">
+                  Correo Electrónico
+                  <span class="sort-icon" [class.active]="sortBy()==='email'">
+                    {{ sortBy()==='email' ? (sortDir()==='asc'?'↑':'↓') : '↕' }}
+                  </span>
+                </div>
+              </th>
+              <th>Roles</th>
+              <th class="sortable" (click)="setSort('enabled')">
+                <div class="th-content">
+                  Estado
+                  <span class="sort-icon" [class.active]="sortBy()==='enabled'">
+                    {{ sortBy()==='enabled' ? (sortDir()==='asc'?'↑':'↓') : '↕' }}
+                  </span>
+                </div>
+              </th>
+              <th class="actions-col">Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let u of pagedUsers()" class="user-row">
+              <td class="id-col">#{{ u.id }}</td>
+              <td class="username-col">
+                <div class="user-info">
+                  <span class="user-avatar">{{ u.username.charAt(0).toUpperCase() }}</span>
+                  <span class="user-name">{{ u.username }}</span>
+                </div>
+              </td>
+              <td class="email-col">{{ u.email }}</td>
+              <td class="roles-col">
+                <div class="roles-list">
+                  <ng-container *ngIf="u.roles && u.roles.length; else noRoles">
+                    <span class="role-badge" *ngFor="let r of u.roles" [class.admin]="r==='ROLE_ADMIN'" [class.user]="r==='ROLE_USER'">
+                      {{ formatRole(r) }}
+                    </span>
+                  </ng-container>
+                  <ng-template #noRoles>
+                    <span class="no-roles">Sin roles</span>
+                  </ng-template>
+                </div>
+              </td>
+              <td class="status-col">
+                <span class="status-indicator" [class.active]="u.enabled" [class.inactive]="!u.enabled">
+                  <span class="status-dot"></span>
+                  {{ u.enabled ? 'Activo' : 'Inactivo' }}
+                </span>
+              </td>
+              <td class="actions-col">
+                <div class="action-buttons">
+                  <button class="action-btn edit-btn" (click)="openEditRoles(u)" title="Editar roles">
+                    ✏️
+                  </button>
+                  <button class="action-btn delete-btn" (click)="deleteUser(u)" title="Eliminar usuario">
+                    🗑️
+                  </button>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+
+        <!-- Paginación -->
+        <div class="pagination-controls" *ngIf="totalPages() > 1">
+          <button class="page-btn" (click)="prevPage()" [disabled]="page()===1">
+            ← Anterior
+          </button>
+          <div class="page-info">
+            Página <strong>{{ page() }}</strong> de <strong>{{ totalPages() }}</strong>
+          </div>
+          <button class="page-btn" (click)="nextPage()" [disabled]="page()===totalPages()">
+            Siguiente →
+          </button>
+        </div>
+      </div>
+      
+      <ng-template #emptyState>
+        <div class="empty-state" *ngIf="!isLoading">
+          <div class="empty-icon">📭</div>
+          <h3>No hay usuarios para mostrar</h3>
+          <p>No se encontraron usuarios que coincidan con los filtros aplicados.</p>
+        </div>
+      </ng-template>
+    </div>
+
+    <!-- Modal para editar roles -->
+    <div class="modal-overlay" *ngIf="showRolesModal" (click)="closeRolesModal()">
+      <div class="modal-content" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+          <h3>Editar Roles - {{ selectedUser?.username }}</h3>
+          <button class="close-btn" (click)="closeRolesModal()">&times;</button>
+        </div>
+        
+        <div class="modal-body">
+          <p class="modal-description">Seleccione los roles que desea asignar a este usuario:</p>
+          
+          <div class="roles-list">
+            <div class="role-item" *ngFor="let role of availableRoles">
+              <label class="role-checkbox">
+                <input 
+                  type="checkbox" 
+                  [checked]="isRoleSelected(role.value)"
+                  (change)="toggleRole(role.value)"
+                />
+                <span class="role-label">{{ role.label }}</span>
+              </label>
+            </div>
+          </div>
+
+          <div class="alert error" *ngIf="errorMessage">{{ errorMessage }}</div>
+        </div>
+        
+        <div class="modal-footer">
+          <button class="btn btn-secondary" (click)="closeRolesModal()">Cancelar</button>
+          <button class="btn btn-primary" (click)="saveRoles()" [disabled]="isLoading">
+            {{ isLoading ? 'Guardando...' : 'Guardar' }}
+          </button>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
