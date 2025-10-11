@@ -1,8 +1,9 @@
 import { Injectable, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
-import {Observable, BehaviorSubject, timer, EMPTY, map, interval} from 'rxjs';
+import {Observable, BehaviorSubject, timer, EMPTY, map, interval, Subject} from 'rxjs';
 import { catchError, switchMap, tap } from 'rxjs/operators';
+import { environment } from '../environments/environment';
 
 export type AuthUser = {
   username: string;
@@ -60,14 +61,20 @@ export class AuthService {
   private keepAliveSub: any;
   private readonly inactivityThresholdMs = 15 * 60 * 1000; // 15 minutes without user events considered inactive
   private readonly keepAliveIntervalMs = 4 * 60 * 1000; // check every 4 minutes
-  private readonly API_URL = 'http://localhost:8080/api/auth';
-  private readonly USER_API_URL = 'http://localhost:8080/api/user';
+  private readonly API_URL = `${environment.apiUrl}/api/auth`;
+  private readonly USER_API_URL = `${environment.apiUrl}/api/user`;
   private readonly storageKey = 'avaltrust.auth';
   private readonly _user = signal<AuthUser | null>(this.readFromStorage());
   private readonly _userProfile = signal<UserProfile | null>(null);
   private readonly _userPermissions = signal<UserPermissions | null>(null);
   private refreshTimer: any;
   private readonly tokenRefreshSubject = new BehaviorSubject<string | null>(null);
+
+  // Session warning functionality
+  private sessionWarningTimer: any;
+  private readonly sessionWarningSubject = new Subject<number>(); // Emits seconds remaining
+  readonly sessionWarning$ = this.sessionWarningSubject.asObservable();
+  private readonly warningThresholdMs = 60 * 1000; // Show warning 1 minute before expiration
 
   readonly user = this._user.asReadonly();
   readonly userProfile = this._userProfile.asReadonly();
@@ -238,6 +245,7 @@ export class AuthService {
     const user = this._user();
     this.clearTokenRefreshTimer();
     this.clearKeepAliveTimer();
+    this.clearSessionWarningTimer();
     this.unbindActivityListeners();
 
     // Limpiar estado local inmediatamente
@@ -260,6 +268,15 @@ export class AuthService {
     }
 
     return EMPTY;
+  }
+
+  /**
+   * Extiende la sesión refrescando el token
+   */
+  extendSession(): Observable<string> {
+    this.recordActivity(); // Actualizar última actividad
+    this.clearSessionWarningTimer(); // Limpiar advertencia
+    return this.refreshToken();
   }
 
   private readFromStorage(): AuthUser | null {
@@ -328,6 +345,9 @@ export class AuthService {
           this._user.set(updatedUser);
           this.writeToStorage(updatedUser);
           this.tokenRefreshSubject.next(response.accessToken);
+          
+          // Reiniciar timer de advertencia después del refresh
+          this.startSessionWarningTimer();
         }),
         map(response => response.accessToken), // Extraer solo el accessToken
         catchError(() => {
@@ -353,6 +373,7 @@ export class AuthService {
         next: () => {
           // Timer se reinicia automáticamente después de renovar
           this.startTokenRefreshTimer();
+          this.startSessionWarningTimer(); // También reiniciar el timer de advertencia
         },
         error: () => {
           this.logout();
@@ -362,6 +383,9 @@ export class AuthService {
       // Token ya expirado, renovar inmediatamente
       this.refreshToken().subscribe();
     }
+
+    // Iniciar timer de advertencia
+    this.startSessionWarningTimer();
   }
 
   private clearTokenRefreshTimer(): void {
@@ -411,6 +435,8 @@ export class AuthService {
         return;
       }
       // Otherwise, do a lightweight ping to keep backend session alive
+      // and record this as activity to prevent session timeout
+      this.recordActivity();
       this.http.get(`${this.USER_API_URL}/profile`).pipe(
         catchError(() => EMPTY)
       ).subscribe();
@@ -421,6 +447,60 @@ export class AuthService {
     if (this.keepAliveSub) {
       this.keepAliveSub.unsubscribe?.();
       this.keepAliveSub = null;
+    }
+  }
+
+  /**
+   * Inicia el timer para mostrar advertencia de sesión
+   * Se muestra 1 minuto antes de la expiración del token
+   */
+  private startSessionWarningTimer(): void {
+    this.clearSessionWarningTimer();
+
+    const user = this._user();
+    if (!user) return;
+
+    const now = Date.now();
+    const expirationTime = user.expiresIn * 1000;
+    const timeUntilWarning = expirationTime - now - this.warningThresholdMs;
+
+    if (timeUntilWarning > 0) {
+      this.sessionWarningTimer = timer(timeUntilWarning).subscribe(() => {
+        // Iniciar countdown de 60 segundos
+        let secondsRemaining = 60;
+        this.sessionWarningSubject.next(secondsRemaining);
+
+        const countdownInterval = setInterval(() => {
+          secondsRemaining--;
+          if (secondsRemaining > 0) {
+            this.sessionWarningSubject.next(secondsRemaining);
+          } else {
+            clearInterval(countdownInterval);
+            // Si llega a 0, cerrar sesión automáticamente
+            const currentUser = this._user();
+            if (currentUser && this.isTokenExpired(currentUser)) {
+              this.logout(true);
+            }
+          }
+        }, 1000);
+
+        // Guardar referencia al intervalo para poder limpiarlo
+        (this.sessionWarningTimer as any).countdownInterval = countdownInterval;
+      });
+    }
+  }
+
+  /**
+   * Limpia el timer de advertencia de sesión
+   */
+  private clearSessionWarningTimer(): void {
+    if (this.sessionWarningTimer) {
+      // Limpiar el countdown si existe
+      if ((this.sessionWarningTimer as any).countdownInterval) {
+        clearInterval((this.sessionWarningTimer as any).countdownInterval);
+      }
+      this.sessionWarningTimer.unsubscribe();
+      this.sessionWarningTimer = null;
     }
   }
 
