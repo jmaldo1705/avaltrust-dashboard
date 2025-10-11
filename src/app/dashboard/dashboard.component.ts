@@ -30,6 +30,11 @@ interface MoraCategory {
   severity: 'low' | 'medium' | 'high' | 'critical';
 }
 
+interface MoraTimelineItem {
+  date: Date;
+  categories: MoraCategory[];
+}
+
 interface PaymentStats {
   totalPayments: number;
   totalInterest: number;
@@ -90,7 +95,8 @@ export class DashboardComponent implements OnInit {
   }
 
   selectedPeriod = 'month';
-  moraView = 'distribution';
+  moraView: 'distribution' | 'timeline' = 'distribution';
+  timelinePeriod: 'week' | 'month' | 'quarter' | 'year' = 'month';
 
   // Datos del dashboard
   portfolioStats: PortfolioStats = {
@@ -106,6 +112,7 @@ export class DashboardComponent implements OnInit {
   totalValorAval: number = 0;
 
   moraDistribution: MoraCategory[] = [];
+  moraTimeline: MoraTimelineItem[] = [];
 
   paymentStats: PaymentStats = {
     totalPayments: 0,
@@ -210,6 +217,21 @@ export class DashboardComponent implements OnInit {
 
   setMoraView(view: 'distribution' | 'timeline') {
     this.moraView = view;
+    if (view === 'timeline' && this.moraTimeline.length === 0) {
+      this.loadTimelineData();
+    }
+  }
+
+  loadTimelineData() {
+    this.dashboardService.getMoraTimeline(this.timelinePeriod).subscribe({
+      next: (data: any[]) => {
+        this.moraTimeline = data.map(item => ({
+          date: new Date(item.date),
+          categories: item.categories
+        }));
+      },
+      error: (err) => console.error('Error cargando moraTimeline', err)
+    });
   }
 
   loadPaymentData() {

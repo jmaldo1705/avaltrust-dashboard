@@ -90,13 +90,13 @@
         <div class="chart-header">
           <h3>Distribución por Días de Mora</h3>
           <div class="chart-controls">
-            <button class="chart-btn active" (click)="setMoraView('distribution')">Distribución</button>
-            <button class="chart-btn" (click)="setMoraView('timeline')">Timeline</button>
+            <button class="chart-btn" [class.active]="moraView === 'distribution'" (click)="setMoraView('distribution')">Distribución</button>
+            <button class="chart-btn" [class.active]="moraView === 'timeline'" (click)="setMoraView('timeline')">Timeline</button>
           </div>
         </div>
         <div class="chart-content">
-          <!-- Aquí iría tu componente de gráfico -->
-          <div class="mora-distribution">
+          <!-- Vista de Distribución -->
+          <div class="mora-distribution" *ngIf="moraView === 'distribution'">
             <div class="mora-category" *ngFor="let category of moraDistribution">
               <div class="category-header">
                 <span class="category-name">{{ category.name }}</span>
@@ -106,6 +106,41 @@
                 <div class="bar-fill" [style.width.%]="category.percentage" [class]="category.severity"></div>
               </div>
               <div class="category-amount">{{ category.amount | currency:'COP':'symbol':'1.0-0' }}</div>
+            </div>
+          </div>
+
+          <!-- Vista de Timeline -->
+          <div class="mora-timeline" *ngIf="moraView === 'timeline'">
+            <div class="timeline-controls">
+              <select class="timeline-period-select" [(ngModel)]="timelinePeriod" (change)="loadTimelineData()">
+                <option value="week">Última Semana</option>
+                <option value="month">Último Mes</option>
+                <option value="quarter">Último Trimestre</option>
+                <option value="year">Último Año</option>
+              </select>
+            </div>
+            
+            <div class="timeline-chart" *ngIf="moraTimeline.length > 0">
+              <div class="timeline-item" *ngFor="let item of moraTimeline">
+                <div class="timeline-date">{{ item.date | date:'dd/MM/yyyy' }}</div>
+                <div class="timeline-bars">
+                  <div class="timeline-bar-group" *ngFor="let category of item.categories">
+                    <div class="timeline-bar-label">{{ category.name }}</div>
+                    <div class="timeline-bar-container">
+                      <div class="timeline-bar-fill" 
+                           [style.width.%]="category.percentage" 
+                           [class]="category.severity"
+                           [title]="category.count + ' usuarios - ' + (category.amount | currency:'COP':'symbol':'1.0-0')">
+                      </div>
+                      <span class="timeline-bar-value">{{ category.count }}</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <div class="timeline-empty" *ngIf="moraTimeline.length === 0">
+              <p>No hay datos disponibles para el período seleccionado</p>
             </div>
           </div>
         </div>

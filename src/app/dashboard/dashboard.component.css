@@ -62,6 +62,246 @@
   word-break: break-all;
 }
 
+/* Timeline de mora */
+.mora-timeline {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  width: 100%;
+}
+
+.timeline-controls {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.5rem 0.75rem;
+  background: #f8fafc;
+  border-radius: 6px;
+  margin-bottom: 0.25rem;
+}
+
+.timeline-controls::before {
+  content: "📊 Período:";
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: #64748b;
+}
+
+.timeline-period-select {
+  padding: 0.4rem 0.75rem;
+  border: 1px solid #cbd5e1;
+  border-radius: 4px;
+  background: white;
+  color: #1e293b;
+  font-size: 0.8rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-weight: 500;
+}
+
+.timeline-period-select:hover {
+  border-color: #3b82f6;
+  background: #f8fafc;
+}
+
+.timeline-period-select:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1);
+}
+
+.timeline-chart {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  max-height: 450px;
+  overflow-y: auto;
+  padding: 0.25rem;
+}
+
+.timeline-chart::-webkit-scrollbar {
+  width: 5px;
+}
+
+.timeline-chart::-webkit-scrollbar-track {
+  background: #f1f5f9;
+  border-radius: 3px;
+}
+
+.timeline-chart::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 3px;
+}
+
+.timeline-chart::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+.timeline-item {
+  display: grid;
+  grid-template-columns: 85px 1fr;
+  gap: 0.75rem;
+  align-items: center;
+  padding: 0.6rem 0.75rem;
+  background: white;
+  border-radius: 6px;
+  border-left: 3px solid #3b82f6;
+  transition: all 0.2s ease;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.timeline-item:hover {
+  background: #fafbfc;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+  transform: translateX(2px);
+}
+
+.timeline-date {
+  font-weight: 600;
+  color: #3b82f6;
+  font-size: 0.75rem;
+  letter-spacing: 0.02em;
+  text-align: center;
+  padding: 0.35rem 0.5rem;
+  background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
+  border-radius: 4px;
+  white-space: nowrap;
+}
+
+.timeline-bars {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.4rem 0.6rem;
+}
+
+.timeline-bar-group {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.timeline-bar-label {
+  font-size: 0.68rem;
+  font-weight: 600;
+  color: #475569;
+  min-width: 65px;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  overflow: hidden;
+}
+
+.timeline-bar-container {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  position: relative;
+  flex: 1;
+  min-width: 0;
+}
+
+.timeline-bar-fill {
+  height: 14px;
+  border-radius: 3px;
+  transition: all 0.3s ease;
+  min-width: 3px;
+  cursor: pointer;
+  position: relative;
+}
+
+.timeline-bar-fill:hover {
+  opacity: 0.85;
+  height: 16px;
+}
+
+.timeline-bar-fill.low { 
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+}
+.timeline-bar-fill.medium { 
+  background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+}
+.timeline-bar-fill.high { 
+  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+}
+.timeline-bar-fill.critical { 
+  background: linear-gradient(135deg, #dc2626 0%, #991b1b 100%);
+}
+
+.timeline-bar-value {
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: #1e293b;
+  min-width: 22px;
+  text-align: right;
+  background: #f1f5f9;
+  padding: 0.1rem 0.35rem;
+  border-radius: 3px;
+}
+
+.timeline-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 2.5rem 1rem;
+  color: #94a3b8;
+  font-size: 0.875rem;
+  text-align: center;
+  background: #f8fafc;
+  border-radius: 6px;
+  border: 2px dashed #e2e8f0;
+}
+
+.timeline-empty::before {
+  content: "📊";
+  font-size: 2.5rem;
+  margin-bottom: 0.75rem;
+  opacity: 0.5;
+}
+
+.timeline-empty p {
+  margin: 0;
+  font-weight: 500;
+}
+
+/* Responsive para timeline */
+@media (max-width: 768px) {
+  .timeline-item {
+    grid-template-columns: 1fr;
+    gap: 0.5rem;
+  }
+  
+  .timeline-date {
+    text-align: left;
+    width: fit-content;
+  }
+  
+  .timeline-bars {
+    grid-template-columns: 1fr;
+    gap: 0.5rem;
+  }
+  
+  .timeline-bar-label {
+    min-width: 80px;
+  }
+}
+
+@media (max-width: 480px) {
+  .timeline-controls {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .timeline-controls::before {
+    text-align: center;
+  }
+  
+  .timeline-bar-label {
+    font-size: 0.65rem;
+    min-width: 60px;
+  }
+}
+
 /* Resumen de pagos */
 .payment-summary {
   display: grid;

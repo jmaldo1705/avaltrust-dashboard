@@ -53,6 +53,11 @@ export interface DelinquentUserDto {
   guaranteeRate: string;
 }
 
+export interface MoraTimelineItemDto {
+  date: string; // ISO string
+  categories: MoraCategoryDto[];
+}
+
 export interface ClaimsSummaryDto {
   totalCapital: number;
   totalInterest: number;
@@ -107,6 +112,10 @@ export class DashboardService {
 
   getMoraDistribution(): Observable<MoraCategoryDto[]> {
     return this.http.get<MoraCategoryDto[]>(`${this.baseUrl}/api/dashboard/mora-distribution`);
+  }
+
+  getMoraTimeline(period: 'week' | 'month' | 'quarter' | 'year'): Observable<MoraTimelineItemDto[]> {
+    return this.http.get<MoraTimelineItemDto[]>(`${this.baseUrl}/api/dashboard/mora-timeline`, { params: { period } });
   }
 
   getPaymentStats(period: 'month' | 'quarter' | 'year'): Observable<PaymentStatsDto> {
