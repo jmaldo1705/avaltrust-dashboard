@@ -199,13 +199,14 @@ export class DashboardComponent implements OnInit {
     this.loadPaymentData();
   }
 
-  // Cobertura: traer valor desde el servicio (sin cálculos locales)
+  // Cobertura: traer valor desde el servicio y dividir entre 1.19
   private loadTotalValorAval() {
     this.totalValorAval = 0;
     this.portfolioService.getSumValorAval().subscribe({
       next: (resp: any) => {
         const value = Number(resp?.sumValorAval ?? resp?.sum_valor_aval ?? resp?.sum ?? 0);
-        this.totalValorAval = isNaN(value) ? 0 : value;
+        // Dividir la suma de valores aval entre 1.19
+        this.totalValorAval = isNaN(value) ? 0 : value / 1.19;
       },
       error: (err) => console.error('Error cargando cobertura (sumValorAval)', err)
     });
@@ -629,10 +630,6 @@ export class DashboardComponent implements OnInit {
   navigateToClaim(claimId: string) {
     // Ajustar cuando exista ruta específica de detalle de siniestro
     this.navigateTo('/claims');
-  }
-
-  contactUser(userId: string) {
-    this.navigateTo(`/portfolio/contact/${userId}`);
   }
 
   trackByUserId(index: number, user: DelinquentUser): string {

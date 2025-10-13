@@ -38,12 +38,6 @@ export class ReportsComponent implements OnInit {
   reportsForm!: FormGroup;
   isLoading = false;
   selectedReportType = '';
-  selectedOutputFormat = 'PDF';
-  reportHistory: any[] = [];
-  showHistory = false;
-  previewData: any = null;
-  showPreview = false;
-  Object = Object; // Para usar Object.keys en el template
 
   // Opciones para los reportes
   reportTypes = [
@@ -167,52 +161,54 @@ export class ReportsComponent implements OnInit {
   }
 
   generateReport() {
-    if (!this.reportsForm.valid || !this.selectedReportType) {
-      return;
+    if (this.reportsForm.valid && this.selectedReportType) {
+      this.isLoading = true;
+
+      const reportParams = {
+        ...this.reportsForm.value,
+        userId: this.auth.user()?.username || 'sistema'
+      };
+
+      console.log('Generando reporte con parámetros:', reportParams);
+
+      this.reportsService.generateReport(reportParams)
+        .pipe(
+          catchError(error => {
+            console.error('Error al generar reporte:', error);
+            return of(null);
+          }),
+          finalize(() => {
+            this.isLoading = false;
+          })
+        )
+        .subscribe(response => {
+          if (response) {
+            this.downloadPDF(response);
+          }
+        });
     }
-
-    this.isLoading = true;
-    const reportParams = {
-      ...this.reportsForm.value,
-      reportType: this.selectedReportType,
-      userId: this.auth.user()?.username || 'sistema',
-      outputFormat: this.selectedOutputFormat
-    };
-
-    // Descargar según el formato seleccionado
-    const downloadMethod = this.selectedOutputFormat === 'PDF' 
-      ? this.reportsService.downloadPDF(reportParams)
-      : this.selectedOutputFormat === 'EXCEL'
-      ? this.reportsService.downloadExcel(reportParams)
-      : this.reportsService.downloadCSV(reportParams);
-
-    downloadMethod
-      .pipe(
-        catchError(error => {
-          console.error('Error al generar reporte:', error);
-          alert('Error al generar el reporte. Por favor, intente nuevamente.');
-          return of(null);
-        }),
-        finalize(() => {
-          this.isLoading = false;
-          this.loadReportHistory(); // Recargar historial
-        })
-      )
-      .subscribe(blob => {
-        if (blob) {
-          const fileName = this.generateFileName();
-          this.reportsService.downloadFile(blob, fileName);
-          console.log(`Reporte descargado: ${fileName}`);
-        }
-      });
   }
 
-  private generateFileName(): string {
-    const timestamp = new Date().toISOString().split('T')[0].replace(/-/g, '');
-    const extension = this.selectedOutputFormat === 'PDF' ? 'pdf' 
-                    : this.selectedOutputFormat === 'EXCEL' ? 'xlsx' 
-                    : 'csv';
-    return `${this.selectedReportType}_${timestamp}.${extension}`;
+  private downloadPDF(reportData: any) {
+    const fileName = `${this.getReportName()}_${new Date().toISOString().split('T')[0]}.pdf`;
+
+    // Aquí se implementaría la generación del PDF
+    this.reportsService.generatePDF(reportData, this.selectedReportType)
+      .then(pdfBlob => {
+        const url = window.URL.createObjectURL(pdfBlob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = fileName;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        window.URL.revokeObjectURL(url);
+
+        console.log(`Reporte descargado: ${fileName}`);
+      })
+      .catch(error => {
+        console.error('Error al generar PDF:', error);
+      });
   }
 
   private getReportName(): string {
@@ -221,95 +217,18 @@ export class ReportsComponent implements OnInit {
   }
 
   previewReport() {
-    if (!this.reportsForm.valid || !this.selectedReportType) {
-      return;
-    }
-
-    this.isLoading = true;
-    const reportParams = {
-      ...this.reportsForm.value,
-      reportType: this.selectedReportType,
-      userId: this.auth.user()?.username || 'sistema'
-    };
-
-    this.reportsService.generateReport(reportParams)
-      .pipe(
-        catchError(error => {
-          console.error('Error al generar vista previa:', error);
-          alert('Error al generar vista previa. Por favor, intente nuevamente.');
-          return of(null);
-        }),
-        finalize(() => {
-          this.isLoading = false;
-        })
-      )
-      .subscribe(response => {
-        if (response) {
-          this.previewData = response;
-          this.showPreview = true;
-        }
-      });
-  }
-
-  closePreview() {
-    this.showPreview = false;
-    this.previewData = null;
+    // Implementar vista previa del reporte
+    console.log('Vista previa del reporte:', this.reportsForm.value);
   }
 
   resetForm() {
     this.reportsForm.reset();
     this.selectedReportType = '';
-    this.selectedOutputFormat = 'PDF';
     this.reportsForm.patchValue({
       timeRange: 'last_30_days',
       includeCharts: true,
       includeDetails: true,
       includeMetrics: true
     });
-  }
-
-  onOutputFormatChange(format: string) {
-    this.selectedOutputFormat = format;
-  }
-
-  toggleHistory() {
-    this.showHistory = !this.showHistory;
-    if (this.showHistory && this.reportHistory.length === 0) {
-      this.loadReportHistory();
-    }
-  }
-
-  loadReportHistory() {
-    const userId = this.auth.user()?.username || 'sistema';
-    this.reportsService.getReportHistory(userId)
-      .pipe(
-        catchError(error => {
-          console.error('Error al cargar historial:', error);
-          return of([]);
-        })
-      )
-      .subscribe(history => {
-        this.reportHistory = history;
-      });
-  }
-
-  getStatusLabel(status: string): string {
-    return this.reportsService.getStatusLabel(status);
-  }
-
-  getStatusClass(status: string): string {
-    return this.reportsService.getStatusClass(status);
-  }
-
-  formatDate(dateString: string): string {
-    return this.reportsService.formatDate(dateString);
-  }
-
-  formatFileSize(bytes: number): string {
-    return this.reportsService.formatFileSize(bytes);
-  }
-
-  getReportTypeName(reportType: string): string {
-    return this.reportsService.getReportTypeName(reportType);
   }
 }

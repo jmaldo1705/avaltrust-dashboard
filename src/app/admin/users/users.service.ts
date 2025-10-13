@@ -68,11 +68,11 @@ export class UsersService {
   }
 
   /**
-   * POST /api/auth/register
-   * Crea un nuevo usuario en el sistema
+   * POST /api/admin/users
+   * Crea un nuevo usuario en el sistema (solo admins)
    */
   createUser(data: CreateUserRequest): Observable<CreateUserResponse> {
-    return this.http.post<CreateUserResponse>(`${this.authUrl}/register`, data);
+    return this.http.post<CreateUserResponse>(`${this.baseUrl}/users`, data);
   }
 
   /**

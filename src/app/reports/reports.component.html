@@ -149,6 +149,51 @@
           <!-- Opciones de Formato -->
           <div class="form-section" *ngIf="selectedReportType">
             <h2 class="section-title">Opciones del Reporte</h2>
+            
+            <!-- Formato de salida -->
+            <div class="output-format-section">
+              <label class="format-label">Formato de salida:</label>
+              <div class="format-buttons">
+                <button
+                  type="button"
+                  class="format-btn"
+                  [class.active]="selectedOutputFormat === 'PDF'"
+                  (click)="onOutputFormatChange('PDF')">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                    <polyline points="14 2 14 8 20 8"/>
+                  </svg>
+                  PDF
+                </button>
+                <button
+                  type="button"
+                  class="format-btn"
+                  [class.active]="selectedOutputFormat === 'EXCEL'"
+                  (click)="onOutputFormatChange('EXCEL')">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                    <polyline points="14 2 14 8 20 8"/>
+                    <line x1="16" y1="13" x2="8" y2="13"/>
+                    <line x1="16" y1="17" x2="8" y2="17"/>
+                    <polyline points="10 9 9 9 8 9"/>
+                  </svg>
+                  Excel
+                </button>
+                <button
+                  type="button"
+                  class="format-btn"
+                  [class.active]="selectedOutputFormat === 'CSV'"
+                  (click)="onOutputFormatChange('CSV')">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                    <polyline points="14 2 14 8 20 8"/>
+                    <line x1="9" y1="15" x2="15" y2="15"/>
+                  </svg>
+                  CSV
+                </button>
+              </div>
+            </div>
+
             <div class="checkbox-group">
               <label class="checkbox-label">
                 <input type="checkbox" formControlName="includeCharts">
@@ -175,13 +220,32 @@
               class="btn btn-secondary"
               (click)="previewReport()"
               [disabled]="isLoading">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                <circle cx="12" cy="12" r="3"/>
+              </svg>
               Vista Previa
+            </button>
+            <button
+              type="button"
+              class="btn btn-outline"
+              (click)="toggleHistory()"
+              [disabled]="isLoading">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="10"/>
+                <polyline points="12 6 12 12 16 14"/>
+              </svg>
+              Historial
             </button>
             <button
               type="button"
               class="btn btn-outline"
               (click)="resetForm()"
               [disabled]="isLoading">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="1 4 1 10 7 10"/>
+                <path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/>
+              </svg>
               Limpiar
             </button>
             <button
@@ -190,10 +254,118 @@
               (click)="generateReport()"
               [disabled]="isLoading || !selectedReportType">
               <span *ngIf="isLoading" class="loading-spinner"></span>
-              {{ isLoading ? 'Generando...' : 'Generar PDF' }}
+              <svg *ngIf="!isLoading" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                <polyline points="7 10 12 15 17 10"/>
+                <line x1="12" y1="15" x2="12" y2="3"/>
+              </svg>
+              {{ isLoading ? 'Generando...' : 'Descargar ' + selectedOutputFormat }}
             </button>
           </div>
         </form>
+
+        <!-- Historial de Reportes -->
+        <div class="history-panel" *ngIf="showHistory">
+          <div class="history-header">
+            <h3>Historial de Reportes</h3>
+            <button class="close-btn" (click)="toggleHistory()">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="18" y1="6" x2="6" y2="18"/>
+                <line x1="6" y1="6" x2="18" y2="18"/>
+              </svg>
+            </button>
+          </div>
+          <div class="history-content">
+            <div *ngIf="reportHistory.length === 0" class="empty-state">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="10"/>
+                <line x1="12" y1="8" x2="12" y2="12"/>
+                <line x1="12" y1="16" x2="12.01" y2="16"/>
+              </svg>
+              <p>No hay reportes generados aún</p>
+            </div>
+            <div *ngFor="let report of reportHistory" class="history-item">
+              <div class="history-item-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                  <polyline points="14 2 14 8 20 8"/>
+                </svg>
+              </div>
+              <div class="history-item-info">
+                <h4>{{ report.reportTitle }}</h4>
+                <p class="history-meta">
+                  <span>{{ formatDate(report.generatedAt) }}</span>
+                  <span class="separator">•</span>
+                  <span>{{ formatFileSize(report.fileSize) }}</span>
+                  <span class="separator">•</span>
+                  <span [class]="getStatusClass(report.status)">{{ getStatusLabel(report.status) }}</span>
+                </p>
+              </div>
+              <div class="history-item-actions">
+                <span class="download-count">{{ report.downloadCount }} descargas</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Preview Modal -->
+        <div class="preview-modal" *ngIf="showPreview" (click)="closePreview()">
+          <div class="preview-content" (click)="$event.stopPropagation()">
+            <div class="preview-header">
+              <h3>Vista Previa del Reporte</h3>
+              <button class="close-btn" (click)="closePreview()">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <line x1="18" y1="6" x2="6" y2="18"/>
+                  <line x1="6" y1="6" x2="18" y2="18"/>
+                </svg>
+              </button>
+            </div>
+            <div class="preview-body" *ngIf="previewData">
+              <h4>{{ previewData.title }}</h4>
+              
+              <!-- Resumen -->
+              <div class="preview-summary" *ngIf="previewData.summary">
+                <h5>Resumen</h5>
+                <div class="summary-grid">
+                  <div class="summary-item">
+                    <span class="label">Total Registros:</span>
+                    <span class="value">{{ previewData.summary.totalRecords }}</span>
+                  </div>
+                  <div class="summary-item">
+                    <span class="label">Monto Total:</span>
+                    <span class="value">${{ previewData.summary.totalAmount | number:'1.2-2' }}</span>
+                  </div>
+                  <div class="summary-item">
+                    <span class="label">Promedio:</span>
+                    <span class="value">${{ previewData.summary.averageAmount | number:'1.2-2' }}</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Datos (primeros registros) -->
+              <div class="preview-data" *ngIf="previewData.data && previewData.data.length > 0">
+                <h5>Primeros Registros (máximo 10)</h5>
+                <div class="data-table-wrapper">
+                  <table class="data-table">
+                    <thead>
+                      <tr>
+                        <th *ngFor="let key of Object.keys(previewData.data[0])">{{ key }}</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr *ngFor="let row of previewData.data.slice(0, 10)">
+                        <td *ngFor="let key of Object.keys(row)">{{ row[key] }}</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+                <p class="preview-note" *ngIf="previewData.data.length > 10">
+                  ... y {{ previewData.data.length - 10 }} registros más
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   </main>

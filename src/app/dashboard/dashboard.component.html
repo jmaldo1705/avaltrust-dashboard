@@ -234,7 +234,6 @@
           <div class="col-rate">{{ user.guaranteeRate }}</div>
           <div class="col-actions">
             <button class="action-btn-small" (click)="viewUserDetail(user.id)">Ver</button>
-            <button class="action-btn-small contact" (click)="contactUser(user.id)">Contactar</button>
           </div>
         </div>
         <div class="empty-state" *ngIf="processedDelinquents.length === 0">

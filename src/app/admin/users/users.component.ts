@@ -290,14 +290,12 @@ export class UsersComponent implements OnInit {
     });
   }
 
-  // Modal de confirmación de eliminación
+  // Modal de confirmación para desactivar/activar
   showDeleteModal = false;
   userToDelete: AppUser | null = null;
-  deleteMode: 'disable' | 'permanent' = 'disable';
 
-  openDeleteModal(user: AppUser, mode: 'disable' | 'permanent' = 'disable') {
+  openDeleteModal(user: AppUser, mode: 'disable' = 'disable') {
     this.userToDelete = user;
-    this.deleteMode = mode;
     this.showDeleteModal = true;
     this.errorMessage = null;
   }
@@ -305,17 +303,11 @@ export class UsersComponent implements OnInit {
   closeDeleteModal() {
     this.showDeleteModal = false;
     this.userToDelete = null;
-    this.deleteMode = 'disable';
   }
 
   confirmDelete() {
     if (!this.userToDelete) return;
-
-    if (this.deleteMode === 'disable') {
-      this.toggleUserStatus(this.userToDelete);
-    } else {
-      this.permanentlyDeleteUser(this.userToDelete);
-    }
+    this.toggleUserStatus(this.userToDelete);
   }
 
   toggleUserStatus(user: AppUser) {
@@ -334,29 +326,6 @@ export class UsersComponent implements OnInit {
       error: (err: any) => {
         console.error('Error toggling user status', err);
         this.errorMessage = this.getErrorMessage(err) || `No se pudo ${action} el usuario`;
-        this.isLoading = false;
-      }
-    });
-  }
-
-  permanentlyDeleteUser(user: AppUser) {
-    this.isLoading = true;
-    this.errorMessage = null;
-    
-    this.usersService.deleteUser(user.id).subscribe({
-      next: () => {
-        this.successMessage = `Usuario "${user.username}" eliminado permanentemente`;
-        this.closeDeleteModal();
-        this.loadUsers();
-      },
-      error: (err: any) => {
-        console.error('Error deleting user', err);
-        // Verificar si es un error de constraint de base de datos
-        if (err.error?.error && err.error.error.includes('foreign key constraint')) {
-          this.errorMessage = `No se puede eliminar el usuario "${user.username}" porque tiene datos relacionados (tokens de sesión, etc.). Por favor, primero desactívelo.`;
-        } else {
-          this.errorMessage = this.getErrorMessage(err) || 'No se pudo eliminar el usuario';
-        }
         this.isLoading = false;
       }
     });

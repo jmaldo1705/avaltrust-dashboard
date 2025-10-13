@@ -181,14 +181,6 @@
                     <span class="btn-icon">▶️</span>
                     <span class="btn-text">Activar</span>
                   </button>
-                  
-                  <button 
-                    class="action-btn delete-btn" 
-                    (click)="openDeleteModal(u, 'permanent')" 
-                    title="Eliminar permanentemente">
-                    <span class="btn-icon">🗑️</span>
-                    <span class="btn-text">Eliminar</span>
-                  </button>
                 </div>
               </td>
             </tr>
@@ -310,21 +302,20 @@
       </div>
     </div>
 
-    <!-- Modal de confirmación de eliminación/desactivación -->
+    <!-- Modal de confirmación de desactivación/activación -->
     <div class="modal-overlay" *ngIf="showDeleteModal" (click)="closeDeleteModal()">
       <div class="modal-content modal-confirm" (click)="$event.stopPropagation()">
-        <div class="modal-header" [class.warning]="deleteMode === 'permanent'">
+        <div class="modal-header">
           <h3>
-            <span *ngIf="deleteMode === 'disable' && userToDelete?.enabled">⏸️ Desactivar Usuario</span>
-            <span *ngIf="deleteMode === 'disable' && !userToDelete?.enabled">▶️ Activar Usuario</span>
-            <span *ngIf="deleteMode === 'permanent'">⚠️ Eliminar Usuario</span>
+            <span *ngIf="userToDelete?.enabled">⏸️ Desactivar Usuario</span>
+            <span *ngIf="!userToDelete?.enabled">▶️ Activar Usuario</span>
           </h3>
           <button class="close-btn" (click)="closeDeleteModal()">&times;</button>
         </div>
         
         <div class="modal-body">
           <!-- Desactivar usuario -->
-          <div *ngIf="deleteMode === 'disable' && userToDelete?.enabled" class="confirm-content">
+          <div *ngIf="userToDelete?.enabled" class="confirm-content">
             <div class="confirm-icon warning">⏸️</div>
             <h4>¿Desactivar a "{{ userToDelete?.username }}"?</h4>
             <p class="confirm-description">
@@ -340,32 +331,12 @@
           </div>
 
           <!-- Activar usuario -->
-          <div *ngIf="deleteMode === 'disable' && !userToDelete?.enabled" class="confirm-content">
+          <div *ngIf="!userToDelete?.enabled" class="confirm-content">
             <div class="confirm-icon success">▶️</div>
             <h4>¿Activar a "{{ userToDelete?.username }}"?</h4>
             <p class="confirm-description">
               El usuario podrá volver a iniciar sesión en el sistema.
             </p>
-          </div>
-
-          <!-- Eliminar permanentemente -->
-          <div *ngIf="deleteMode === 'permanent'" class="confirm-content">
-            <div class="confirm-icon danger">🗑️</div>
-            <h4>¿Eliminar permanentemente a "{{ userToDelete?.username }}"?</h4>
-            <p class="confirm-description danger">
-              <strong>¡ATENCIÓN!</strong> Esta acción no se puede deshacer.
-            </p>
-            <div class="warning-box">
-              <span class="warning-icon">⚠️</span>
-              <div class="warning-text">
-                <strong>Importante:</strong>
-                <ul>
-                  <li>Se eliminarán todos los datos del usuario</li>
-                  <li>Si el usuario tiene sesiones activas o datos relacionados, la eliminación fallará</li>
-                  <li>Se recomienda <strong>desactivar</strong> en lugar de eliminar</li>
-                </ul>
-              </div>
-            </div>
           </div>
 
           <div class="alert error" *ngIf="errorMessage">{{ errorMessage }}</div>
@@ -377,14 +348,12 @@
           </button>
           <button 
             class="btn"
-            [class.btn-warning]="deleteMode === 'disable' && userToDelete?.enabled"
-            [class.btn-success]="deleteMode === 'disable' && !userToDelete?.enabled"
-            [class.btn-danger]="deleteMode === 'permanent'"
+            [class.btn-danger]="userToDelete?.enabled"
+            [class.btn-success]="!userToDelete?.enabled"
             (click)="confirmDelete()" 
             [disabled]="isLoading">
-            <span *ngIf="!isLoading && deleteMode === 'disable' && userToDelete?.enabled">Desactivar</span>
-            <span *ngIf="!isLoading && deleteMode === 'disable' && !userToDelete?.enabled">Activar</span>
-            <span *ngIf="!isLoading && deleteMode === 'permanent'">Eliminar Definitivamente</span>
+            <span *ngIf="!isLoading && userToDelete?.enabled">Desactivar</span>
+            <span *ngIf="!isLoading && !userToDelete?.enabled">Activar</span>
             <span *ngIf="isLoading">Procesando...</span>
           </button>
         </div>

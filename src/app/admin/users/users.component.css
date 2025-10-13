@@ -450,14 +450,14 @@
 }
 
 .disable-btn {
-  background: #fef3c7;
-  color: #92400e;
+  background: #fee2e2;
+  color: #991b1b;
 }
 
 .disable-btn:hover {
-  background: #fde68a;
+  background: #fecaca;
   transform: translateY(-2px);
-  box-shadow: 0 4px 6px rgba(245, 158, 11, 0.2);
+  box-shadow: 0 4px 6px rgba(239, 68, 68, 0.3);
 }
 
 .enable-btn {
