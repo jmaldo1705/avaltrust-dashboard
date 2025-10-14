@@ -141,7 +141,7 @@ export class PortfolioComponent implements OnInit {
       totalDeuda: ['', [Validators.required]],
       fechaVencimiento: ['', [Validators.required]],
       diasMora: [0],
-      fechaPago: ['', [Validators.required]],
+      fechaPago: [''],
       estadoCredito: ['', [Validators.required]],
       periodicidad: ['', [Validators.required]]
     });

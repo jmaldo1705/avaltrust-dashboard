@@ -294,7 +294,7 @@
               <div class="detail-value">{{ selectedUserDetail.valorDesembolso | currency:'COP':'symbol':'1.0-0' }}</div>
             </div>
             <div class="detail-row">
-              <div class="detail-label">Valor Aval</div>
+              <div class="detail-label">Valor Fianza</div>
               <div class="detail-value">{{ selectedUserDetail.valorAval | currency:'COP':'symbol':'1.0-0' }}</div>
             </div>
             <div class="detail-row">
@@ -302,7 +302,7 @@
               <div class="detail-value">{{ selectedUserDetail.interes | currency:'COP':'symbol':'1.0-0' }}</div>
             </div>
             <div class="detail-row">
-              <div class="detail-label">Tasa Aval</div>
+              <div class="detail-label">Tasa Fianza</div>
               <div class="detail-value">{{ selectedUserDetail.tasaAval }}%</div>
             </div>
             <div class="detail-row" *ngIf="selectedUserDetail.otrosConceptos != null">
@@ -310,7 +310,7 @@
               <div class="detail-value">{{ selectedUserDetail.otrosConceptos | currency:'COP':'symbol':'1.0-0' }}</div>
             </div>
             <div class="detail-row" *ngIf="selectedUserDetail.abonoAval != null">
-              <div class="detail-label">Abono Aval</div>
+              <div class="detail-label">Abono Fianza</div>
               <div class="detail-value">{{ selectedUserDetail.abonoAval | currency:'COP':'symbol':'1.0-0' }}</div>
             </div>
             <div class="detail-row" *ngIf="selectedUserDetail.abonoCapital != null">
