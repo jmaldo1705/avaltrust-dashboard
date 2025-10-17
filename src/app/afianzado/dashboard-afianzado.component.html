@@ -1,0 +1,145 @@
+<div class="dashboard-layout">
+  <!-- Header componente -->
+  <app-header
+    [isSidebarOpen]="isSidebarOpen"
+    [isUserMenuOpen]="isUserMenuOpen"
+    (toggleSidebar)="toggleSidebar()"
+    (toggleUserMenu)="toggleUserMenu()"
+    (closeUserMenu)="closeUserMenu()"
+    (navigate)="onHeaderNavigate($event)"
+    (logout)="logout()">
+  </app-header>
+
+  <!-- Overlay para cerrar menús en móvil -->
+  <div
+    class="overlay"
+    [class.active]="isSidebarOpen || isUserMenuOpen"
+    (click)="closeSidebar(); closeUserMenu()">
+  </div>
+
+  <!-- Componente Sidebar -->
+  <app-sidebar
+    [isSidebarOpen]="isSidebarOpen"
+    (sidebarClose)="onSidebarClose()"
+    (navigate)="onSidebarNavigate($event)">
+  </app-sidebar>
+
+  <!-- Contenido principal -->
+  <main class="main-content">
+    <div class="loading" *ngIf="loading">
+      <div class="spinner"></div>
+      <p>Cargando información...</p>
+    </div>
+
+    <div class="error" *ngIf="error && !loading">
+      <p>{{ error }}</p>
+      <button (click)="loadDashboard()">Reintentar</button>
+    </div>
+
+    <div class="dashboard-content" *ngIf="dashboard && !loading">
+      <!-- Header con información del afianzado -->
+      <div class="content-header">
+        <h2>Mi Dashboard</h2>
+        <p class="welcome-message">
+          Bienvenido, <strong>{{ dashboard.nombreAfianzado }}</strong> - Documento: {{ dashboard.documentoIdentidad }}
+        </p>
+      </div>
+
+    <!-- Tarjetas de resumen -->
+    <div class="summary-cards">
+      <div class="card total-deuda">
+        <div class="card-icon">💰</div>
+        <div class="card-content">
+          <h3>Deuda Total</h3>
+          <p class="amount">{{ formatCurrency(dashboard.deudaTotal) }}</p>
+        </div>
+      </div>
+
+      <div class="card total-mora">
+        <div class="card-icon">⚠️</div>
+        <div class="card-content">
+          <h3>Mora Total</h3>
+          <p class="amount">{{ formatCurrency(dashboard.moraTotal) }}</p>
+        </div>
+      </div>
+
+      <div class="card total-obligaciones">
+        <div class="card-icon">📋</div>
+        <div class="card-content">
+          <h3>Total Obligaciones</h3>
+          <p class="amount">{{ dashboard.totalObligaciones }}</p>
+        </div>
+      </div>
+
+      <div class="card obligaciones-al-dia">
+        <div class="card-icon">✅</div>
+        <div class="card-content">
+          <h3>Al Día</h3>
+          <p class="amount">{{ dashboard.obligacionesAlDia }}</p>
+        </div>
+      </div>
+
+      <div class="card obligaciones-mora">
+        <div class="card-icon">❌</div>
+        <div class="card-content">
+          <h3>En Mora</h3>
+          <p class="amount">{{ dashboard.obligacionesEnMora }}</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tabla de obligaciones -->
+    <div class="obligaciones-section">
+      <h2>Detalle de Obligaciones</h2>
+      <div class="table-responsive">
+        <table class="obligaciones-table">
+          <thead>
+            <tr>
+              <th>Obligación</th>
+              <th>Tipo</th>
+              <th>Valor Total</th>
+              <th>Saldo Actual</th>
+              <th>Cuota Mensual</th>
+              <th>Fecha Vencimiento</th>
+              <th>Estado</th>
+              <th>Días Mora</th>
+              <th>Valor Mora</th>
+              <th>Certificado</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let obligacion of dashboard.obligaciones">
+              <td>{{ obligacion.numeroObligacion }}</td>
+              <td>{{ obligacion.tipoObligacion }}</td>
+              <td>{{ formatCurrency(obligacion.valorTotal) }}</td>
+              <td>{{ formatCurrency(obligacion.saldoActual) }}</td>
+              <td>{{ formatCurrency(obligacion.cuotaMensual) }}</td>
+              <td>{{ formatDate(obligacion.fechaVencimiento) }}</td>
+              <td>
+                <span [class]="'estado-badge ' + getEstadoClass(obligacion.estado)">
+                  {{ obligacion.estado }}
+                </span>
+              </td>
+              <td>
+                <span [class]="obligacion.diasMora > 0 ? 'dias-mora-alert' : ''">
+                  {{ obligacion.diasMora }}
+                </span>
+              </td>
+              <td>{{ formatCurrency(obligacion.valorMora) }}</td>
+              <td>
+                <button class="btn-download" (click)="descargarCertificado(obligacion.numeroObligacion)" title="Descargar Certificado de Fianza">
+                  📄 Descargar
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="no-data" *ngIf="dashboard.obligaciones.length === 0">
+        <p>No tienes obligaciones registradas en este momento.</p>
+      </div>
+    </div>
+    </div>
+  </main>
+</div>

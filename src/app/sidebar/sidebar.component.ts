@@ -61,6 +61,10 @@ export class SidebarComponent {
       return 'Analista';
     }
 
+    if (this.auth.hasRole('ROLE_AFIANZADO')) {
+      return 'Afianzado';
+    }
+
     if (this.auth.hasRole('ROLE_USER')) {
       return 'Usuario';
     }
@@ -87,6 +91,7 @@ export class SidebarComponent {
       case 'manager': return 'Gerente';
       case 'supervisor': return 'Supervisor';
       case 'analyst': return 'Analista';
+      case 'afianzado': return 'Afianzado';
       case 'user': return 'Usuario';
       case 'guest': return 'Invitado';
       default:

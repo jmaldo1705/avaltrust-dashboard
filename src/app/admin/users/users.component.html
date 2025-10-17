@@ -118,6 +118,7 @@
                 </div>
               </th>
               <th>Roles</th>
+              <th>Aliado Estratégico</th>
               <th class="sortable" (click)="setSort('enabled')">
                 <div class="th-content">
                   Estado
@@ -151,6 +152,14 @@
                   </ng-template>
                 </div>
               </td>
+              <td class="aliado-col">
+                <span *ngIf="u.aliadoEstrategicoNombre" class="aliado-badge">
+                  {{ u.aliadoEstrategicoNombre }}
+                </span>
+                <span *ngIf="!u.aliadoEstrategicoNombre" class="no-aliado">
+                  Sin aliado
+                </span>
+              </td>
               <td class="status-col">
                 <span class="status-indicator" [class.active]="u.enabled" [class.inactive]="!u.enabled">
                   <span class="status-dot"></span>
@@ -159,9 +168,9 @@
               </td>
               <td class="actions-col">
                 <div class="action-buttons">
-                  <button class="action-btn edit-btn" (click)="openEditRoles(u)" title="Editar roles">
+                  <button class="action-btn edit-btn" (click)="openEditModal(u)" title="Editar usuario">
                     <span class="btn-icon">✏️</span>
-                    <span class="btn-text">Roles</span>
+                    <span class="btn-text">Editar</span>
                   </button>
                   
                   <button 
@@ -210,16 +219,18 @@
       </ng-template>
     </div>
 
-    <!-- Modal para crear usuario -->
-    <div class="modal-overlay" *ngIf="showCreateModal" (click)="closeCreateModal()">
+    <!-- Modal para crear/editar usuario -->
+    <div class="modal-overlay" *ngIf="showEditModal" (click)="closeEditModal()">
       <div class="modal-content modal-large" (click)="$event.stopPropagation()">
         <div class="modal-header">
-          <h3>➕ Crear Nuevo Usuario</h3>
-          <button class="close-btn" (click)="closeCreateModal()">&times;</button>
+          <h3>{{ editMode === 'create' ? '➕ Crear Nuevo Usuario' : '✏️ Editar Usuario' }}</h3>
+          <button class="close-btn" (click)="closeEditModal()">&times;</button>
         </div>
         
         <div class="modal-body">
-          <p class="modal-description">Complete los datos del nuevo usuario:</p>
+          <p class="modal-description">
+            {{ editMode === 'create' ? 'Complete los datos del nuevo usuario:' : 'Modifique los datos del usuario:' }}
+          </p>
           
           <div class="form-grid">
             <div class="form-field">
@@ -229,11 +240,13 @@
               <input 
                 type="text" 
                 class="form-input"
-                [(ngModel)]="newUserForm.username"
+                [(ngModel)]="editUserForm.username"
                 placeholder="usuario123"
                 autocomplete="off"
+                [disabled]="editMode === 'edit'"
               />
-              <span class="field-hint">Mínimo 3 caracteres</span>
+              <span class="field-hint" *ngIf="editMode === 'create'">Mínimo 3 caracteres</span>
+              <span class="field-hint" *ngIf="editMode === 'edit'">El nombre de usuario no se puede modificar</span>
             </div>
 
             <div class="form-field">
@@ -243,47 +256,76 @@
               <input 
                 type="email" 
                 class="form-input"
-                [(ngModel)]="newUserForm.email"
+                [(ngModel)]="editUserForm.email"
                 placeholder="usuario@ejemplo.com"
                 autocomplete="email"
+                [disabled]="editMode === 'edit'"
               />
-              <span class="field-hint">Debe ser un email válido</span>
+              <span class="field-hint" *ngIf="editMode === 'create'">Debe ser un email válido</span>
+              <span class="field-hint" *ngIf="editMode === 'edit'">El email no se puede modificar</span>
             </div>
 
             <div class="form-field">
               <label class="field-label">
-                Contraseña <span class="required">*</span>
+                Contraseña <span *ngIf="editMode === 'create'" class="required">*</span>
               </label>
               <input 
                 type="password" 
                 class="form-input"
-                [(ngModel)]="newUserForm.password"
-                placeholder="••••••••"
+                [(ngModel)]="editUserForm.password"
+                [placeholder]="editMode === 'create' ? '••••••••' : 'Dejar vacío para mantener la actual'"
                 autocomplete="new-password"
               />
-              <span class="field-hint">Mínimo 6 caracteres</span>
+              <span class="field-hint">
+                {{ editMode === 'create' ? 'Mínimo 6 caracteres' : 'Opcional: Solo si desea cambiar la contraseña' }}
+              </span>
             </div>
 
             <div class="form-field">
               <label class="field-label">
-                Confirmar Contraseña <span class="required">*</span>
+                Confirmar Contraseña <span *ngIf="editMode === 'create'" class="required">*</span>
               </label>
               <input 
                 type="password" 
                 class="form-input"
-                [(ngModel)]="newUserForm.confirmPassword"
+                [(ngModel)]="editUserForm.confirmPassword"
                 placeholder="••••••••"
                 autocomplete="new-password"
               />
               <span class="field-hint">Debe coincidir con la contraseña</span>
             </div>
-          </div>
 
-          <div class="info-box">
-            <span class="info-icon">ℹ️</span>
-            <div class="info-text">
-              <strong>Nota:</strong> El nuevo usuario será creado con rol de <strong>Usuario (ROLE_USER)</strong> por defecto. 
-              Puede cambiar sus roles después desde la tabla de usuarios.
+            <div class="form-field">
+              <label class="field-label">
+                Aliado Estratégico
+              </label>
+              <select 
+                class="form-input"
+                [(ngModel)]="editUserForm.aliadoEstrategicoId"
+              >
+                <option [ngValue]="null">Sin aliado (acceso completo)</option>
+                <option *ngFor="let aliado of aliados" [ngValue]="aliado.id">
+                  {{ aliado.nombre }}
+                </option>
+              </select>
+              <span class="field-hint">Opcional: Asociar usuario a un aliado estratégico para filtrar datos</span>
+            </div>
+
+            <div class="form-field full-width">
+              <label class="field-label">
+                Roles <span class="required">*</span>
+              </label>
+              <div class="roles-selection">
+                <label *ngFor="let role of availableRoles" class="role-checkbox">
+                  <input 
+                    type="checkbox" 
+                    [checked]="isRoleSelected(role.value)"
+                    (change)="toggleRole(role.value)"
+                  />
+                  <span class="role-label">{{ role.label }}</span>
+                </label>
+              </div>
+              <span class="field-hint">Debe seleccionar al menos un rol</span>
             </div>
           </div>
 
@@ -291,12 +333,14 @@
         </div>
         
         <div class="modal-footer">
-          <button class="btn btn-secondary" (click)="closeCreateModal()" [disabled]="isLoading">
+          <button class="btn btn-secondary" (click)="closeEditModal()" [disabled]="isLoading">
             Cancelar
           </button>
-          <button class="btn btn-primary" (click)="createUser()" [disabled]="isLoading">
-            <span *ngIf="!isLoading">✓ Crear Usuario</span>
-            <span *ngIf="isLoading">Creando...</span>
+          <button class="btn btn-primary" (click)="saveUser()" [disabled]="isLoading">
+            <span *ngIf="!isLoading">
+              {{ editMode === 'create' ? '✓ Crear Usuario' : '✓ Guardar Cambios' }}
+            </span>
+            <span *ngIf="isLoading">{{ editMode === 'create' ? 'Creando...' : 'Guardando...' }}</span>
           </button>
         </div>
       </div>
@@ -355,42 +399,6 @@
             <span *ngIf="!isLoading && userToDelete?.enabled">Desactivar</span>
             <span *ngIf="!isLoading && !userToDelete?.enabled">Activar</span>
             <span *ngIf="isLoading">Procesando...</span>
-          </button>
-        </div>
-      </div>
-    </div>
-
-    <!-- Modal para editar roles -->
-    <div class="modal-overlay" *ngIf="showRolesModal" (click)="closeRolesModal()">
-      <div class="modal-content" (click)="$event.stopPropagation()">
-        <div class="modal-header">
-          <h3>Editar Roles - {{ selectedUser?.username }}</h3>
-          <button class="close-btn" (click)="closeRolesModal()">&times;</button>
-        </div>
-        
-        <div class="modal-body">
-          <p class="modal-description">Seleccione los roles que desea asignar a este usuario:</p>
-          
-          <div class="roles-list">
-            <div class="role-item" *ngFor="let role of availableRoles">
-              <label class="role-checkbox">
-                <input 
-                  type="checkbox" 
-                  [checked]="isRoleSelected(role.value)"
-                  (change)="toggleRole(role.value)"
-                />
-                <span class="role-label">{{ role.label }}</span>
-              </label>
-            </div>
-          </div>
-
-          <div class="alert error" *ngIf="errorMessage">{{ errorMessage }}</div>
-        </div>
-        
-        <div class="modal-footer">
-          <button class="btn btn-secondary" (click)="closeRolesModal()">Cancelar</button>
-          <button class="btn btn-primary" (click)="saveRoles()" [disabled]="isLoading">
-            {{ isLoading ? 'Guardando...' : 'Guardar' }}
           </button>
         </div>
       </div>

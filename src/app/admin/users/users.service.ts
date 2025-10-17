@@ -9,6 +9,8 @@ export interface AppUser {
   email: string;
   roles: string[];
   enabled: boolean;
+  aliadoEstrategicoId?: number | null;
+  aliadoEstrategicoNombre?: string | null;
 }
 
 export interface UpdateRolesRequest {
@@ -19,9 +21,11 @@ export interface CreateUserRequest {
   username: string;
   password: string;
   email: string;
+  aliadoEstrategicoId?: number | null;
 }
 
 export interface CreateUserResponse {
+  id?: number;
   username: string;
   email: string;
   message: string;
@@ -45,7 +49,9 @@ export class UsersService {
           username: u.username,
           email: u.email,
           roles: Array.isArray(u.roles) ? u.roles : [],
-          enabled: u.enabled ?? true
+          enabled: u.enabled ?? true,
+          aliadoEstrategicoId: u.aliadoEstrategicoId || null,
+          aliadoEstrategicoNombre: u.aliadoEstrategicoNombre || null
         }));
       })
     );
@@ -57,6 +63,24 @@ export class UsersService {
    */
   updateUserRoles(userId: number, roles: string[]): Observable<AppUser> {
     return this.http.post<AppUser>(`${this.baseUrl}/users/${userId}/roles`, { roles });
+  }
+
+  /**
+   * PUT /api/admin/users/{userId}
+   * Actualiza un usuario completo (roles, aliado estratégico y opcionalmente contraseña)
+   */
+  updateUser(userId: number, roles: string[], aliadoEstrategicoId: number | null, password?: string): Observable<AppUser> {
+    const body: any = { 
+      roles, 
+      aliadoEstrategicoId 
+    };
+    
+    // Solo incluir contraseña si se proporciona y no está vacía
+    if (password && password.trim() !== '') {
+      body.password = password.trim();
+    }
+    
+    return this.http.put<AppUser>(`${this.baseUrl}/users/${userId}`, body);
   }
 
   /**

@@ -10,6 +10,7 @@ import { SidebarComponent } from '../sidebar/sidebar.component';
 import { HasRoleDirective } from '../auth/has-role.directive';
 import { DashboardService } from './dashboard.service';
 import { PortfolioService } from '../portfolio/portfolio.service';
+import { FiltroAliadosComponent, FiltroAliadosEvent } from './filtro-aliados.component';
 import * as XLSX from 'xlsx';
 
 // Interfaces para tipado
@@ -58,6 +59,8 @@ interface Alert {
   userId?: string;
   portfolioId?: string;  // ID del portfolio específico
   obligacion?: string;    // Número de obligación
+  aliadoEstrategicoId?: number;
+  aliadoEstrategicoNombre?: string;
 }
 
 interface DelinquentUser {
@@ -67,12 +70,14 @@ interface DelinquentUser {
   debtAmount: number;
   delayDays: number;
   guaranteeRate: string;
+  aliadoEstrategicoId?: number;
+  aliadoEstrategicoNombre?: string;
 }
 
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [CommonModule, FormsModule, HeaderComponent, SidebarComponent],
+  imports: [CommonModule, FormsModule, HeaderComponent, SidebarComponent, FiltroAliadosComponent],
   templateUrl: './dashboard.component.html',
   styleUrls: ['./dashboard.component.css']
 })
@@ -97,6 +102,10 @@ export class DashboardComponent implements OnInit {
   selectedPeriod = 'month';
   moraView: 'distribution' | 'timeline' = 'distribution';
   timelinePeriod: 'week' | 'month' | 'quarter' | 'year' = 'month';
+
+  // Filtro de aliados estratégicos (solo para ADMIN)
+  selectedAliadoIds: number[] | null = null;
+  isAliadoFilterVisible = false;
 
   // Datos del dashboard
   portfolioStats: PortfolioStats = {
@@ -149,13 +158,28 @@ export class DashboardComponent implements OnInit {
       this.auth.getUserProfile().subscribe();
     }
 
+    // Verificar si es admin para mostrar filtro de aliados
+    this.checkAdminRole();
+
     // Cargar datos del dashboard
     this.loadDashboardData();
   }
 
+  private checkAdminRole() {
+    const profile = this.userProfile();
+    this.isAliadoFilterVisible = profile?.roles?.includes('ROLE_ADMIN') ?? false;
+  }
+
+  onAliadoFilterChange(event: FiltroAliadosEvent) {
+    this.selectedAliadoIds = event.aliadoIds;
+    this.loadDashboardData();
+  }
+
   private loadDashboardData() {
+    const params = this.selectedAliadoIds ? { aliadoIds: this.selectedAliadoIds } : {};
+
     // Cargar estadísticas generales de la cartera
-    this.dashboardService.getPortfolioStats().subscribe({
+    this.dashboardService.getPortfolioStats(params).subscribe({
       next: (data: any) => this.portfolioStats = data,
       error: (err) => console.error('Error cargando portfolioStats', err)
     });
@@ -164,13 +188,13 @@ export class DashboardComponent implements OnInit {
     this.loadTotalValorAval();
 
     // Distribución por categorías de mora
-    this.dashboardService.getMoraDistribution().subscribe({
+    this.dashboardService.getMoraDistribution(params).subscribe({
       next: (data: any) => this.moraDistribution = data,
       error: (err) => console.error('Error cargando moraDistribution', err)
     });
 
     // Alertas
-    this.dashboardService.getAlerts().subscribe({
+    this.dashboardService.getAlerts(params).subscribe({
       next: (data: any[]) => {
         this.alerts = data.map(a => {
           const userId = (a as any).userId ?? (a as any).user_id ?? (a as any).userID ?? (a as any).usuarioId ?? (a as any).usuario_id ?? (a as any).clienteId ?? (a as any).cliente_id;
@@ -185,7 +209,7 @@ export class DashboardComponent implements OnInit {
     });
 
     // Top usuarios morosos
-    this.dashboardService.getTopDelinquents().subscribe({
+    this.dashboardService.getTopDelinquents(params).subscribe({
       next: (data: any[]) => {
         this.topDelinquentUsers = (data || []).map((u: any) => {
           const uid = u.userId ?? u.user_id ?? u.uid ?? u.userUid ?? u.usuarioUid ?? u.clienteUid ?? u.cliente_id ?? u.id;
@@ -202,7 +226,8 @@ export class DashboardComponent implements OnInit {
   // Cobertura: traer valor desde el servicio y dividir entre 1.19 y luego reducir 5% adicional
   private loadTotalValorAval() {
     this.totalValorAval = 0;
-    this.portfolioService.getSumValorAval().subscribe({
+    const params = this.selectedAliadoIds ? { aliadoIds: this.selectedAliadoIds } : {};
+    this.portfolioService.getSumValorAval(params).subscribe({
       next: (resp: any) => {
         const value = Number(resp?.sumValorAval ?? resp?.sum_valor_aval ?? resp?.sum ?? 0);
         // Dividir la suma de valores aval entre 1.19 y luego reducir 5% adicional

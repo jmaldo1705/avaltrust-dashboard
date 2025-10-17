@@ -8,6 +8,8 @@ import { SidebarComponent } from '../../sidebar/sidebar.component';
 import { UiStateService } from '../../ui-state.service';
 import { AuthService } from '../../auth/auth.service';
 import { UsersService, AppUser } from './users.service';
+import { AliadoService } from '../../aliado/aliado.service';
+import { AliadoEstrategico } from '../../aliado/aliado.interface';
 
 @Component({
   selector: 'app-users',
@@ -21,6 +23,7 @@ export class UsersComponent implements OnInit {
   private uiState = inject(UiStateService);
   private auth = inject(AuthService);
   private usersService = inject(UsersService);
+  private aliadoService = inject(AliadoService);
 
   userProfile = this.auth.userProfile;
 
@@ -47,24 +50,27 @@ export class UsersComponent implements OnInit {
   page = signal(1);
   pageSize = 10;
 
-  // Modal para editar roles
-  showRolesModal = false;
-  selectedUser: AppUser | null = null;
-  selectedRoles: string[] = [];
-
-  // Modal para crear usuario
-  showCreateModal = false;
-  newUserForm = {
+  // Modal para editar usuario
+  showEditModal = false;
+  editMode: 'create' | 'edit' = 'create';
+  editUserForm = {
+    id: 0,
     username: '',
     email: '',
     password: '',
-    confirmPassword: ''
+    confirmPassword: '',
+    aliadoEstrategicoId: null as number | null,
+    roles: [] as string[]
   };
+
+  // Lista de aliados estratégicos
+  aliados: AliadoEstrategico[] = [];
 
   // Roles disponibles en el sistema
   availableRoles = [
     { value: 'ROLE_USER', label: 'Usuario' },
-    { value: 'ROLE_ADMIN', label: 'Administrador' }
+    { value: 'ROLE_ADMIN', label: 'Administrador' },
+    { value: 'ROLE_AFIANZADO', label: 'Afianzado' }
   ];
 
   // Getters/Setters para ngModel
@@ -125,6 +131,19 @@ export class UsersComponent implements OnInit {
 
   ngOnInit() {
     this.loadUsers();
+    this.loadAliados();
+  }
+
+  // Cargar aliados estratégicos
+  loadAliados() {
+    this.aliadoService.getActivos().subscribe({
+      next: (data) => {
+        this.aliados = data;
+      },
+      error: (err) => {
+        console.error('Error al cargar aliados:', err);
+      }
+    });
   }
 
   // Sidebar controls
@@ -164,130 +183,182 @@ export class UsersComponent implements OnInit {
     });
   }
 
+  // Abrir modal para crear usuario
   openCreateModal() {
-    this.newUserForm = {
+    this.editMode = 'create';
+    this.editUserForm = {
+      id: 0,
       username: '',
       email: '',
       password: '',
-      confirmPassword: ''
+      confirmPassword: '',
+      aliadoEstrategicoId: null,
+      roles: ['ROLE_USER']
     };
-    this.showCreateModal = true;
+    this.showEditModal = true;
     this.errorMessage = null;
     this.successMessage = null;
   }
 
-  closeCreateModal() {
-    this.showCreateModal = false;
-    this.newUserForm = {
+  // Abrir modal para editar usuario
+  openEditModal(user: AppUser) {
+    this.editMode = 'edit';
+    this.editUserForm = {
+      id: user.id,
+      username: user.username,
+      email: user.email,
+      password: '',
+      confirmPassword: '',
+      aliadoEstrategicoId: user.aliadoEstrategicoId || null,
+      roles: [...user.roles]
+    };
+    this.showEditModal = true;
+    this.errorMessage = null;
+    this.successMessage = null;
+  }
+
+  // Cerrar modal
+  closeEditModal() {
+    this.showEditModal = false;
+    this.editUserForm = {
+      id: 0,
       username: '',
       email: '',
       password: '',
-      confirmPassword: ''
+      confirmPassword: '',
+      aliadoEstrategicoId: null,
+      roles: []
     };
   }
 
-  createUser() {
+  // Guardar usuario (crear o editar)
+  saveUser() {
     this.errorMessage = null;
     this.successMessage = null;
 
     // Validaciones
-    if (!this.newUserForm.username || !this.newUserForm.email || !this.newUserForm.password) {
-      this.errorMessage = 'Todos los campos son obligatorios';
+    if (!this.editUserForm.username || !this.editUserForm.email) {
+      this.errorMessage = 'El nombre de usuario y el email son obligatorios';
       return;
     }
 
-    if (this.newUserForm.username.length < 3) {
+    if (this.editUserForm.username.length < 3) {
       this.errorMessage = 'El nombre de usuario debe tener al menos 3 caracteres';
       return;
     }
 
-    if (this.newUserForm.password.length < 6) {
-      this.errorMessage = 'La contraseña debe tener al menos 6 caracteres';
-      return;
+    // Validar contraseña solo si se está creando o si se proporcionó una nueva
+    if (this.editMode === 'create') {
+      if (!this.editUserForm.password) {
+        this.errorMessage = 'La contraseña es obligatoria';
+        return;
+      }
+      if (this.editUserForm.password.length < 6) {
+        this.errorMessage = 'La contraseña debe tener al menos 6 caracteres';
+        return;
+      }
+      if (this.editUserForm.password !== this.editUserForm.confirmPassword) {
+        this.errorMessage = 'Las contraseñas no coinciden';
+        return;
+      }
+    } else if (this.editUserForm.password) {
+      // Si se está editando y se proporcionó contraseña
+      if (this.editUserForm.password.length < 6) {
+        this.errorMessage = 'La contraseña debe tener al menos 6 caracteres';
+        return;
+      }
+      if (this.editUserForm.password !== this.editUserForm.confirmPassword) {
+        this.errorMessage = 'Las contraseñas no coinciden';
+        return;
+      }
     }
 
-    if (this.newUserForm.password !== this.newUserForm.confirmPassword) {
-      this.errorMessage = 'Las contraseñas no coinciden';
-      return;
-    }
-
-    // Validar email básico
+    // Validar email
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(this.newUserForm.email)) {
+    if (!emailRegex.test(this.editUserForm.email)) {
       this.errorMessage = 'El formato del email no es válido';
       return;
     }
 
-    this.isLoading = true;
-    const payload = {
-      username: this.newUserForm.username.trim(),
-      email: this.newUserForm.email.trim(),
-      password: this.newUserForm.password
-    };
-
-    this.usersService.createUser(payload).subscribe({
-      next: (response) => {
-        this.successMessage = `Usuario "${response.username}" creado exitosamente`;
-        this.closeCreateModal();
-        this.loadUsers(); // Recargar la lista
-      },
-      error: (err: any) => {
-        console.error('Error creating user', err);
-        this.errorMessage = this.getErrorMessage(err) || 'No se pudo crear el usuario';
-        this.isLoading = false;
-      }
-    });
-  }
-
-  openEditRoles(user: AppUser) {
-    this.selectedUser = user;
-    this.selectedRoles = [...user.roles]; // copia de los roles actuales
-    this.showRolesModal = true;
-    this.errorMessage = null;
-    this.successMessage = null;
-  }
-
-  closeRolesModal() {
-    this.showRolesModal = false;
-    this.selectedUser = null;
-    this.selectedRoles = [];
-  }
-
-  toggleRole(role: string) {
-    const index = this.selectedRoles.indexOf(role);
-    if (index > -1) {
-      this.selectedRoles.splice(index, 1);
-    } else {
-      this.selectedRoles.push(role);
-    }
-  }
-
-  isRoleSelected(role: string): boolean {
-    return this.selectedRoles.includes(role);
-  }
-
-  saveRoles() {
-    if (!this.selectedUser) return;
-
-    if (this.selectedRoles.length === 0) {
-      this.errorMessage = 'Debe seleccionar al menos un rol';
+    // Validar que tenga al menos un rol
+    if (this.editUserForm.roles.length === 0) {
+      this.errorMessage = 'Debe asignar al menos un rol al usuario';
       return;
     }
 
     this.isLoading = true;
-    this.errorMessage = null;
-    this.usersService.updateUserRoles(this.selectedUser.id, this.selectedRoles).subscribe({
-      next: (updatedUser: AppUser) => {
-        this.successMessage = 'Roles actualizados correctamente';
-        this.closeRolesModal();
-        this.loadUsers();
-      },
-      error: (err: any) => {
-        console.error('Error updating roles', err);
-        this.errorMessage = this.getErrorMessage(err) || 'No se pudieron actualizar los roles';
-        this.isLoading = false;
-      }
-    });
+
+    if (this.editMode === 'create') {
+      // Crear usuario
+      const payload = {
+        username: this.editUserForm.username.trim(),
+        email: this.editUserForm.email.trim(),
+        password: this.editUserForm.password,
+        aliadoEstrategicoId: this.editUserForm.aliadoEstrategicoId
+      };
+
+      this.usersService.createUser(payload).subscribe({
+        next: (response) => {
+          // Después de crear, actualizar los roles si no es ROLE_USER por defecto
+          if (this.editUserForm.roles.length !== 1 || this.editUserForm.roles[0] !== 'ROLE_USER') {
+            this.usersService.updateUserRoles(response.id!, this.editUserForm.roles).subscribe({
+              next: () => {
+                this.successMessage = `Usuario "${response.username}" creado exitosamente`;
+                this.closeEditModal();
+                this.loadUsers();
+              },
+              error: (err) => {
+                this.errorMessage = 'Usuario creado pero hubo error al asignar roles: ' + this.getErrorMessage(err);
+                this.isLoading = false;
+              }
+            });
+          } else {
+            this.successMessage = `Usuario "${response.username}" creado exitosamente`;
+            this.closeEditModal();
+            this.loadUsers();
+          }
+        },
+        error: (err: any) => {
+          console.error('Error creating user', err);
+          this.errorMessage = this.getErrorMessage(err) || 'No se pudo crear el usuario';
+          this.isLoading = false;
+        }
+      });
+    } else {
+      // Editar usuario - actualizar roles, aliado estratégico y opcionalmente contraseña
+      this.usersService.updateUser(
+        this.editUserForm.id, 
+        this.editUserForm.roles,
+        this.editUserForm.aliadoEstrategicoId,
+        this.editUserForm.password // Enviar contraseña si se modificó
+      ).subscribe({
+        next: () => {
+          this.successMessage = 'Usuario actualizado exitosamente';
+          this.closeEditModal();
+          this.loadUsers();
+        },
+        error: (err) => {
+          console.error('Error updating user', err);
+          this.errorMessage = this.getErrorMessage(err) || 'No se pudo actualizar el usuario';
+          this.isLoading = false;
+        }
+      });
+    }
+  }
+
+  // Alternar selección de rol
+  toggleRole(role: string) {
+    const index = this.editUserForm.roles.indexOf(role);
+    if (index > -1) {
+      this.editUserForm.roles.splice(index, 1);
+    } else {
+      this.editUserForm.roles.push(role);
+    }
+  }
+
+  // Verificar si un rol está seleccionado
+  isRoleSelected(role: string): boolean {
+    return this.editUserForm.roles.includes(role);
   }
 
   // Modal de confirmación para desactivar/activar

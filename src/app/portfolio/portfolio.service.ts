@@ -135,7 +135,11 @@ export class PortfolioService {
   /**
    * Obtener suma total de valor de aval (cobertura) desde el backend
    */
-  getSumValorAval(): Observable<{ sumValorAval: number }> {
-    return this.http.get<{ sumValorAval: number }>(`${this.baseUrl}/sum-valor-aval`);
+  getSumValorAval(params: { aliadoIds?: number[] } = {}): Observable<{ sumValorAval: number }> {
+    const queryParams: any = {};
+    if (params.aliadoIds && params.aliadoIds.length > 0) {
+      queryParams.aliadoIds = params.aliadoIds.join(',');
+    }
+    return this.http.get<{ sumValorAval: number }>(`${this.baseUrl}/sum-valor-aval`, { params: queryParams });
   }
 }

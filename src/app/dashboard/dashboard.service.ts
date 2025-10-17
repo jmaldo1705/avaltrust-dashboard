@@ -42,6 +42,8 @@ export interface AlertDto {
   description: string;
   timestamp: string; // ISO string
   userId?: string; // opcional: id del usuario asociado a la alerta
+  aliadoEstrategicoId?: number;
+  aliadoEstrategicoNombre?: string;
 }
 
 export interface DelinquentUserDto {
@@ -51,6 +53,8 @@ export interface DelinquentUserDto {
   debtAmount: number;
   delayDays: number;
   guaranteeRate: string;
+  aliadoEstrategicoId?: number;
+  aliadoEstrategicoNombre?: string;
 }
 
 export interface MoraTimelineItemDto {
@@ -106,32 +110,46 @@ export class DashboardService {
   private baseUrl = `${environment.apiUrl}`;
 
   // Endpoints sugeridos (el backend puede ajustarlos)
-  getPortfolioStats(): Observable<PortfolioStatsDto> {
-    return this.http.get<PortfolioStatsDto>(`${this.baseUrl}/api/dashboard/portfolio-stats`);
+  getPortfolioStats(params: { aliadoIds?: number[] } = {}): Observable<PortfolioStatsDto> {
+    const queryParams = this.buildAliadoParams(params.aliadoIds);
+    return this.http.get<PortfolioStatsDto>(`${this.baseUrl}/api/dashboard/portfolio-stats`, { params: queryParams });
   }
 
-  getMoraDistribution(): Observable<MoraCategoryDto[]> {
-    return this.http.get<MoraCategoryDto[]>(`${this.baseUrl}/api/dashboard/mora-distribution`);
+  getMoraDistribution(params: { aliadoIds?: number[] } = {}): Observable<MoraCategoryDto[]> {
+    const queryParams = this.buildAliadoParams(params.aliadoIds);
+    return this.http.get<MoraCategoryDto[]>(`${this.baseUrl}/api/dashboard/mora-distribution`, { params: queryParams });
   }
 
-  getMoraTimeline(period: 'week' | 'month' | 'quarter' | 'year'): Observable<MoraTimelineItemDto[]> {
-    return this.http.get<MoraTimelineItemDto[]>(`${this.baseUrl}/api/dashboard/mora-timeline`, { params: { period } });
+  getMoraTimeline(period: 'week' | 'month' | 'quarter' | 'year', params: { aliadoIds?: number[] } = {}): Observable<MoraTimelineItemDto[]> {
+    const queryParams = { period, ...this.buildAliadoParams(params.aliadoIds) };
+    return this.http.get<MoraTimelineItemDto[]>(`${this.baseUrl}/api/dashboard/mora-timeline`, { params: queryParams });
   }
 
-  getPaymentStats(period: 'month' | 'quarter' | 'year'): Observable<PaymentStatsDto> {
-    return this.http.get<PaymentStatsDto>(`${this.baseUrl}/api/dashboard/payments/stats`, { params: { period } });
+  getPaymentStats(period: 'month' | 'quarter' | 'year', params: { aliadoIds?: number[] } = {}): Observable<PaymentStatsDto> {
+    const queryParams = { period, ...this.buildAliadoParams(params.aliadoIds) };
+    return this.http.get<PaymentStatsDto>(`${this.baseUrl}/api/dashboard/payments/stats`, { params: queryParams });
   }
 
-  getRecentPayments(period: 'month' | 'quarter' | 'year'): Observable<RecentPaymentDto[]> {
-    return this.http.get<RecentPaymentDto[]>(`${this.baseUrl}/api/dashboard/payments/recent`, { params: { period } });
+  getRecentPayments(period: 'month' | 'quarter' | 'year', params: { aliadoIds?: number[] } = {}): Observable<RecentPaymentDto[]> {
+    const queryParams = { period, ...this.buildAliadoParams(params.aliadoIds) };
+    return this.http.get<RecentPaymentDto[]>(`${this.baseUrl}/api/dashboard/payments/recent`, { params: queryParams });
   }
 
-  getAlerts(): Observable<AlertDto[]> {
-    return this.http.get<AlertDto[]>(`${this.baseUrl}/api/dashboard/alerts`);
+  getAlerts(params: { aliadoIds?: number[] } = {}): Observable<AlertDto[]> {
+    const queryParams = this.buildAliadoParams(params.aliadoIds);
+    return this.http.get<AlertDto[]>(`${this.baseUrl}/api/dashboard/alerts`, { params: queryParams });
   }
 
-  getTopDelinquents(): Observable<DelinquentUserDto[]> {
-    return this.http.get<DelinquentUserDto[]>(`${this.baseUrl}/api/users/top-delinquents`);
+  getTopDelinquents(params: { aliadoIds?: number[] } = {}): Observable<DelinquentUserDto[]> {
+    const queryParams = this.buildAliadoParams(params.aliadoIds);
+    return this.http.get<DelinquentUserDto[]>(`${this.baseUrl}/api/users/top-delinquents`, { params: queryParams });
+  }
+
+  private buildAliadoParams(aliadoIds?: number[]): any {
+    if (!aliadoIds || aliadoIds.length === 0) {
+      return {};
+    }
+    return { aliadoIds: aliadoIds.join(',') };
   }
 
   getPortfolioDetail(portfolioId: string): Observable<UserDetailDto> {

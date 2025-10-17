@@ -175,8 +175,14 @@ export class AuthService {
   }
 
   redirectToAppropriateRoute(): void {
-    // Siempre redirigir al dashboard sin importar el rol
-    this.router.navigate(['/dashboard']);
+    // Redirigir según el rol del usuario
+    const profile = this._userProfile();
+    
+    if (profile?.roles?.includes('ROLE_AFIANZADO')) {
+      this.router.navigate(['/dashboard-afianzado']);
+    } else {
+      this.router.navigate(['/dashboard']);
+    }
   }
 
   login(username: string, password: string): Observable<AuthUser> {

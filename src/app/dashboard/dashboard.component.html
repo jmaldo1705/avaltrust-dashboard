@@ -35,6 +35,13 @@
       </p>
     </div>
 
+    <!-- Filtro de Aliados Estratégicos (solo ADMIN) -->
+    <div class="filters-section" *ngIf="isAliadoFilterVisible">
+      <app-filtro-aliados
+        (selectionChange)="onAliadoFilterChange($event)">
+      </app-filtro-aliados>
+    </div>
+
     <!-- Métricas principales -->
     <div class="metrics-grid">
       <!-- Total de cartera -->
@@ -158,7 +165,12 @@
             <div class="alert-content">
               <div class="alert-title">{{ alert.title }}</div>
               <div class="alert-description">{{ alert.description }}</div>
-              <div class="alert-time">{{ alert.timestamp | date:'short' }}</div>
+              <div class="alert-meta">
+                <span class="alert-time">{{ alert.timestamp | date:'short' }}</span>
+                <span class="alert-aliado-badge" *ngIf="isAliadoFilterVisible && alert.aliadoEstrategicoNombre" [class.has-aliado]="alert.aliadoEstrategicoNombre">
+                  🏢 {{ alert.aliadoEstrategicoNombre }}
+                </span>
+              </div>
             </div>
             <button class="alert-action" (click)="handleAlert(alert)">Ver</button>
           </div>
@@ -214,6 +226,9 @@
               Obligación <span class="sort-icon">{{ getDelinquentsSortIcon('guaranteeRate') }}</span>
             </span>
           </div>
+          <div class="col-aliado" *ngIf="isAliadoFilterVisible">
+            Aliado Estratégico
+          </div>
           <div class="col-actions">Acciones</div>
         </div>
         <div class="table-row" *ngFor="let user of visibleDelinquentUsers; trackBy: trackByUserId">
@@ -232,6 +247,11 @@
             </span>
           </div>
           <div class="col-rate">{{ user.guaranteeRate }}</div>
+          <div class="col-aliado" *ngIf="isAliadoFilterVisible">
+            <span class="aliado-badge" [class.has-aliado]="user.aliadoEstrategicoNombre">
+              {{ user.aliadoEstrategicoNombre || 'Sin Aliado' }}
+            </span>
+          </div>
           <div class="col-actions">
             <button class="action-btn-small" (click)="viewUserDetail(user.id)">Ver</button>
           </div>

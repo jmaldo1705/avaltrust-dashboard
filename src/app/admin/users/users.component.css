@@ -378,6 +378,23 @@
   font-size: 13px;
 }
 
+.aliado-badge {
+  display: inline-block;
+  padding: 5px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+  background: #d1fae5;
+  color: #065f46;
+  border: 1px solid #a7f3d0;
+}
+
+.no-aliado {
+  color: #94a3b8;
+  font-style: italic;
+  font-size: 13px;
+}
+
 .status-indicator {
   display: inline-flex;
   align-items: center;
@@ -771,6 +788,10 @@
   gap: 8px;
 }
 
+.form-field.full-width {
+  grid-column: 1 / -1;
+}
+
 .field-label {
   font-size: 14px;
   font-weight: 600;
@@ -832,6 +853,45 @@
 
 .info-text strong {
   font-weight: 600;
+}
+
+/* Roles selection */
+.roles-selection {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 16px;
+  background: #f9fafb;
+  border: 2px solid #e5e7eb;
+  border-radius: 10px;
+}
+
+.role-checkbox {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  cursor: pointer;
+  padding: 10px;
+  border-radius: 8px;
+  transition: background 0.2s;
+}
+
+.role-checkbox:hover {
+  background: #f3f4f6;
+}
+
+.role-checkbox input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  cursor: pointer;
+  accent-color: #3b82f6;
+}
+
+.role-checkbox .role-label {
+  font-size: 14px;
+  font-weight: 500;
+  color: #374151;
+  user-select: none;
 }
 
 /* Confirm modal styles */

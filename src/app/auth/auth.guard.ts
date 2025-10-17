@@ -52,11 +52,24 @@ function checkRoleAccess(
     return true;
   }
 
-  // No tiene los roles necesarios - redirigir al dashboard
+  // No tiene los roles necesarios - redirigir según su rol
   console.warn(`Acceso denegado. Roles requeridos: ${requiredRoles.join(', ')}`);
-  alert('No tienes permisos para acceder a esta página.');
-
-  // Siempre redirigir al dashboard
-  router.navigate(['/dashboard']);
+  
+  // Si es AFIANZADO, redirigir a su dashboard
+  if (authService.hasRole('ROLE_AFIANZADO')) {
+    console.log('Redirigiendo afianzado a su dashboard');
+    router.navigate(['/dashboard-afianzado']);
+  } 
+  // Si es ADMIN o USER, redirigir al dashboard normal
+  else if (authService.hasRole('ROLE_ADMIN') || authService.hasRole('ROLE_USER')) {
+    console.log('Redirigiendo a dashboard normal');
+    router.navigate(['/dashboard']);
+  } 
+  // Si no tiene ningún rol conocido, redirigir a login
+  else {
+    console.log('Usuario sin rol conocido, redirigiendo a login');
+    router.navigate(['/login']);
+  }
+  
   return false;
 }

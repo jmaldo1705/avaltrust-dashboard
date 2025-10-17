@@ -30,8 +30,35 @@
     <nav class="sidebar-nav">
       <div class="nav-container">
 
-        <!-- Dashboard -->
-        <a class="nav-link" [class.active]="isActive('/dashboard')" (click)="navigateTo('/dashboard')">
+        <!-- Dashboard Afianzado - Solo para ROLE_AFIANZADO -->
+        <a class="nav-link"
+           *appHasRole="'ROLE_AFIANZADO'"
+           [class.active]="isActive('/dashboard-afianzado')"
+           (click)="navigateTo('/dashboard-afianzado')">
+          <div class="nav-link-inner">
+            <div class="nav-icon-wrapper">
+              <div class="nav-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                  <rect x="3" y="3" width="7" height="9"/>
+                  <rect x="14" y="3" width="7" height="5"/>
+                  <rect x="14" y="12" width="7" height="9"/>
+                  <rect x="3" y="16" width="7" height="5"/>
+                </svg>
+              </div>
+            </div>
+            <div class="nav-content">
+              <span class="nav-title">Mi Dashboard</span>
+              <span class="nav-description">Información personal</span>
+            </div>
+          </div>
+          <div class="nav-accent"></div>
+        </a>
+
+        <!-- Dashboard - Solo para ADMIN y USER -->
+        <a class="nav-link"
+           *ngIf="!auth.hasRole('ROLE_AFIANZADO')"
+           [class.active]="isActive('/dashboard')"
+           (click)="navigateTo('/dashboard')">
           <div class="nav-link-inner">
             <div class="nav-icon-wrapper">
               <div class="nav-icon">
@@ -51,8 +78,11 @@
           <div class="nav-accent"></div>
         </a>
 
-        <!-- Cargue Cartera -->
-        <a class="nav-link" [class.active]="isActive('/portfolio')" (click)="navigateTo('/portfolio')">
+        <!-- Cargue Cartera - Solo para ADMIN y USER -->
+        <a class="nav-link"
+           *ngIf="!auth.hasRole('ROLE_AFIANZADO')"
+           [class.active]="isActive('/portfolio')"
+           (click)="navigateTo('/portfolio')">
           <div class="nav-link-inner">
             <div class="nav-icon-wrapper">
               <div class="nav-icon">
@@ -73,7 +103,11 @@
           <div class="nav-accent"></div>
         </a>
 
-        <a class="nav-link" [class.active]="isActive('/claims')" (click)="navigateTo('/claims')">
+        <!-- Cargue Siniestros - Solo para ADMIN y USER -->
+        <a class="nav-link"
+           *ngIf="!auth.hasRole('ROLE_AFIANZADO')"
+           [class.active]="isActive('/claims')"
+           (click)="navigateTo('/claims')">
           <div class="nav-link-inner">
             <div class="nav-icon-wrapper">
               <div class="nav-icon">
@@ -91,7 +125,11 @@
           <div class="nav-accent"></div>
         </a>
 
-        <a class="nav-link" [class.active]="isActive('/documentos')" (click)="navigateTo('/documentos')">
+        <!-- Documentos - Solo para ADMIN y USER -->
+        <a class="nav-link"
+           *ngIf="!auth.hasRole('ROLE_AFIANZADO')"
+           [class.active]="isActive('/documentos')"
+           (click)="navigateTo('/documentos')">
           <div class="nav-link-inner">
             <div class="nav-icon-wrapper">
               <div class="nav-icon">
@@ -131,6 +169,30 @@
             <div class="nav-content">
               <span class="nav-title">Gestión Usuarios</span>
               <span class="nav-description">Solo administradores</span>
+            </div>
+          </div>
+          <div class="nav-accent"></div>
+        </a>
+
+        <!-- Aliados Estratégicos - Solo Admin -->
+        <a class="nav-link admin-only"
+           *appHasRole="'ROLE_ADMIN'"
+           [class.active]="isActive('/aliados')"
+           (click)="navigateTo('/aliados')">
+          <div class="nav-link-inner">
+            <div class="nav-icon-wrapper">
+              <div class="nav-icon admin-exclusive">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                  <path d="M3 6h18M3 12h18M3 18h18"/>
+                  <circle cx="21" cy="6" r="2"/>
+                  <circle cx="21" cy="12" r="2"/>
+                  <circle cx="21" cy="18" r="2"/>
+                </svg>
+              </div>
+            </div>
+            <div class="nav-content">
+              <span class="nav-title">Aliados Estratégicos</span>
+              <span class="nav-description">Gestión de empresas</span>
             </div>
           </div>
           <div class="nav-accent"></div>

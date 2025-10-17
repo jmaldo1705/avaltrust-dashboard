@@ -1,0 +1,203 @@
+<div class="dashboard-container">
+  <app-header></app-header>
+  
+  <div class="dashboard-content">
+    <app-sidebar
+      (sidebarClose)="onSidebarClose()"
+      (navigate)="onSidebarNavigate($event)">
+    </app-sidebar>
+    
+    <main class="main-content">
+      <!-- Header -->
+      <div class="page-header">
+        <h1>Gestión de Aliados Estratégicos</h1>
+        <p>Administre las empresas cliente del sistema</p>
+      </div>
+
+      <!-- Mensajes -->
+      <div *ngIf="successMessage" class="alert alert-success">
+        {{ successMessage }}
+      </div>
+      <div *ngIf="error && !showModal" class="alert alert-error">
+        {{ error }}
+      </div>
+
+      <!-- Controles -->
+      <div class="controls-section">
+        <div class="search-box">
+          <input 
+            type="text" 
+            [(ngModel)]="searchTerm" 
+            placeholder="Buscar por nombre, NIT o correo..."
+            class="search-input">
+        </div>
+        
+        <div class="action-buttons">
+          <label class="checkbox-label">
+            <input type="checkbox" [(ngModel)]="mostrarInactivos">
+            Mostrar inactivos
+          </label>
+          
+          <button class="btn btn-primary" (click)="openCreateModal()">
+            + Nuevo Aliado
+          </button>
+        </div>
+      </div>
+
+      <!-- Tabla -->
+      <div class="table-container">
+        <table class="data-table" *ngIf="!loading && aliadosFiltrados.length > 0">
+          <thead>
+            <tr>
+              <th>Estado</th>
+              <th>Nombre</th>
+              <th>NIT</th>
+              <th>Correo</th>
+              <th>Teléfono</th>
+              <th>Fecha Creación</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let aliado of aliadosFiltrados">
+              <td>
+                <span class="status-badge" [ngClass]="aliado.activo ? 'active' : 'inactive'">
+                  {{ aliado.activo ? 'Activo' : 'Inactivo' }}
+                </span>
+              </td>
+              <td><strong>{{ aliado.nombre }}</strong></td>
+              <td>{{ aliado.nit }}</td>
+              <td>{{ aliado.correo }}</td>
+              <td>{{ aliado.telefono || '-' }}</td>
+              <td>{{ aliado.fechaCreacion | date:'dd/MM/yyyy' }}</td>
+              <td class="actions-cell">
+                <button class="btn btn-sm btn-edit" (click)="openEditModal(aliado)" title="Editar">
+                  ✏️
+                </button>
+                <button 
+                  *ngIf="aliado.activo" 
+                  class="btn btn-sm btn-danger" 
+                  (click)="desactivar(aliado)"
+                  title="Desactivar">
+                  🚫
+                </button>
+                <button 
+                  *ngIf="!aliado.activo" 
+                  class="btn btn-sm btn-success" 
+                  (click)="activar(aliado)"
+                  title="Activar">
+                  ✅
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div *ngIf="loading" class="loading-spinner">
+          <p>Cargando aliados...</p>
+        </div>
+
+        <div *ngIf="!loading && aliadosFiltrados.length === 0" class="no-data">
+          <p>No se encontraron aliados estratégicos</p>
+        </div>
+      </div>
+    </main>
+  </div>
+</div>
+
+<!-- Modal -->
+<div class="modal-overlay" *ngIf="showModal" (click)="onOverlayClick($event)">
+  <div class="modal-content" (click)="$event.stopPropagation()" (mousedown)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h2>{{ modalMode === 'create' ? 'Nuevo Aliado Estratégico' : 'Editar Aliado Estratégico' }}</h2>
+      <button class="btn-close" (click)="closeModal()">×</button>
+    </div>
+
+    <div class="modal-body">
+      <div *ngIf="error" class="alert alert-error">{{ error }}</div>
+
+      <form>
+        <div class="form-group">
+          <label>Nombre de la Empresa *</label>
+          <input 
+            type="text" 
+            [(ngModel)]="formData.nombre" 
+            name="nombre"
+            placeholder="Ej: Empresa ABC S.A.S."
+            class="form-control"
+            required>
+        </div>
+
+        <div class="form-group">
+          <label>NIT *</label>
+          <input 
+            type="text" 
+            [(ngModel)]="formData.nit" 
+            name="nit"
+            placeholder="Ej: 123456789-0"
+            class="form-control"
+            [disabled]="modalMode === 'edit'"
+            required>
+          <small *ngIf="modalMode === 'edit'" class="form-hint">El NIT no se puede modificar</small>
+        </div>
+
+        <div class="form-group">
+          <label>Correo Electrónico *</label>
+          <input 
+            type="email" 
+            [(ngModel)]="formData.correo" 
+            name="correo"
+            placeholder="contacto@empresa.com"
+            class="form-control"
+            required>
+        </div>
+
+        <div class="form-group">
+          <label>Dirección</label>
+          <input 
+            type="text" 
+            [(ngModel)]="formData.direccion" 
+            name="direccion"
+            placeholder="Calle 123 #45-67"
+            class="form-control">
+        </div>
+
+        <div class="form-group">
+          <label>Teléfono</label>
+          <input 
+            type="text" 
+            [(ngModel)]="formData.telefono" 
+            name="telefono"
+            placeholder="+57 300 123 4567"
+            class="form-control">
+        </div>
+
+        <div class="form-group">
+          <label>Observaciones</label>
+          <textarea 
+            [(ngModel)]="formData.observaciones" 
+            name="observaciones"
+            rows="3"
+            placeholder="Notas adicionales..."
+            class="form-control"></textarea>
+        </div>
+
+        <div class="form-group" *ngIf="modalMode === 'edit'">
+          <label class="checkbox-label">
+            <input type="checkbox" [(ngModel)]="formData.activo" name="activo">
+            Aliado activo
+          </label>
+        </div>
+      </form>
+    </div>
+
+    <div class="modal-footer">
+      <button class="btn btn-secondary" (click)="closeModal()" [disabled]="loading">
+        Cancelar
+      </button>
+      <button class="btn btn-primary" (click)="save()" [disabled]="loading">
+        {{ loading ? 'Guardando...' : 'Guardar' }}
+      </button>
+    </div>
+  </div>
+</div>
