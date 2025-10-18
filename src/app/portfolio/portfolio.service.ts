@@ -79,7 +79,7 @@ export class PortfolioService {
   /**
    * Carga masiva de archivos
    */
-  uploadPortfolioFile(file: File): Observable<FileUploadResponse> {
+  uploadPortfolioFile(file: File, aliadoEstrategicoId?: number): Observable<FileUploadResponse> {
     const formData = new FormData();
     formData.append('file', file);
 
@@ -88,6 +88,11 @@ export class PortfolioService {
     if (user?.username) {
       formData.append('creadoPor', user.username);
       formData.append('modificadoPor', user.username);
+    }
+
+    // Agregar el aliado estratégico si fue seleccionado (para ADMIN)
+    if (aliadoEstrategicoId) {
+      formData.append('aliadoEstrategicoId', aliadoEstrategicoId.toString());
     }
 
     return this.http.post<FileUploadResponse>(
@@ -135,11 +140,11 @@ export class PortfolioService {
   /**
    * Obtener suma total de valor de aval (cobertura) desde el backend
    */
-  getSumValorAval(params: { aliadoIds?: number[] } = {}): Observable<{ sumValorAval: number }> {
+  getSumValorAval(params: { aliadoIds?: number[] } = {}): Observable<{ sumValorAval: number; porcentajeCapitalizacion: number }> {
     const queryParams: any = {};
     if (params.aliadoIds && params.aliadoIds.length > 0) {
       queryParams.aliadoIds = params.aliadoIds.join(',');
     }
-    return this.http.get<{ sumValorAval: number }>(`${this.baseUrl}/sum-valor-aval`, { params: queryParams });
+    return this.http.get<{ sumValorAval: number; porcentajeCapitalizacion: number }>(`${this.baseUrl}/sum-valor-aval`, { params: queryParams });
   }
 }

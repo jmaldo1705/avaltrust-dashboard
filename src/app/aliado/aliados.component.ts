@@ -114,7 +114,8 @@ export class AliadosComponent implements OnInit {
       direccion: aliado.direccion,
       telefono: aliado.telefono,
       activo: aliado.activo,
-      observaciones: aliado.observaciones
+      observaciones: aliado.observaciones,
+      porcentajeCapitalizacion: aliado.porcentajeCapitalizacion || 100
     };
     this.showModal = true;
     this.error = '';
@@ -252,7 +253,8 @@ export class AliadosComponent implements OnInit {
       direccion: '',
       telefono: '',
       activo: true,
-      observaciones: ''
+      observaciones: '',
+      porcentajeCapitalizacion: 100
     };
   }
 

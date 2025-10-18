@@ -705,3 +705,31 @@
     font-size: 0.8rem;
   }
 }
+
+/* Estilos para selección de aliado estratégico */
+.info-message {
+  color: #3b82f6;
+  font-size: 0.85rem;
+  font-weight: 500;
+  margin-top: 0.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.info-message::before {
+  content: "ℹ️";
+  font-size: 1rem;
+}
+
+.aliado-selection {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.aliado-selection .form-group {
+  margin-bottom: 0;
+}

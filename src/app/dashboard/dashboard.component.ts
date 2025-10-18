@@ -223,16 +223,18 @@ export class DashboardComponent implements OnInit {
     this.loadPaymentData();
   }
 
-  // Cobertura: traer valor desde el servicio y dividir entre 1.19 y luego reducir 5% adicional
+  // Cobertura: traer valor desde el servicio y dividir entre 1.19 y luego aplicar porcentaje de capitalización
   private loadTotalValorAval() {
     this.totalValorAval = 0;
     const params = this.selectedAliadoIds ? { aliadoIds: this.selectedAliadoIds } : {};
     this.portfolioService.getSumValorAval(params).subscribe({
       next: (resp: any) => {
         const value = Number(resp?.sumValorAval ?? resp?.sum_valor_aval ?? resp?.sum ?? 0);
-        // Dividir la suma de valores aval entre 1.19 y luego reducir 5% adicional
+        const porcentajeCapitalizacion = Number(resp?.porcentajeCapitalizacion ?? 100);
+        
+        // Dividir la suma de valores aval entre 1.19 y luego aplicar el porcentaje de capitalización
         const valorConIva = value / 1.19;
-        this.totalValorAval = isNaN(valorConIva) ? 0 : valorConIva * 0.95;
+        this.totalValorAval = isNaN(valorConIva) ? 0 : valorConIva * (porcentajeCapitalizacion / 100);
       },
       error: (err) => console.error('Error cargando cobertura (sumValorAval)', err)
     });

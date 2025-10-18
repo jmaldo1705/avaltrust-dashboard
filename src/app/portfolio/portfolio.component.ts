@@ -1,7 +1,7 @@
 import { Component, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
-import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
+import { FormBuilder, FormGroup, Validators, ReactiveFormsModule, FormsModule } from '@angular/forms';
 import { catchError, finalize } from 'rxjs/operators';
 import { of } from 'rxjs';
 
@@ -11,12 +11,14 @@ import { HeaderComponent } from '../header/header.component';
 import { SidebarComponent } from '../sidebar/sidebar.component';
 import { PortfolioService, PortfolioRequest } from './portfolio.service';
 import { ExcelTemplateService } from './excel-template.service';
+import { AliadoService } from '../aliado/aliado.service';
+import { AliadoEstrategico } from '../aliado/aliado.interface';
 import * as XLSX from 'xlsx';
 
 @Component({
   selector: 'app-portfolio',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, HeaderComponent, SidebarComponent],
+  imports: [CommonModule, ReactiveFormsModule, FormsModule, HeaderComponent, SidebarComponent],
   templateUrl: './portfolio.component.html',
   styleUrls: ['./portfolio.component.css']
 })
@@ -27,6 +29,7 @@ export class PortfolioComponent implements OnInit {
   private uiState = inject(UiStateService);
   private portfolioService = inject(PortfolioService);
   private excelTemplateService = inject(ExcelTemplateService);
+  private aliadoService = inject(AliadoService);
 
   // Estados de UI usando el servicio compartido
   get isSidebarOpen() {
@@ -43,6 +46,11 @@ export class PortfolioComponent implements OnInit {
   isLoading = false;
   uploadedFile: File | null = null;
   uploadResult: any = null;
+
+  // Aliados estratégicos (para ADMIN)
+  aliados: AliadoEstrategico[] = [];
+  selectedAliadoId: number | null = null; // Para carga masiva
+  isAdmin = false;
 
   // Opciones para los selects
   documentTypes = [
@@ -73,8 +81,36 @@ export class PortfolioComponent implements OnInit {
   ];
 
   ngOnInit() {
+    this.checkUserRole();
     this.initializeForm();
     this.loadFormOptions();
+    
+    // Si es admin, cargar aliados activos
+    if (this.isAdmin) {
+      this.loadAliados();
+    }
+  }
+
+  /**
+   * Verificar si el usuario es administrador
+   */
+  checkUserRole() {
+    const currentUser = this.auth.user();
+    this.isAdmin = currentUser?.roles?.includes('ROLE_ADMIN') || false;
+  }
+
+  /**
+   * Cargar lista de aliados estratégicos activos
+   */
+  loadAliados() {
+    this.aliadoService.getActivos().subscribe({
+      next: (aliados) => {
+        this.aliados = aliados;
+      },
+      error: (error) => {
+        console.error('Error al cargar aliados:', error);
+      }
+    });
   }
 
   // Métodos de navegación del sidebar
@@ -143,7 +179,8 @@ export class PortfolioComponent implements OnInit {
       diasMora: [0],
       fechaPago: [''],
       estadoCredito: ['', [Validators.required]],
-      periodicidad: ['', [Validators.required]]
+      periodicidad: ['', [Validators.required]],
+      aliadoEstrategicoId: [null] // Campo opcional para ADMIN seleccionar aliado
     });
 
     // Calcular total deuda automáticamente
@@ -297,7 +334,8 @@ export class PortfolioComponent implements OnInit {
       const currentUser = this.auth.user();
       console.log(`Subiendo archivo al backend: ${this.uploadedFile.name} (Usuario: ${currentUser?.username || 'sistema'})`);
 
-      this.portfolioService.uploadPortfolioFile(this.uploadedFile)
+      // Pasar el aliadoEstrategicoId si el ADMIN seleccionó uno
+      this.portfolioService.uploadPortfolioFile(this.uploadedFile, this.selectedAliadoId || undefined)
         .pipe(
           catchError(error => {
             console.error('Error al subir archivo:', error);

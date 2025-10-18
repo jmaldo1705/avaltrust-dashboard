@@ -14,6 +14,7 @@ export interface AliadoEstrategico {
   usuarioCreacion?: string;
   usuarioModificacion?: string;
   observaciones?: string;
+  porcentajeCapitalizacion?: number;
 }
 
 /**
@@ -27,6 +28,7 @@ export interface AliadoEstrategicoRequest {
   telefono?: string;
   activo?: boolean;
   observaciones?: string;
+  porcentajeCapitalizacion?: number;
 }
 
 /**

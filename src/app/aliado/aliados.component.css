@@ -154,6 +154,17 @@
   color: #742a2a;
 }
 
+.percentage-badge {
+  display: inline-block;
+  padding: 0.35rem 0.75rem;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  background: #e6f7ff;
+  color: #0066cc;
+  border: 1px solid #b3d9ff;
+}
+
 .actions-cell {
   display: flex;
   gap: 0.5rem;

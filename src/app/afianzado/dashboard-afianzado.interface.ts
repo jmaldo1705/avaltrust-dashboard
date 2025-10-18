@@ -9,6 +9,7 @@ export interface Obligacion {
   estado: string;
   diasMora: number;
   valorMora: number;
+  nombreEmpresa: string; // Nombre del aliado estratégico
 }
 
 export interface DashboardAfianzado {

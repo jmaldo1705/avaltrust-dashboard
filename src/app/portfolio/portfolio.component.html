@@ -93,6 +93,34 @@
 
           <form [formGroup]="portfolioForm" (ngSubmit)="onSubmitForm()" class="portfolio-form">
 
+            <!-- Sección: Selección de Aliado (Solo ADMIN) -->
+            <div class="form-section" *ngIf="isAdmin">
+              <div class="section-header">
+                <h4>Asignación de Aliado Estratégico</h4>
+              </div>
+
+              <div class="form-grid">
+                <div class="form-group">
+                  <label for="aliadoEstrategicoId" class="form-label">
+                    Empresa / Aliado Estratégico <span class="required">*</span>
+                  </label>
+                  <select
+                    id="aliadoEstrategicoId"
+                    formControlName="aliadoEstrategicoId"
+                    class="form-control"
+                    [class.error]="getFieldError('aliadoEstrategicoId')">
+                    <option value="">Seleccione un aliado</option>
+                    <option *ngFor="let aliado of aliados" [value]="aliado.id">
+                      {{ aliado.nombre }} (NIT: {{ aliado.nit }})
+                    </option>
+                  </select>
+                  <div class="info-message">
+                    Seleccione la empresa a la que se asignará esta cartera
+                  </div>
+                </div>
+              </div>
+            </div>
+
             <!-- Sección: Información del Cliente -->
             <div class="form-section">
               <div class="section-header">
@@ -494,6 +522,27 @@
           <div class="upload-header">
             <h3>Carga Masiva de Registros</h3>
             <p>Cargue múltiples registros de cartera usando archivos Excel o CSV</p>
+          </div>
+
+          <!-- Selección de Aliado (Solo ADMIN) -->
+          <div class="aliado-selection" *ngIf="isAdmin">
+            <div class="form-group">
+              <label for="aliadoSelect" class="form-label">
+                Empresa / Aliado Estratégico <span class="required">*</span>
+              </label>
+              <select
+                id="aliadoSelect"
+                [(ngModel)]="selectedAliadoId"
+                class="form-control">
+                <option [value]="null">Seleccione un aliado</option>
+                <option *ngFor="let aliado of aliados" [value]="aliado.id">
+                  {{ aliado.nombre }} (NIT: {{ aliado.nit }})
+                </option>
+              </select>
+              <div class="info-message">
+                Todos los registros del archivo se asignarán a esta empresa
+              </div>
+            </div>
           </div>
 
           <!-- Instrucciones -->

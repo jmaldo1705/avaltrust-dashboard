@@ -44,19 +44,15 @@ export class HeaderComponent {
     this.logout.emit();
   }
 
-  // Método getUserAvatar corregido - sin referencia a avatar
-  getUserAvatar(): string {
-    const profile = this.userProfile();
-
-    // Si tiene username, usar la inicial
-    if (profile?.username) {
-      const initial = profile.username.charAt(0).toUpperCase();
-      return `https://via.placeholder.com/44x44/3b82f6/fff?text=${initial}`;
-    }
-
-    // Avatar por defecto
-    return 'https://via.placeholder.com/44x44/3b82f6/fff?text=U';
-  }
+  // Método getUserAvatar ya no se usa - ahora usamos SVG inline
+  // getUserAvatar(): string {
+  //   const profile = this.userProfile();
+  //   if (profile?.username) {
+  //     const initial = profile.username.charAt(0).toUpperCase();
+  //     return `https://via.placeholder.com/44x44/3b82f6/fff?text=${initial}`;
+  //   }
+  //   return 'https://via.placeholder.com/44x44/3b82f6/fff?text=U';
+  // }
 
   // Métodos adicionales útiles para el header
   getUserDisplayName(): string {
