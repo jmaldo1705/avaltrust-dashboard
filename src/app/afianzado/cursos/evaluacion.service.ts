@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { environment } from '../../environments/environment';
 import {
   EvaluacionCursoDTO,
   SubmitEvaluacionDTO,
@@ -16,8 +17,8 @@ import {
   providedIn: 'root'
 })
 export class EvaluacionService {
-  private apiUrl = 'http://localhost:8080/api/evaluaciones';
-  private certificadosUrl = 'http://localhost:8080/api/certificados';
+  private apiUrl = `${environment.apiUrl}/api/evaluaciones`;
+  private certificadosUrl = `${environment.apiUrl}/api/certificados`;
 
   constructor(private http: HttpClient) {}
 
