@@ -8,6 +8,9 @@ import { ClaimsComponent } from './claims/claims.component';
 import { UsersComponent } from './admin/users/users.component';
 import { DashboardAfianzadoComponent } from './afianzado/dashboard-afianzado.component';
 import { AliadosComponent } from './aliado/aliados.component';
+import { ListaCursosComponent } from './afianzado/cursos/lista-cursos.component';
+import { DetalleCursoComponent } from './afianzado/cursos/detalle-curso.component';
+import { EvaluacionCursoComponent } from './afianzado/cursos/evaluacion-curso.component';
 
 export const routes: Routes = [
   { 
@@ -39,6 +42,27 @@ export const routes: Routes = [
     canActivate: [authGuard],
     data: { roles: ['ROLE_AFIANZADO'] }, // SOLO para AFIANZADO
     title: 'Mi Dashboard - Avaltrust'
+  },
+  {
+    path: 'escuela-financiera',
+    component: ListaCursosComponent,
+    canActivate: [authGuard],
+    data: { roles: ['ROLE_AFIANZADO'] }, // SOLO para AFIANZADO
+    title: 'Escuela Financiera - Avaltrust'
+  },
+  {
+    path: 'escuela-financiera/:id',
+    component: DetalleCursoComponent,
+    canActivate: [authGuard],
+    data: { roles: ['ROLE_AFIANZADO'] }, // SOLO para AFIANZADO
+    title: 'Módulo - Escuela Financiera - Avaltrust'
+  },
+  {
+    path: 'escuela-financiera/:cursoId/evaluacion',
+    component: EvaluacionCursoComponent,
+    canActivate: [authGuard],
+    data: { roles: ['ROLE_AFIANZADO'] }, // SOLO para AFIANZADO
+    title: 'Evaluación - Escuela Financiera - Avaltrust'
   },
   {
     path: 'portfolio',

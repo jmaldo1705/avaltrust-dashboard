@@ -725,12 +725,18 @@
 
 .table-header, .table-row {
   display: grid;
-  grid-template-columns: minmax(140px, 2fr) minmax(110px, 1.5fr) minmax(70px, 1fr) minmax(70px, 1fr) minmax(110px, 1.5fr);
-  gap: 0.5rem;
+  grid-template-columns: minmax(140px, 2fr) minmax(110px, 1.5fr) minmax(70px, 1fr) minmax(70px, 1fr) minmax(100px, 1fr);
+  gap: 1rem;
   padding: 1rem;
   border-bottom: 1px solid #e2e8f0;
   min-width: 550px;
   box-sizing: border-box;
+}
+
+/* Grid con columna de aliado visible (para administradores) */
+.table-header:has(.col-aliado), 
+.table-row:has(.col-aliado) {
+  grid-template-columns: minmax(140px, 2fr) minmax(110px, 1.5fr) minmax(70px, 1fr) minmax(70px, 1fr) minmax(120px, 1.2fr) minmax(100px, 1fr);
 }
 
 .table-header {
@@ -1051,9 +1057,9 @@
 
 /* ========== Columna de Aliado en Tablas ========== */
 .col-aliado {
-  flex: 1;
-  min-width: 150px;
-  padding: 0.75rem;
+  display: flex;
+  align-items: center;
+  min-width: 0;
   font-size: 0.85rem;
 }
 
@@ -1061,7 +1067,7 @@
   display: inline-block;
   padding: 0.35rem 0.75rem;
   border-radius: 12px;
-  font-size: 0.85rem;
+  font-size: 0.75rem;
   font-weight: 500;
   background: #e5e7eb;
   color: #6b7280;

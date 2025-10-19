@@ -90,11 +90,12 @@
 }
 
 .card {
-  background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 100%);
+  background: linear-gradient(135deg, #004C97 0%, #003d7a 100%);
   border-radius: 12px;
   padding: 1.5rem;
   color: white;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.1);
   display: flex;
   align-items: center;
   gap: 1rem;
@@ -103,7 +104,7 @@
 
 .card:hover {
   transform: translateY(-5px);
-  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
 .card-icon {
@@ -113,22 +114,24 @@
 .card-content h3 {
   font-size: 0.9rem;
   margin: 0 0 0.5rem 0;
-  opacity: 0.9;
+  color: rgba(255, 255, 255, 0.85);
+  font-weight: 500;
 }
 
 .card-content .amount {
   font-size: 1.5rem;
   font-weight: bold;
   margin: 0;
+  color: #FFFFFF;
 }
 
-/* Card variations */
+/* Card variations - Colores mejorados con saturación unificada */
 .total-deuda {
-  background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 100%);
+  background: linear-gradient(135deg, #004C97 0%, #003d7a 100%);
 }
 
 .total-mora {
-  background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+  background: linear-gradient(135deg, #E74C3C 0%, #c0392b 100%);
 }
 
 .total-obligaciones {
@@ -136,19 +139,20 @@
 }
 
 .obligaciones-al-dia {
-  background: linear-gradient(135deg, #059669 0%, #047857 100%);
+  background: linear-gradient(135deg, #219653 0%, #1e7e4a 100%);
 }
 
 .obligaciones-mora {
-  background: linear-gradient(135deg, #ea580c 0%, #c2410c 100%);
+  background: linear-gradient(135deg, #E74C3C 0%, #c0392b 100%);
 }
 
-/* Obligaciones Section */
+/* Obligaciones Section - Mejorada con sombra más suave y borde */
 .obligaciones-section {
   background: white;
   border-radius: 12px;
   padding: 2rem;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  border: 1px solid #e5e5e5;
 }
 
 .obligaciones-section h2 {
@@ -230,10 +234,10 @@
   font-weight: 600;
 }
 
-/* Botón de descarga */
+/* Botón de descarga - Azul oscuro uniforme para todos */
 .btn-download {
-  background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
-  color: white;
+  background: linear-gradient(135deg, #004C97 0%, #003d7a 100%);
+  color: #FFFFFF;
   border: none;
   padding: 0.6rem 1.2rem;
   border-radius: 8px;
@@ -244,7 +248,7 @@
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
-  box-shadow: 0 2px 4px rgba(231, 76, 60, 0.2);
+  box-shadow: 0 2px 4px rgba(0, 76, 151, 0.2);
 }
 
 .btn-download .pdf-icon {
@@ -254,14 +258,14 @@
 }
 
 .btn-download:hover {
-  background: linear-gradient(135deg, #c0392b 0%, #a93226 100%);
+  background: linear-gradient(135deg, #003d7a 0%, #002d5c 100%);
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(231, 76, 60, 0.4);
+  box-shadow: 0 4px 12px rgba(0, 76, 151, 0.4);
 }
 
 .btn-download:active {
   transform: translateY(0);
-  box-shadow: 0 2px 4px rgba(231, 76, 60, 0.2);
+  box-shadow: 0 2px 4px rgba(0, 76, 151, 0.2);
 }
 
 .no-data {

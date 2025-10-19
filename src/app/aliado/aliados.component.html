@@ -1,5 +1,13 @@
 <div class="dashboard-container">
-  <app-header></app-header>
+  <app-header
+    [isSidebarOpen]="isSidebarOpen"
+    [isUserMenuOpen]="isUserMenuOpen"
+    (toggleSidebar)="toggleSidebar()"
+    (toggleUserMenu)="toggleUserMenu()"
+    (closeUserMenu)="closeUserMenu()"
+    (navigate)="onHeaderNavigate($event)"
+    (logout)="logout()">
+  </app-header>
   
   <div class="dashboard-content">
     <app-sidebar

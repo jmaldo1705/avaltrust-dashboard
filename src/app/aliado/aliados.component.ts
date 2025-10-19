@@ -9,6 +9,7 @@ import { AuthService } from '../auth/auth.service';
 import { HasRoleDirective } from '../auth/has-role.directive';
 import { HeaderComponent } from '../header/header.component';
 import { SidebarComponent } from '../sidebar/sidebar.component';
+import { UiStateService } from '../ui-state.service';
 
 /**
  * Componente para gestión de Aliados Estratégicos
@@ -25,12 +26,22 @@ export class AliadosComponent implements OnInit {
   private aliadoService = inject(AliadoService);
   private authService = inject(AuthService);
   private router = inject(Router);
+  private uiState = inject(UiStateService);
 
   // Estado
   aliados: AliadoEstrategico[] = [];
   loading = false;
   error = '';
   successMessage = '';
+  
+  // Estados de UI usando el servicio compartido
+  get isSidebarOpen() {
+    return this.uiState.isSidebarOpen();
+  }
+
+  get isUserMenuOpen() {
+    return this.uiState.isUserMenuOpen();
+  }
 
   // Filtros
   searchTerm = '';
@@ -269,7 +280,50 @@ export class AliadosComponent implements OnInit {
    * Cerrar sidebar (para compatibilidad con componentes que lo usan)
    */
   onSidebarClose(): void {
-    // No necesitamos hacer nada aquí en este componente
-    // pero el método debe existir para evitar errores
+    this.uiState.closeSidebar();
+  }
+
+  /**
+   * Métodos para controlar el sidebar usando UiStateService
+   */
+  toggleSidebar() {
+    this.uiState.toggleSidebar();
+  }
+
+  closeSidebar() {
+    this.uiState.closeSidebar();
+  }
+
+  /**
+   * Métodos para controlar el menú de usuario usando UiStateService
+   */
+  toggleUserMenu() {
+    this.uiState.toggleUserMenu();
+  }
+
+  closeUserMenu() {
+    this.uiState.closeUserMenu();
+  }
+
+  /**
+   * Navegación principal
+   */
+  navigateTo(route: string) {
+    this.router.navigate([route]);
+  }
+
+  /**
+   * Métodos de navegación del header
+   */
+  onHeaderNavigate(route: string) {
+    this.navigateTo(route);
+  }
+
+  /**
+   * Método de logout
+   */
+  logout() {
+    this.uiState.closeAllMenus();
+    this.authService.logout(true);
   }
 }

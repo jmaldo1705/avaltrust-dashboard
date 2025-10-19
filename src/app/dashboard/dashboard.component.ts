@@ -139,7 +139,7 @@ export class DashboardComponent implements OnInit {
   delinquentsFilter: string = '';
   delinquentsSortBy: 'name' | 'debtAmount' | 'delayDays' | 'guaranteeRate' = 'delayDays';
   delinquentsSortDir: 'asc' | 'desc' = 'desc';
-  delinquentsPageSize: number = 10;
+  delinquentsPageSize: number = 5;
   delinquentsCurrentPage: number = 1;
 
 

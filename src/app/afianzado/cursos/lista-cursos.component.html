@@ -1,0 +1,84 @@
+<app-header
+  [isSidebarOpen]="isSidebarOpen"
+  [isUserMenuOpen]="isUserMenuOpen"
+  (toggleSidebar)="toggleSidebar()"
+  (toggleUserMenu)="toggleUserMenu()"
+  (closeUserMenu)="handleUserMenuClose()"
+  (navigate)="onHeaderNavigate($event)"
+  (logout)="onLogout()"
+></app-header>
+
+<app-sidebar
+  [isOpen]="isSidebarOpen"
+  (close)="handleSidebarClose()"
+  (navigate)="onSidebarNavigate($event)"
+></app-sidebar>
+
+<main class="main-content">
+  <div class="escuela-header">
+    <div class="header-content">
+      <div class="header-icon">🎓</div>
+      <div class="header-text">
+        <h1 class="header-title">Escuela Financiera</h1>
+        <p class="header-subtitle">Aprende a tomar control de tus finanzas y construye tu futuro próspero</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="content-wrapper">
+    <div *ngIf="loading" class="loading-container">
+      <div class="loader"></div>
+      <p>Cargando módulos...</p>
+    </div>
+
+    <div *ngIf="!loading" class="modulos-grid">
+      <div *ngFor="let modulo of modulos" class="modulo-card" [class.completado]="modulo.completado" (click)="verModulo(modulo.id)">
+        <div class="badge-completado" *ngIf="modulo.completado">
+          <svg viewBox="0 0 24 24" fill="currentColor">
+            <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+          </svg>
+          Completado
+        </div>
+        <div class="modulo-icon">{{ modulo.icono }}</div>
+        <div class="modulo-content">
+          <h3 class="modulo-titulo">{{ modulo.titulo }}</h3>
+          <p class="modulo-descripcion">{{ modulo.descripcion }}</p>
+          <div class="modulo-footer">
+            <span class="duracion">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="10"/>
+                <polyline points="12 6 12 12 16 14"/>
+              </svg>
+              {{ modulo.duracionEstimada }}
+            </span>
+            <div class="footer-actions">
+              <!-- Botón de certificado (solo visible si está completado) -->
+              <button 
+                *ngIf="modulo.completado" 
+                class="btn-certificado" 
+                (click)="descargarCertificado($event, modulo.id)"
+                title="Descargar certificado">
+                <svg viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2M18,20H6V4H13V9H18V20M10,19L12,15H9V10H13V15L15,19H13L12,17L11,19H10Z"/>
+                </svg>
+                Certificado
+              </button>
+              <span class="cta">
+                {{ modulo.completado ? 'Revisar' : 'Ver módulo' }}
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M5 12h14M12 5l7 7-7 7"/>
+                </svg>
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div *ngIf="!loading && modulos.length === 0" class="empty-state">
+      <div class="empty-icon">📚</div>
+      <h3>No hay módulos disponibles</h3>
+      <p>Pronto agregaremos más contenido educativo para ti</p>
+    </div>
+  </div>
+</main>
