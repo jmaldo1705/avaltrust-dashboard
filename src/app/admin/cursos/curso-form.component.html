@@ -51,7 +51,17 @@
 
           <div class="form-group">
             <label>Orden</label>
-            <input type="number" [(ngModel)]="curso.orden" name="orden" class="form-control" min="1">
+            <input 
+              type="number" 
+              [(ngModel)]="curso.orden" 
+              name="orden" 
+              class="form-control" 
+              min="1"
+              [disabled]="!isEditMode"
+              [title]="isEditMode ? 'Puedes cambiar el orden aquí o arrastrando en la lista' : 'El orden se asigna automáticamente. Puedes cambiarlo después arrastrando en la lista'">
+            <small class="form-hint">
+              {{ isEditMode ? '💡 También puedes reordenar arrastrando en la lista de cursos' : '✨ Orden asignado automáticamente (siguiente al último)' }}
+            </small>
           </div>
         </div>
 

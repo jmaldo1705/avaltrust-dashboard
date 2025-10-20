@@ -37,9 +37,11 @@
     </div>
 
     <div *ngIf="!loading && cursos.length > 0" class="cursos-table-container">
+      <p class="drag-hint">💡 <strong>Tip:</strong> Arrastra los cursos para cambiar su orden</p>
       <table class="cursos-table">
         <thead>
           <tr>
+            <th width="60">🔄</th>
             <th>Orden</th>
             <th>Icono</th>
             <th>Título</th>
@@ -50,8 +52,24 @@
           </tr>
         </thead>
         <tbody>
-          <tr *ngFor="let curso of cursos" class="curso-row">
-            <td class="text-center">{{ curso.orden }}</td>
+          <tr 
+            *ngFor="let curso of cursos; let i = index" 
+            class="curso-row"
+            [class.drag-over]="draggedOverIndex === i"
+            draggable="true"
+            (dragstart)="onDragStart($event, curso, i)"
+            (dragover)="onDragOver($event, i)"
+            (dragleave)="onDragLeave($event)"
+            (drop)="onDrop($event, i)"
+            (dragend)="onDragEnd($event)">
+            <td class="drag-handle">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="3" y1="12" x2="21" y2="12"/>
+                <line x1="3" y1="6" x2="21" y2="6"/>
+                <line x1="3" y1="18" x2="21" y2="18"/>
+              </svg>
+            </td>
+            <td class="text-center orden-cell">{{ curso.orden }}</td>
             <td class="text-center icono-cell">{{ curso.icono }}</td>
             <td>
               <div class="curso-titulo">{{ curso.titulo }}</div>

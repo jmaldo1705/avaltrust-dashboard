@@ -45,6 +45,9 @@ export class CursoFormComponent implements OnInit {
         this.isEditMode = true;
         this.cursoId = +params['id'];
         this.cargarCurso();
+      } else {
+        // Modo creación: obtener el siguiente orden disponible
+        this.obtenerSiguienteOrden();
       }
     });
   }
@@ -66,6 +69,24 @@ export class CursoFormComponent implements OnInit {
         this.loading = false;
         alert('Error al cargar el curso');
         this.router.navigate(['/admin/cursos']);
+      }
+    });
+  }
+
+  obtenerSiguienteOrden(): void {
+    this.adminCursosService.listarCursos().subscribe({
+      next: (cursos) => {
+        if (cursos.length === 0) {
+          this.curso.orden = 1;
+        } else {
+          // Obtener el máximo orden y sumar 1
+          const maxOrden = Math.max(...cursos.map(c => c.orden || 0));
+          this.curso.orden = maxOrden + 1;
+        }
+      },
+      error: (error) => {
+        console.error('Error al obtener orden:', error);
+        this.curso.orden = 1; // Valor por defecto en caso de error
       }
     });
   }
