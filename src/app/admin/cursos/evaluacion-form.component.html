@@ -1,0 +1,169 @@
+<app-header
+  [isSidebarOpen]="isSidebarOpen"
+  [isUserMenuOpen]="isUserMenuOpen"
+  (toggleSidebar)="toggleSidebar()"
+  (toggleUserMenu)="toggleUserMenu()"
+  (closeUserMenu)="handleUserMenuClose()"
+  (navigate)="onHeaderNavigate($event)"
+  (logout)="onLogout()"
+></app-header>
+
+<app-sidebar
+  [isOpen]="isSidebarOpen"
+  (close)="handleSidebarClose()"
+  (navigate)="onSidebarNavigate($event)"
+></app-sidebar>
+
+<main class="main-content">
+  <div class="page-header">
+    <div class="header-content">
+      <h1 class="page-title">📝 Gestión de Evaluación</h1>
+      <div class="header-actions">
+        <button class="btn-secondary" (click)="volver()" [disabled]="saving">Volver</button>
+        <button class="btn-primary" (click)="guardarEvaluacion()" [disabled]="saving">
+          {{ saving ? 'Guardando...' : 'Guardar Evaluación' }}
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div class="content-wrapper" *ngIf="!loading">
+    <div class="evaluacion-info">
+      <div class="info-card">
+        <h3>💡 Instrucciones</h3>
+        <ul>
+          <li>Crea preguntas de opción múltiple con una sola respuesta correcta</li>
+          <li>Cada pregunta debe tener al menos 2 opciones</li>
+          <li>Marca la opción correcta con el botón verde ✓</li>
+          <li><strong>Explicaciones:</strong> Cada opción puede tener una explicación que se muestra al usuario después de responder</li>
+          <li>Las explicaciones ayudan al usuario a entender por qué una respuesta es correcta o incorrecta</li>
+          <li>Los puntos se acumulan automáticamente</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="preguntas-container">
+      <div class="section-header">
+        <h2 class="section-title">❓ Preguntas de Evaluación</h2>
+        <button class="btn-add" (click)="agregarPregunta()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M12 5v14M5 12h14"/>
+          </svg>
+          Agregar Pregunta
+        </button>
+      </div>
+
+      <div class="preguntas-list">
+        <div *ngFor="let pregunta of preguntas; let pi = index" class="pregunta-card" [class.expanded]="preguntaExpandida === pi">
+          <div class="pregunta-header" (click)="togglePregunta(pi)">
+            <div class="pregunta-info">
+              <span class="pregunta-numero">Pregunta {{ pi + 1 }}</span>
+              <input 
+                type="text" 
+                [(ngModel)]="pregunta.textoPregunta" 
+                [name]="'pregunta_texto_' + pi" 
+                class="pregunta-texto-input" 
+                placeholder="Escribe aquí la pregunta..." 
+                (click)="$event.stopPropagation()">
+              <div class="pregunta-puntos">
+                <span>Puntos:</span>
+                <input 
+                  type="number" 
+                  [(ngModel)]="pregunta.puntos" 
+                  [name]="'pregunta_puntos_' + pi" 
+                  class="puntos-input" 
+                  min="1" 
+                  (click)="$event.stopPropagation()">
+              </div>
+            </div>
+            <div class="pregunta-actions">
+              <button type="button" class="btn-icon-delete" (click)="eliminarPregunta(pi); $event.stopPropagation()">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="3 6 5 6 21 6"/>
+                  <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+                </svg>
+              </button>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="chevron">
+                <polyline points="6 9 12 15 18 9"/>
+              </svg>
+            </div>
+          </div>
+
+          <div class="pregunta-content" *ngIf="preguntaExpandida === pi">
+            <div class="opciones-section">
+              <div class="opciones-header">
+                <h4>✅ Opciones de Respuesta</h4>
+                <button type="button" class="btn-small" (click)="agregarOpcion(pi)">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M12 5v14M5 12h14"/>
+                  </svg>
+                  Agregar Opción
+                </button>
+              </div>
+
+              <div class="opciones-list">
+                <div *ngFor="let opcion of pregunta.opciones; let oi = index" class="opcion-item" [class.correcta]="opcion.esCorrecta">
+                  <div class="opcion-header">
+                    <button 
+                      type="button" 
+                      class="btn-marcar-correcta" 
+                      [class.activa]="opcion.esCorrecta"
+                      (click)="marcarCorrecta(pi, oi)"
+                      title="Marcar como correcta">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                        <polyline points="20 6 9 17 4 12"/>
+                      </svg>
+                    </button>
+                    <span class="opcion-letra">{{ getLetraOpcion(oi) }}</span>
+                    <input 
+                      type="text" 
+                      [(ngModel)]="opcion.textoOpcion" 
+                      [name]="'opcion_texto_' + pi + '_' + oi" 
+                      class="form-control-sm" 
+                      placeholder="Texto de la opción">
+                    <button 
+                      type="button" 
+                      class="btn-icon-delete-sm" 
+                      (click)="eliminarOpcion(pi, oi)"
+                      *ngIf="pregunta.opciones.length > 2">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M18 6L6 18M6 6l12 12"/>
+                      </svg>
+                    </button>
+                  </div>
+                  <div class="opcion-explicacion">
+                    <label>💬 Explicación para esta opción:</label>
+                    <textarea 
+                      [(ngModel)]="opcion.explicacion" 
+                      [name]="'opcion_explicacion_' + pi + '_' + oi" 
+                      class="form-control-sm" 
+                      rows="2" 
+                      placeholder="Explica al usuario por qué esta opción es correcta o incorrecta"></textarea>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div *ngIf="preguntas.length === 0" class="empty-preguntas">
+        <p>No hay preguntas en esta evaluación. Comienza agregando la primera pregunta.</p>
+      </div>
+    </div>
+
+    <div class="form-actions">
+      <button type="button" class="btn-secondary" (click)="volver()" [disabled]="saving">Volver</button>
+      <button type="button" class="btn-primary" (click)="guardarEvaluacion()" [disabled]="saving">
+        {{ saving ? 'Guardando...' : 'Guardar Evaluación' }}
+      </button>
+    </div>
+  </div>
+
+  <div class="content-wrapper" *ngIf="loading">
+    <div class="loading-container">
+      <div class="loader"></div>
+      <p>Cargando evaluación...</p>
+    </div>
+  </div>
+</main>

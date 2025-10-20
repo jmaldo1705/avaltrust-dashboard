@@ -1,0 +1,217 @@
+<app-header
+  [isSidebarOpen]="isSidebarOpen"
+  [isUserMenuOpen]="isUserMenuOpen"
+  (toggleSidebar)="toggleSidebar()"
+  (toggleUserMenu)="toggleUserMenu()"
+  (closeUserMenu)="handleUserMenuClose()"
+  (navigate)="onHeaderNavigate($event)"
+  (logout)="onLogout()"
+></app-header>
+
+<app-sidebar
+  [isOpen]="isSidebarOpen"
+  (close)="handleSidebarClose()"
+  (navigate)="onSidebarNavigate($event)"
+></app-sidebar>
+
+<main class="main-content">
+  <div class="page-header">
+    <div class="header-content">
+      <h1 class="page-title">{{ isEditMode ? '✏️ Editar Curso' : '➕ Nuevo Curso' }}</h1>
+      <div class="header-actions">
+        <button class="btn-secondary" (click)="cancelar()" [disabled]="saving">Cancelar</button>
+        <button class="btn-primary" (click)="guardarCurso()" [disabled]="saving">
+          {{ saving ? 'Guardando...' : 'Guardar Curso' }}
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div class="content-wrapper" *ngIf="!loading">
+    <form class="curso-form">
+      <!-- Información básica -->
+      <div class="form-section">
+        <h2 class="section-title">📝 Información Básica</h2>
+        
+        <div class="form-grid">
+          <div class="form-group">
+            <label>Título del Curso *</label>
+            <input type="text" [(ngModel)]="curso.titulo" name="titulo" class="form-control" placeholder="Ej: Presupuesto Personal" required>
+          </div>
+
+          <div class="form-group">
+            <label>Icono (Emoji)</label>
+            <input type="text" [(ngModel)]="curso.icono" name="icono" class="form-control" placeholder="📚" maxlength="2">
+          </div>
+
+          <div class="form-group">
+            <label>Duración Estimada</label>
+            <input type="text" [(ngModel)]="curso.duracionEstimada" name="duracion" class="form-control" placeholder="Ej: 30 minutos">
+          </div>
+
+          <div class="form-group">
+            <label>Orden</label>
+            <input type="number" [(ngModel)]="curso.orden" name="orden" class="form-control" min="1">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Descripción *</label>
+          <textarea [(ngModel)]="curso.descripcion" name="descripcion" class="form-control" rows="3" placeholder="Breve descripción del curso" required></textarea>
+        </div>
+
+        <div class="form-group">
+          <label>Introducción</label>
+          <textarea [(ngModel)]="curso.introduccion" name="introduccion" class="form-control" rows="4" placeholder="Texto introductorio del curso"></textarea>
+        </div>
+
+        <div class="form-group">
+          <label>Mensaje de Cierre</label>
+          <textarea [(ngModel)]="curso.mensajeCierre" name="mensajeCierre" class="form-control" rows="3" placeholder="Mensaje final del curso"></textarea>
+        </div>
+      </div>
+
+      <!-- Objetivos -->
+      <div class="form-section">
+        <div class="section-header">
+          <h2 class="section-title">🎯 Objetivos de Aprendizaje</h2>
+          <button type="button" class="btn-add" (click)="agregarObjetivo()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M12 5v14M5 12h14"/>
+            </svg>
+            Agregar Objetivo
+          </button>
+        </div>
+
+        <div class="objetivos-list">
+          <div *ngFor="let objetivo of curso.objetivos; let i = index; trackBy: trackByIndex" class="objetivo-item">
+            <input 
+              type="text" 
+              [ngModel]="objetivo" 
+              (ngModelChange)="actualizarObjetivo(i, $event)"
+              [name]="'objetivo_' + i" 
+              class="form-control" 
+              placeholder="Objetivo de aprendizaje">
+            <button type="button" class="btn-remove" (click)="eliminarObjetivo(i)" *ngIf="curso.objetivos.length > 1">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M18 6L6 18M6 6l12 12"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Secciones -->
+      <div class="form-section">
+        <div class="section-header">
+          <h2 class="section-title">📖 Contenido del Curso (Secciones)</h2>
+          <button type="button" class="btn-add" (click)="agregarSeccion()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M12 5v14M5 12h14"/>
+            </svg>
+            Agregar Sección
+          </button>
+        </div>
+
+        <div class="secciones-list">
+          <div *ngFor="let seccion of curso.secciones; let si = index" class="seccion-card" [class.expanded]="seccionExpandida === si">
+            <div class="seccion-header" (click)="toggleSeccion(si)">
+              <div class="seccion-info">
+                <span class="seccion-numero">Sección {{ si + 1 }}</span>
+                <input type="text" [(ngModel)]="seccion.titulo" [name]="'seccion_titulo_' + si" class="seccion-titulo-input" placeholder="Título de la sección" (click)="$event.stopPropagation()">
+              </div>
+              <div class="seccion-actions">
+                <button type="button" class="btn-icon-delete" (click)="eliminarSeccion(si); $event.stopPropagation()">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="3 6 5 6 21 6"/>
+                    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+                  </svg>
+                </button>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="chevron">
+                  <polyline points="6 9 12 15 18 9"/>
+                </svg>
+              </div>
+            </div>
+
+            <div class="seccion-content" *ngIf="seccionExpandida === si">
+              <!-- Puntos de Contenido -->
+              <div class="subsection">
+                <div class="subsection-header">
+                  <h4>📌 Puntos de Contenido</h4>
+                  <button type="button" class="btn-small" (click)="agregarPunto(si)">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <path d="M12 5v14M5 12h14"/>
+                    </svg>
+                    Agregar Punto
+                  </button>
+                </div>
+
+                <div class="puntos-list">
+                  <div *ngFor="let punto of seccion.puntos; let pi = index" class="punto-item">
+                    <div class="punto-header">
+                      <span class="punto-numero">{{ pi + 1 }}</span>
+                      <input type="text" [(ngModel)]="punto.titulo" [name]="'punto_titulo_' + si + '_' + pi" class="form-control-sm" placeholder="Título del punto">
+                      <button type="button" class="btn-icon-delete-sm" (click)="eliminarPunto(si, pi)">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                          <path d="M18 6L6 18M6 6l12 12"/>
+                        </svg>
+                      </button>
+                    </div>
+                    <textarea [(ngModel)]="punto.contenido" [name]="'punto_contenido_' + si + '_' + pi" class="form-control-sm" rows="3" placeholder="Contenido del punto"></textarea>
+                    
+                    <!-- Ejemplos del punto -->
+                    <div class="ejemplos-punto">
+                      <div class="ejemplos-punto-header">
+                        <label>💡 Ejemplos de este punto:</label>
+                        <button type="button" class="btn-small-icon" (click)="agregarEjemplo(si, pi)">
+                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M12 5v14M5 12h14"/>
+                          </svg>
+                        </button>
+                      </div>
+                      <div class="ejemplos-list-punto">
+                        <div *ngFor="let ejemplo of punto.ejemplos; let ei = index" class="ejemplo-item-sm">
+                          <div class="ejemplo-header-sm">
+                            <span class="ejemplo-numero-sm">{{ ei + 1 }}</span>
+                            <input type="text" [(ngModel)]="ejemplo.titulo" [name]="'ejemplo_titulo_' + si + '_' + pi + '_' + ei" class="form-control-xs" placeholder="Título del ejemplo">
+                            <button type="button" class="btn-icon-delete-xs" (click)="eliminarEjemplo(si, pi, ei)">
+                              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M18 6L6 18M6 6l12 12"/>
+                              </svg>
+                            </button>
+                          </div>
+                          <textarea [(ngModel)]="ejemplo.descripcion" [name]="'ejemplo_desc_' + si + '_' + pi + '_' + ei" class="form-control-xs" rows="2" placeholder="Descripción del ejemplo"></textarea>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Ejemplos movidos dentro de cada punto de contenido -->
+            </div>
+          </div>
+        </div>
+
+        <div *ngIf="curso.secciones.length === 0" class="empty-secciones">
+          <p>No hay secciones de contenido. Agrega al menos una sección para estructurar el curso.</p>
+        </div>
+      </div>
+
+      <!-- Botones finales -->
+      <div class="form-actions">
+        <button type="button" class="btn-secondary" (click)="cancelar()" [disabled]="saving">Cancelar</button>
+        <button type="button" class="btn-primary" (click)="guardarCurso()" [disabled]="saving">
+          {{ saving ? 'Guardando...' : 'Guardar Curso' }}
+        </button>
+      </div>
+    </form>
+  </div>
+
+  <div class="content-wrapper" *ngIf="loading">
+    <div class="loading-container">
+      <div class="loader"></div>
+      <p>Cargando curso...</p>
+    </div>
+  </div>
+</main>

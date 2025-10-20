@@ -11,6 +11,9 @@ import { AliadosComponent } from './aliado/aliados.component';
 import { ListaCursosComponent } from './afianzado/cursos/lista-cursos.component';
 import { DetalleCursoComponent } from './afianzado/cursos/detalle-curso.component';
 import { EvaluacionCursoComponent } from './afianzado/cursos/evaluacion-curso.component';
+import { AdminCursosComponent } from './admin/cursos/admin-cursos.component';
+import { CursoFormComponent } from './admin/cursos/curso-form.component';
+import { EvaluacionFormComponent } from './admin/cursos/evaluacion-form.component';
 
 export const routes: Routes = [
   { 
@@ -90,6 +93,34 @@ export const routes: Routes = [
     canActivate: [authGuard],
     data: { roles: ['ROLE_ADMIN'] }, // SOLO para ADMIN
     title: 'Gestión de Aliados Estratégicos - Avaltrust'
+  },
+  {
+    path: 'admin/cursos',
+    component: AdminCursosComponent,
+    canActivate: [authGuard],
+    data: { roles: ['ROLE_ADMIN'] }, // SOLO para ADMIN
+    title: 'Administración de Cursos - Avaltrust'
+  },
+  {
+    path: 'admin/cursos/nuevo',
+    component: CursoFormComponent,
+    canActivate: [authGuard],
+    data: { roles: ['ROLE_ADMIN'] }, // SOLO para ADMIN
+    title: 'Nuevo Curso - Avaltrust'
+  },
+  {
+    path: 'admin/cursos/editar/:id',
+    component: CursoFormComponent,
+    canActivate: [authGuard],
+    data: { roles: ['ROLE_ADMIN'] }, // SOLO para ADMIN
+    title: 'Editar Curso - Avaltrust'
+  },
+  {
+    path: 'admin/cursos/:id/evaluacion',
+    component: EvaluacionFormComponent,
+    canActivate: [authGuard],
+    data: { roles: ['ROLE_ADMIN'] }, // SOLO para ADMIN
+    title: 'Gestión de Evaluación - Avaltrust'
   },
   // Wildcard - Redirige a dashboard normal (el guard manejará la redirección correcta)
   { 
