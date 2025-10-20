@@ -37,7 +37,7 @@
     </div>
 
     <div *ngIf="!loading && cursos.length > 0" class="cursos-table-container">
-      <p class="drag-hint">💡 <strong>Tip:</strong> Arrastra los cursos para cambiar su orden</p>
+      <p class="drag-hint">💡 <strong>Tip:</strong> Arrastra desde el icono 🔄 o desde el número de orden para cambiar la posición</p>
       <table class="cursos-table">
         <thead>
           <tr>
@@ -55,31 +55,60 @@
           <tr 
             *ngFor="let curso of cursos; let i = index" 
             class="curso-row"
-            [class.drag-over]="draggedOverIndex === i"
-            draggable="true"
-            (dragstart)="onDragStart($event, curso, i)"
-            (dragover)="onDragOver($event, i)"
-            (dragleave)="onDragLeave($event)"
-            (drop)="onDrop($event, i)"
-            (dragend)="onDragEnd($event)">
-            <td class="drag-handle">
+            [class.drag-over]="draggedOverIndex === i">
+            <!-- Columna drag handle: arrastrable -->
+            <td 
+              class="drag-handle"
+              draggable="true"
+              (dragstart)="onDragStart($event, curso, i)"
+              (dragend)="onDragEnd($event)">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <line x1="3" y1="12" x2="21" y2="12"/>
                 <line x1="3" y1="6" x2="21" y2="6"/>
                 <line x1="3" y1="18" x2="21" y2="18"/>
               </svg>
             </td>
-            <td class="text-center orden-cell">{{ curso.orden }}</td>
-            <td class="text-center icono-cell">{{ curso.icono }}</td>
-            <td>
+            <!-- Columna orden: también arrastrable -->
+            <td 
+              class="text-center orden-cell drag-area"
+              draggable="true"
+              (dragstart)="onDragStart($event, curso, i)"
+              (dragend)="onDragEnd($event)"
+              (dragover)="onDragOver($event, i)"
+              (dragleave)="onDragLeave($event)"
+              (drop)="onDrop($event, i)">{{ curso.orden }}</td>
+            <!-- Resto de columnas: solo reciben drop, texto seleccionable -->
+            <td 
+              class="text-center icono-cell"
+              (dragover)="onDragOver($event, i)"
+              (dragleave)="onDragLeave($event)"
+              (drop)="onDrop($event, i)">{{ curso.icono }}</td>
+            <td
+              (dragover)="onDragOver($event, i)"
+              (dragleave)="onDragLeave($event)"
+              (drop)="onDrop($event, i)">
               <div class="curso-titulo">{{ curso.titulo }}</div>
             </td>
-            <td>
+            <td
+              (dragover)="onDragOver($event, i)"
+              (dragleave)="onDragLeave($event)"
+              (drop)="onDrop($event, i)">
               <div class="curso-descripcion">{{ curso.descripcion }}</div>
             </td>
-            <td>{{ curso.duracionEstimada }}</td>
-            <td class="text-center">{{ curso.secciones.length || 0 }}</td>
-            <td class="actions-cell">
+            <td
+              (dragover)="onDragOver($event, i)"
+              (dragleave)="onDragLeave($event)"
+              (drop)="onDrop($event, i)">{{ curso.duracionEstimada }}</td>
+            <td 
+              class="text-center"
+              (dragover)="onDragOver($event, i)"
+              (dragleave)="onDragLeave($event)"
+              (drop)="onDrop($event, i)">{{ curso.secciones.length || 0 }}</td>
+            <td 
+              class="actions-cell"
+              (dragover)="onDragOver($event, i)"
+              (dragleave)="onDragLeave($event)"
+              (drop)="onDrop($event, i)">
               <div class="action-buttons">
                 <button 
                   class="btn-action btn-edit" 

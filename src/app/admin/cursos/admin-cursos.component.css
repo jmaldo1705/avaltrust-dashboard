@@ -114,7 +114,6 @@
 .cursos-table tbody tr {
   border-bottom: 1px solid #e2e8f0;
   transition: all 0.2s ease;
-  cursor: move;
 }
 
 .cursos-table tbody tr:hover {
@@ -134,13 +133,13 @@
 .drag-handle {
   text-align: center;
   color: #a0aec0;
-  cursor: grab;
+  cursor: move !important;
   user-select: none;
   padding: 0.75rem;
 }
 
 .drag-handle:active {
-  cursor: grabbing;
+  cursor: move !important;
 }
 
 .drag-handle svg {
@@ -148,6 +147,7 @@
   height: 20px;
   opacity: 0.5;
   transition: opacity 0.2s ease;
+  pointer-events: none;
 }
 
 .cursos-table tbody tr:hover .drag-handle svg {
@@ -159,6 +159,11 @@
   font-weight: 700;
   color: #667eea;
   font-size: 1.1rem;
+}
+
+.drag-area {
+  cursor: move !important;
+  user-select: none;
 }
 
 .cursos-table td {
