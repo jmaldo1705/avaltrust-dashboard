@@ -570,7 +570,11 @@
 
           <!-- Área de carga de archivos -->
           <div class="upload-area">
-            <div class="file-input-container">
+            <div class="file-input-container"
+                 (drop)="onFileDrop($event)"
+                 (dragover)="onDragOver($event)"
+                 (dragleave)="onDragLeave($event)"
+                 [class.drag-over]="isDragging">
               <input
                 id="fileInput"
                 type="file"

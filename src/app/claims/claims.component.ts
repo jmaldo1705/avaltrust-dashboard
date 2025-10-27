@@ -42,6 +42,7 @@ export class ClaimsComponent implements OnInit {
   isLoading = false;
   uploadedFile: File | null = null;
   uploadResult: any = null;
+  isDragging = false; // Para drag & drop
 
   ngOnInit() {
     this.initializeForm();
@@ -184,33 +185,60 @@ export class ClaimsComponent implements OnInit {
   onFileSelected(event: any) {
     const file = event.target.files[0];
     if (file) {
-      const allowedTypes = [
-        'application/vnd.ms-excel',
-        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-        'text/csv'
-      ];
-
-      if (!allowedTypes.includes(file.type)) {
-        this.uploadResult = {
-          success: false,
-          message: 'Tipo de archivo no permitido. Use Excel (.xls, .xlsx) o CSV (.csv)',
-          errors: ['Formato de archivo inválido']
-        };
-        return;
-      }
-
-      if (file.size > 10 * 1024 * 1024) {
-        this.uploadResult = {
-          success: false,
-          message: 'El archivo es demasiado grande. El tamaño máximo permitido es 10MB.',
-          errors: ['Archivo demasiado grande']
-        };
-        return;
-      }
-
-      this.uploadedFile = file;
-      this.uploadResult = null;
+      this.processFile(file);
     }
+  }
+
+  onDragOver(event: DragEvent) {
+    event.preventDefault();
+    event.stopPropagation();
+    this.isDragging = true;
+  }
+
+  onDragLeave(event: DragEvent) {
+    event.preventDefault();
+    event.stopPropagation();
+    this.isDragging = false;
+  }
+
+  onFileDrop(event: DragEvent) {
+    event.preventDefault();
+    event.stopPropagation();
+    this.isDragging = false;
+
+    const files = event.dataTransfer?.files;
+    if (files && files.length > 0) {
+      this.processFile(files[0]);
+    }
+  }
+
+  private processFile(file: File) {
+    const allowedTypes = [
+      'application/vnd.ms-excel',
+      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+      'text/csv'
+    ];
+
+    if (!allowedTypes.includes(file.type)) {
+      this.uploadResult = {
+        success: false,
+        message: 'Tipo de archivo no permitido. Use Excel (.xls, .xlsx) o CSV (.csv)',
+        errors: ['Formato de archivo inválido']
+      };
+      return;
+    }
+
+    if (file.size > 10 * 1024 * 1024) {
+      this.uploadResult = {
+        success: false,
+        message: 'El archivo es demasiado grande. El tamaño máximo permitido es 10MB.',
+        errors: ['Archivo demasiado grande']
+      };
+      return;
+    }
+
+    this.uploadedFile = file;
+    this.uploadResult = null;
   }
 
   onUploadFile() {

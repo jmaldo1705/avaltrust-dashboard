@@ -368,6 +368,18 @@
   margin-bottom: 1rem;
 }
 
+/* Estado drag over */
+.file-input-container.drag-over {
+  background: #eff6ff;
+  border-radius: 8px;
+}
+
+.file-input-container.drag-over .file-input-label {
+  background: rgba(59, 130, 246, 0.1);
+  border-radius: 8px;
+  transform: scale(1.02);
+}
+
 .file-input {
   position: absolute;
   opacity: 0;
