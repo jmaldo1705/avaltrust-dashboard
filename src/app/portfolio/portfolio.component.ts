@@ -354,6 +354,16 @@ export class PortfolioComponent implements OnInit {
     this.uploadResult = null;
   }
 
+  removeSelectedFile() {
+    this.uploadedFile = null;
+    this.uploadResult = null;
+    // Reset file input
+    const fileInput = document.getElementById('fileInput') as HTMLInputElement;
+    if (fileInput) {
+      fileInput.value = '';
+    }
+  }
+
   onUploadFile() {
     if (this.uploadedFile) {
       this.isLoading = true;

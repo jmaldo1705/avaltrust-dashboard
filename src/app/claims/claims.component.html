@@ -432,8 +432,17 @@
             <!-- Información del archivo seleccionado -->
             <div class="file-info" *ngIf="uploadedFile">
               <div class="file-details">
-                <span class="file-name">{{ uploadedFile.name }}</span>
-                <span class="file-size">{{ (uploadedFile.size / 1024 / 1024).toFixed(2) }} MB</span>
+                <div class="file-info-left">
+                  <span class="file-name">{{ uploadedFile.name }}</span>
+                  <span class="file-size">{{ (uploadedFile.size / 1024 / 1024).toFixed(2) }} MB</span>
+                </div>
+                <button
+                  type="button"
+                  class="btn-remove-file"
+                  (click)="removeSelectedFile()"
+                  title="Quitar archivo">
+                  ✕
+                </button>
               </div>
             </div>
 
