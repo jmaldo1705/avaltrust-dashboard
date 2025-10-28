@@ -77,7 +77,7 @@ export class PortfolioService {
   }
 
   /**
-   * Carga masiva de archivos
+   * Carga masiva de archivos (COMPLETA - crear portfolios nuevos)
    */
   uploadPortfolioFile(file: File, aliadoEstrategicoId?: number): Observable<FileUploadResponse> {
     const formData = new FormData();
@@ -102,7 +102,20 @@ export class PortfolioService {
   }
 
   /**
-   * Descargar plantilla de Excel
+   * Carga masiva de actualizaciones (SIMPLIFICADA - actualizar estado de cartera)
+   */
+  uploadEstadoCarteraFile(file: File): Observable<FileUploadResponse> {
+    const formData = new FormData();
+    formData.append('file', file);
+
+    return this.http.post<FileUploadResponse>(
+      `${this.baseUrl}/upload-estado-cartera`,
+      formData
+    );
+  }
+
+  /**
+   * Descargar plantilla de Excel (COMPLETA - para crear portfolios)
    */
   downloadTemplate(): Observable<Blob> {
     // Incluir el usuario logueado en los parámetros de la plantilla
@@ -119,6 +132,28 @@ export class PortfolioService {
     });
 
     return this.http.get(`${this.baseUrl}/template/download`, {
+      responseType: 'blob',
+      params: params,
+      headers
+    });
+  }
+
+  /**
+   * Descargar plantilla de Excel (SIMPLIFICADA - para actualizaciones de estado)
+   */
+  downloadEstadoCarteraTemplate(): Observable<Blob> {
+    const user = this.authService.user();
+    const params: any = {};
+
+    if (user?.username) {
+      params.generadaPor = user.username;
+    }
+
+    const headers = new HttpHeaders({
+      'Accept': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/octet-stream'
+    });
+
+    return this.http.get(`${this.baseUrl}/template/estado-cartera`, {
       responseType: 'blob',
       params: params,
       headers

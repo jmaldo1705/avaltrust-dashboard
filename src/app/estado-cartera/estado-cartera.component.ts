@@ -103,7 +103,6 @@ export class EstadoCarteraComponent implements OnInit {
   uploadedFile: File | null = null;
   isUploading = false;
   isDragging = false;
-  selectedUploadAliadoId: number | null = null;
   uploadResult: any = null;
 
   ngOnInit() {
@@ -364,23 +363,21 @@ export class EstadoCarteraComponent implements OnInit {
     this.isUploadModalOpen = true;
     this.uploadResult = null;
     this.uploadedFile = null;
-    this.selectedUploadAliadoId = null;
   }
 
   closeUploadModal() {
     this.isUploadModalOpen = false;
     this.uploadResult = null;
     this.uploadedFile = null;
-    this.selectedUploadAliadoId = null;
   }
 
   downloadTemplate() {
-    this.portfolioService.downloadTemplate().subscribe({
+    this.portfolioService.downloadEstadoCarteraTemplate().subscribe({
       next: (blob) => {
         const url = window.URL.createObjectURL(blob);
         const link = document.createElement('a');
         link.href = url;
-        link.download = 'plantilla_cartera.xlsx';
+        link.download = 'plantilla_estado_cartera.xlsx';
         link.click();
         window.URL.revokeObjectURL(url);
         this.toastService.success('Plantilla descargada exitosamente');
@@ -459,15 +456,11 @@ export class EstadoCarteraComponent implements OnInit {
       return;
     }
 
-    if (this.isAdmin && !this.selectedUploadAliadoId) {
-      this.toastService.error('Seleccione un aliado estratégico');
-      return;
-    }
-
     this.isUploading = true;
     this.uploadResult = null;
 
-    this.portfolioService.uploadPortfolioFile(this.uploadedFile, this.selectedUploadAliadoId || undefined).subscribe({
+    // Usar el servicio específico para actualizaciones de estado de cartera
+    this.portfolioService.uploadEstadoCarteraFile(this.uploadedFile).subscribe({
       next: (response) => {
         console.log('Archivo cargado exitosamente:', response);
         this.isUploading = false;
@@ -479,7 +472,7 @@ export class EstadoCarteraComponent implements OnInit {
         };
         
         if (response.success) {
-          this.toastService.success(`Archivo cargado exitosamente. ${response.processedRecords} registros procesados.`);
+          this.toastService.success(`Archivo cargado exitosamente. ${response.processedRecords} actualizaciones procesadas.`);
           // Recargar datos
           this.loadPortfolioData();
           // Limpiar archivo

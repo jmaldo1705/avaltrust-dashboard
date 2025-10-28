@@ -301,27 +301,6 @@
           </div>
         </div>
 
-        <!-- Selección de Aliado (Solo ADMIN) -->
-        <div class="aliado-selection" *ngIf="isAdmin">
-          <div class="form-group">
-            <label for="aliadoUploadSelect" class="form-label">
-              Empresa / Aliado Estratégico <span class="required">*</span>
-            </label>
-            <select
-              id="aliadoUploadSelect"
-              [(ngModel)]="selectedUploadAliadoId"
-              class="form-control">
-              <option [value]="null">Seleccione un aliado</option>
-              <option *ngFor="let aliado of aliados" [value]="aliado.id">
-                {{ aliado.nombre }} (NIT: {{ aliado.nit }})
-              </option>
-            </select>
-            <div class="info-message">
-              Todos los registros del archivo se asignarán a esta empresa
-            </div>
-          </div>
-        </div>
-
         <!-- Instrucciones -->
         <div class="upload-instructions">
           <h4>📋 Instrucciones de Carga</h4>
@@ -389,10 +368,10 @@
             <button
               type="button"
               class="btn-upload-submit"
-              [disabled]="!uploadedFile || isUploading || (isAdmin && !selectedUploadAliadoId)"
+              [disabled]="!uploadedFile || isUploading"
               (click)="uploadFile()">
               <span *ngIf="isUploading" class="loading-spinner"></span>
-              {{ isUploading ? 'Cargando...' : 'Cargar Archivo' }}
+              {{ isUploading ? 'Procesando...' : 'Procesar Actualizaciones' }}
             </button>
           </div>
         </div>
