@@ -33,6 +33,10 @@
         </p>
       </div>
       <div class="header-actions">
+        <button class="btn-upload" (click)="openUploadModal()" title="Carga Masiva">
+          <span class="btn-icon">📂</span>
+          Carga Masiva
+        </button>
         <button class="btn-export" (click)="exportToExcel()" title="Exportar a Excel">
           <span class="btn-icon">📊</span>
           Excel
@@ -257,5 +261,143 @@
     (close)="closeActualizacionModal()"
     (submitForm)="onActualizacionSubmit($event)">
   </app-actualizacion-pago-modal>
+
+  <!-- Modal de Carga Masiva -->
+  <div class="modal-overlay" *ngIf="isUploadModalOpen" (click)="closeUploadModal()">
+    <div class="modal-container upload-modal" (click)="$event.stopPropagation()">
+      <!-- Header -->
+      <div class="modal-header">
+        <h3>Carga Masiva de Cartera</h3>
+        <button class="btn-close" (click)="closeUploadModal()" type="button">✕</button>
+      </div>
+
+      <!-- Content -->
+      <div class="modal-content">
+        <!-- Resultado de la operación -->
+        <div class="result-container" *ngIf="uploadResult">
+          <div class="result-card" [ngClass]="uploadResult.success ? 'success' : 'error'">
+            <div class="result-icon">
+              {{ uploadResult.success ? '✅' : '❌' }}
+            </div>
+            <div class="result-content">
+              <h4>{{ uploadResult.success ? 'Operación Exitosa' : 'Error en la Operación' }}</h4>
+              <p>{{ uploadResult.message }}</p>
+              <div class="result-details" *ngIf="uploadResult.records">
+                <span>Registros procesados: <strong>{{ uploadResult.records }}</strong></span>
+              </div>
+              <div class="error-list" *ngIf="uploadResult.errors && uploadResult.errors.length > 0">
+                <h5>Errores encontrados:</h5>
+                <ul>
+                  <li *ngFor="let error of uploadResult.errors">{{ error }}</li>
+                </ul>
+              </div>
+            </div>
+            <button
+              type="button"
+              class="result-close"
+              (click)="uploadResult = null">
+              ✕
+            </button>
+          </div>
+        </div>
+
+        <!-- Selección de Aliado (Solo ADMIN) -->
+        <div class="aliado-selection" *ngIf="isAdmin">
+          <div class="form-group">
+            <label for="aliadoUploadSelect" class="form-label">
+              Empresa / Aliado Estratégico <span class="required">*</span>
+            </label>
+            <select
+              id="aliadoUploadSelect"
+              [(ngModel)]="selectedUploadAliadoId"
+              class="form-control">
+              <option [value]="null">Seleccione un aliado</option>
+              <option *ngFor="let aliado of aliados" [value]="aliado.id">
+                {{ aliado.nombre }} (NIT: {{ aliado.nit }})
+              </option>
+            </select>
+            <div class="info-message">
+              Todos los registros del archivo se asignarán a esta empresa
+            </div>
+          </div>
+        </div>
+
+        <!-- Instrucciones -->
+        <div class="upload-instructions">
+          <h4>📋 Instrucciones de Carga</h4>
+          <ul>
+            <li>Descargue la plantilla oficial para evitar errores de formato</li>
+            <li>Complete todos los campos obligatorios en el archivo</li>
+            <li>Los archivos soportados son: Excel (.xlsx, .xls) y CSV (.csv)</li>
+            <li>Tamaño máximo del archivo: 10 MB</li>
+          </ul>
+        </div>
+
+        <!-- Botón de descarga de plantilla -->
+        <div class="template-download">
+          <button type="button" class="btn-download" (click)="downloadTemplate()">
+            <span class="btn-icon">📥</span>
+            Descargar Plantilla Excel
+          </button>
+        </div>
+
+        <!-- Sección de carga de archivo -->
+        <div class="upload-section">
+          <div class="file-input-container"
+               (drop)="onFileDrop($event)"
+               (dragover)="onDragOver($event)"
+               (dragleave)="onDragLeave($event)"
+               [class.drag-over]="isDragging">
+            <input
+              id="fileInputUpload"
+              type="file"
+              accept=".xls,.xlsx,.csv"
+              (change)="onFileSelected($event)"
+              class="file-input">
+            <label for="fileInputUpload" class="file-input-label">
+              <div class="upload-icon">📂</div>
+              <div class="upload-text">
+                <span class="primary-text">
+                  {{ uploadedFile ? uploadedFile.name : 'Seleccionar archivo' }}
+                </span>
+                <span class="secondary-text">
+                  Arrastra un archivo aquí o haz clic para seleccionar
+                </span>
+              </div>
+            </label>
+          </div>
+
+          <!-- Información del archivo seleccionado -->
+          <div class="file-info" *ngIf="uploadedFile">
+            <div class="file-details">
+              <div class="file-info-left">
+                <span class="file-name">{{ uploadedFile.name }}</span>
+                <span class="file-size">{{ (uploadedFile.size / 1024 / 1024).toFixed(2) }} MB</span>
+              </div>
+              <button
+                type="button"
+                class="btn-remove-file"
+                (click)="removeSelectedFile()"
+                title="Quitar archivo">
+                ✕
+              </button>
+            </div>
+          </div>
+
+          <!-- Botón de carga -->
+          <div class="upload-actions">
+            <button
+              type="button"
+              class="btn-upload-submit"
+              [disabled]="!uploadedFile || isUploading || (isAdmin && !selectedUploadAliadoId)"
+              (click)="uploadFile()">
+              <span *ngIf="isUploading" class="loading-spinner"></span>
+              {{ isUploading ? 'Cargando...' : 'Cargar Archivo' }}
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
 </div>
 

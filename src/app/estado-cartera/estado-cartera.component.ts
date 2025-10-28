@@ -97,6 +97,14 @@ export class EstadoCarteraComponent implements OnInit {
   // Modal de actualización de pago
   isModalOpen = false;
   selectedPortfolio: PortfolioItem | null = null;
+  
+  // Modal de carga masiva
+  isUploadModalOpen = false;
+  uploadedFile: File | null = null;
+  isUploading = false;
+  isDragging = false;
+  selectedUploadAliadoId: number | null = null;
+  uploadResult: any = null;
 
   ngOnInit() {
     this.checkUserRole();
@@ -347,6 +355,152 @@ export class EstadoCarteraComponent implements OnInit {
         if (this.modalComponent) {
           this.modalComponent.resetSubmitting();
         }
+      }
+    });
+  }
+
+  // Métodos de carga masiva
+  openUploadModal() {
+    this.isUploadModalOpen = true;
+    this.uploadResult = null;
+    this.uploadedFile = null;
+    this.selectedUploadAliadoId = null;
+  }
+
+  closeUploadModal() {
+    this.isUploadModalOpen = false;
+    this.uploadResult = null;
+    this.uploadedFile = null;
+    this.selectedUploadAliadoId = null;
+  }
+
+  downloadTemplate() {
+    this.portfolioService.downloadTemplate().subscribe({
+      next: (blob) => {
+        const url = window.URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = 'plantilla_cartera.xlsx';
+        link.click();
+        window.URL.revokeObjectURL(url);
+        this.toastService.success('Plantilla descargada exitosamente');
+      },
+      error: (error) => {
+        console.error('Error al descargar plantilla:', error);
+        this.toastService.error('Error al descargar la plantilla');
+      }
+    });
+  }
+
+  onDragOver(event: DragEvent) {
+    event.preventDefault();
+    event.stopPropagation();
+    this.isDragging = true;
+  }
+
+  onDragLeave(event: DragEvent) {
+    event.preventDefault();
+    event.stopPropagation();
+    this.isDragging = false;
+  }
+
+  onFileDrop(event: DragEvent) {
+    event.preventDefault();
+    event.stopPropagation();
+    this.isDragging = false;
+
+    const files = event.dataTransfer?.files;
+    if (files && files.length > 0) {
+      this.processFile(files[0]);
+    }
+  }
+
+  onFileSelected(event: Event) {
+    const input = event.target as HTMLInputElement;
+    if (input.files && input.files.length > 0) {
+      this.processFile(input.files[0]);
+    }
+  }
+
+  private processFile(file: File) {
+    // Validar tipo de archivo
+    const validTypes = [
+      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+      'application/vnd.ms-excel',
+      'text/csv'
+    ];
+    
+    if (!validTypes.includes(file.type) && !file.name.match(/\.(xlsx|xls|csv)$/i)) {
+      this.toastService.error('Tipo de archivo no válido. Use Excel (.xlsx, .xls) o CSV (.csv)');
+      return;
+    }
+
+    // Validar tamaño (10 MB máximo)
+    const maxSize = 10 * 1024 * 1024;
+    if (file.size > maxSize) {
+      this.toastService.error('El archivo excede el tamaño máximo de 10 MB');
+      return;
+    }
+
+    this.uploadedFile = file;
+  }
+
+  removeSelectedFile() {
+    this.uploadedFile = null;
+    const fileInput = document.getElementById('fileInputUpload') as HTMLInputElement;
+    if (fileInput) {
+      fileInput.value = '';
+    }
+  }
+
+  uploadFile() {
+    if (!this.uploadedFile) {
+      this.toastService.error('Seleccione un archivo para cargar');
+      return;
+    }
+
+    if (this.isAdmin && !this.selectedUploadAliadoId) {
+      this.toastService.error('Seleccione un aliado estratégico');
+      return;
+    }
+
+    this.isUploading = true;
+    this.uploadResult = null;
+
+    this.portfolioService.uploadPortfolioFile(this.uploadedFile, this.selectedUploadAliadoId || undefined).subscribe({
+      next: (response) => {
+        console.log('Archivo cargado exitosamente:', response);
+        this.isUploading = false;
+        this.uploadResult = {
+          success: response.success,
+          message: response.message,
+          records: response.processedRecords,
+          errors: response.errors
+        };
+        
+        if (response.success) {
+          this.toastService.success(`Archivo cargado exitosamente. ${response.processedRecords} registros procesados.`);
+          // Recargar datos
+          this.loadPortfolioData();
+          // Limpiar archivo
+          this.uploadedFile = null;
+          const fileInput = document.getElementById('fileInputUpload') as HTMLInputElement;
+          if (fileInput) {
+            fileInput.value = '';
+          }
+        } else {
+          this.toastService.error('Error al procesar el archivo. Revise los errores.');
+        }
+      },
+      error: (error) => {
+        console.error('Error al cargar archivo:', error);
+        this.isUploading = false;
+        this.uploadResult = {
+          success: false,
+          message: error.error?.message || 'Error al cargar el archivo',
+          errors: error.error?.errors || ['Error desconocido']
+        };
+        this.toastService.error('Error al cargar el archivo');
       }
     });
   }
