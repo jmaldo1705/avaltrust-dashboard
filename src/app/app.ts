@@ -1,12 +1,13 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import { SessionWarningComponent } from './auth/session-warning.component';
+import { ToastContainerComponent } from './services/toast-container.component';
 import { AuthService } from './auth/auth.service';
 import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet, SessionWarningComponent],
+  imports: [RouterOutlet, SessionWarningComponent, ToastContainerComponent],
   template: `
     <router-outlet />
     <app-session-warning 
@@ -15,6 +16,7 @@ import { Subscription } from 'rxjs';
       (continue)="onContinueSession()"
       (logout)="onLogoutSession()"
     />
+    <app-toast-container />
   `
 })
 export class App implements OnInit, OnDestroy {

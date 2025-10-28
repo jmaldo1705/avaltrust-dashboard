@@ -14,6 +14,7 @@ import { EvaluacionCursoComponent } from './afianzado/cursos/evaluacion-curso.co
 import { AdminCursosComponent } from './admin/cursos/admin-cursos.component';
 import { CursoFormComponent } from './admin/cursos/curso-form.component';
 import { EvaluacionFormComponent } from './admin/cursos/evaluacion-form.component';
+import { EstadoCarteraComponent } from './estado-cartera/estado-cartera.component';
 
 export const routes: Routes = [
   { 
@@ -73,6 +74,13 @@ export const routes: Routes = [
     canActivate: [authGuard],
     data: { roles: ['ROLE_ADMIN', 'ROLE_USER'] }, // NO para AFIANZADO
     title: 'Cargue de Cartera - Avaltrust'
+  },
+  {
+    path: 'estado-cartera',
+    component: EstadoCarteraComponent,
+    canActivate: [authGuard],
+    data: { roles: ['ROLE_ADMIN', 'ROLE_USER'] }, // NO para AFIANZADO
+    title: 'Estado de Cartera - Avaltrust'
   },
   {
     path: 'claims',

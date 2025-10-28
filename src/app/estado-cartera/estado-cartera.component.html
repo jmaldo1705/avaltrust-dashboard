@@ -1,0 +1,261 @@
+<div class="dashboard-layout">
+  <!-- Sidebar Component -->
+  <app-sidebar
+    [isSidebarOpen]="isSidebarOpen"
+    [isOpen]="isSidebarOpen"
+    (navigate)="onSidebarNavigate($event)"
+    (close)="onSidebarClose()"
+    (sidebarClose)="closeSidebar()">
+  </app-sidebar>
+
+  <!-- Overlay para móvil -->
+  <div class="overlay" [class.active]="isSidebarOpen || isUserMenuOpen" (click)="closeSidebar(); closeUserMenu()"></div>
+
+  <!-- Header Component -->
+  <app-header
+    [isSidebarOpen]="isSidebarOpen"
+    [isUserMenuOpen]="isUserMenuOpen"
+    (toggleSidebar)="toggleSidebar()"
+    (toggleUserMenu)="toggleUserMenu()"
+    (closeUserMenu)="closeUserMenu()"
+    (navigate)="onHeaderNavigate($event)"
+    (logout)="logout()">
+  </app-header>
+
+  <!-- Contenido Principal -->
+  <main class="main-content">
+    <!-- Header de la página -->
+    <div class="content-header">
+      <div class="header-left">
+        <h2>Estado de Cartera</h2>
+        <p class="welcome-message">
+          Visualice y gestione toda la información de su cartera
+        </p>
+      </div>
+      <div class="header-actions">
+        <button class="btn-export" (click)="exportToExcel()" title="Exportar a Excel">
+          <span class="btn-icon">📊</span>
+          Excel
+        </button>
+        <button class="btn-export" (click)="exportToPDF()" title="Exportar a PDF">
+          <span class="btn-icon">📄</span>
+          PDF
+        </button>
+      </div>
+    </div>
+
+    <!-- Estadísticas -->
+    <div class="statistics-grid">
+      <div class="stat-card">
+        <div class="stat-icon">📋</div>
+        <div class="stat-content">
+          <span class="stat-label">Total Registros</span>
+          <span class="stat-value">{{ totalRegistros }}</span>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon">💰</div>
+        <div class="stat-content">
+          <span class="stat-label">Valor Fianza Total</span>
+          <span class="stat-value">{{ formatCurrency(sumaValorAval) }}</span>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon">📈</div>
+        <div class="stat-content">
+          <span class="stat-label">Deuda Total</span>
+          <span class="stat-value">{{ formatCurrency(sumaTotalDeuda) }}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Filtros -->
+    <div class="filters-container">
+      <!-- Filtro de Aliado Estratégico (Solo ADMIN) -->
+      <div class="aliado-filter" *ngIf="isAdmin">
+        <div class="filter-group-aliado">
+          <label for="aliadoSelect" class="filter-label-aliado">
+            <span class="filter-label-icon">🏢</span>
+            Aliado Estratégico
+          </label>
+          <select
+            id="aliadoSelect"
+            class="filter-select-aliado"
+            [(ngModel)]="selectedAliadoId"
+            (change)="onAliadoChange()">
+            <option [ngValue]="null">Todos los aliados</option>
+            <option *ngFor="let aliado of aliados" [ngValue]="aliado.id">
+              {{ aliado.nombre }} - NIT: {{ aliado.nit }}
+            </option>
+          </select>
+        </div>
+      </div>
+
+      <div class="filters-grid">
+        <div class="filter-group">
+          <label for="searchTerm" class="filter-label">Buscar</label>
+          <input
+            id="searchTerm"
+            type="text"
+            class="filter-input"
+            placeholder="Obligación, documento, nombre..."
+            [(ngModel)]="searchTerm"
+            (input)="applyFilters()">
+        </div>
+
+        <div class="filter-group">
+          <label for="estadoFilter" class="filter-label">Estado</label>
+          <select
+            id="estadoFilter"
+            class="filter-select"
+            [(ngModel)]="estadoFilter"
+            (change)="applyFilters()">
+            <option value="">Todos</option>
+            <option value="VIGENTE">Vigente</option>
+            <option value="VENCIDO">Vencido</option>
+            <option value="CANCELADO">Cancelado</option>
+            <option value="CASTIGADO">Castigado</option>
+          </select>
+        </div>
+
+        <div class="filter-group">
+          <label for="tipoClienteFilter" class="filter-label">Tipo Cliente</label>
+          <select
+            id="tipoClienteFilter"
+            class="filter-select"
+            [(ngModel)]="tipoClienteFilter"
+            (change)="applyFilters()">
+            <option value="">Todos</option>
+            <option value="NATURAL">Persona Natural</option>
+            <option value="JURIDICA">Persona Jurídica</option>
+          </select>
+        </div>
+
+        <div class="filter-actions">
+          <button class="btn-clear-filters" (click)="clearFilters()">
+            Limpiar Filtros
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Loading -->
+    <div class="loading-container" *ngIf="isLoading">
+      <div class="spinner"></div>
+      <p>Cargando datos de cartera...</p>
+    </div>
+
+    <!-- Error -->
+    <div class="error-container" *ngIf="errorMessage && !isLoading">
+      <div class="error-card">
+        <span class="error-icon">⚠️</span>
+        <p>{{ errorMessage }}</p>
+        <button class="btn-retry" (click)="loadPortfolioData()">Reintentar</button>
+      </div>
+    </div>
+
+    <!-- Tabla de datos -->
+    <div class="table-container" *ngIf="!isLoading && !errorMessage">
+      <div class="table-wrapper">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Obligación</th>
+              <th>Cliente</th>
+              <th>Documento</th>
+              <th>Tipo Cliente</th>
+              <th>Valor Desembolso</th>
+              <th>Valor Fianza</th>
+              <th>Total Deuda</th>
+              <th>Fecha Vencimiento</th>
+              <th>Días Mora</th>
+              <th>Estado</th>
+              <th class="th-actions">Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let portfolio of paginatedPortfolios">
+              <td class="td-obligacion">{{ portfolio.obligacion }}</td>
+              <td class="td-cliente">{{ portfolio.nombres }} {{ portfolio.apellidos }}</td>
+              <td>{{ portfolio.numeroDocumento }}</td>
+              <td>
+                <span class="badge" [class.badge-natural]="portfolio.tipoCliente === 'NATURAL'" [class.badge-juridica]="portfolio.tipoCliente === 'JURIDICA'">
+                  {{ portfolio.tipoCliente === 'NATURAL' ? 'Natural' : 'Jurídica' }}
+                </span>
+              </td>
+              <td class="td-amount">{{ formatCurrency(portfolio.valorDesembolso) }}</td>
+              <td class="td-amount">{{ formatCurrency(portfolio.valorAval) }}</td>
+              <td class="td-amount td-total">{{ formatCurrency(portfolio.totalDeuda) }}</td>
+              <td>{{ formatDate(portfolio.fechaVencimiento) }}</td>
+              <td class="td-mora" [class.has-mora]="portfolio.diasMora > 0">
+                {{ portfolio.diasMora }}
+              </td>
+              <td>
+                <span class="badge" [ngClass]="getEstadoBadgeClass(portfolio.estadoCredito)">
+                  {{ portfolio.estadoCredito }}
+                </span>
+              </td>
+              <td class="td-actions">
+                <button
+                  class="btn-action"
+                  (click)="openActualizacionModal(portfolio)"
+                  title="Actualizar pago">
+                  💰
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Sin resultados -->
+      <div class="no-results" *ngIf="filteredPortfolios.length === 0">
+        <div class="no-results-icon">📭</div>
+        <h3>No se encontraron registros</h3>
+        <p>No hay registros que coincidan con los filtros aplicados</p>
+      </div>
+
+      <!-- Paginación -->
+      <div class="pagination" *ngIf="filteredPortfolios.length > 0">
+        <button 
+          class="pagination-btn"
+          [disabled]="currentPage === 1"
+          (click)="goToPage(currentPage - 1)">
+          ← Anterior
+        </button>
+
+        <div class="pagination-numbers">
+          <button
+            *ngFor="let page of pageNumbers"
+            class="pagination-number"
+            [class.active]="page === currentPage"
+            (click)="goToPage(page)">
+            {{ page }}
+          </button>
+        </div>
+
+        <button 
+          class="pagination-btn"
+          [disabled]="currentPage === totalPages"
+          (click)="goToPage(currentPage + 1)">
+          Siguiente →
+        </button>
+
+        <div class="pagination-info">
+          Mostrando {{ (currentPage - 1) * itemsPerPage + 1 }} - 
+          {{ Math.min(currentPage * itemsPerPage, filteredPortfolios.length) }} 
+          de {{ filteredPortfolios.length }} registros
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Modal de Actualización de Pago -->
+  <app-actualizacion-pago-modal
+    [isOpen]="isModalOpen"
+    [portfolio]="selectedPortfolio"
+    (close)="closeActualizacionModal()"
+    (submitForm)="onActualizacionSubmit($event)">
+  </app-actualizacion-pago-modal>
+</div>
+

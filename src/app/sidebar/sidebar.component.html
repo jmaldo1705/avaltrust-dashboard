@@ -126,6 +126,31 @@
           <div class="nav-accent"></div>
         </a>
 
+        <!-- Estado Cartera - Solo para ADMIN y USER -->
+        <a class="nav-link"
+           *ngIf="!auth.hasRole('ROLE_AFIANZADO')"
+           [class.active]="isActive('/estado-cartera')"
+           (click)="navigateTo('/estado-cartera')">
+          <div class="nav-link-inner">
+            <div class="nav-icon-wrapper">
+              <div class="nav-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                  <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+                  <polyline points="9,22 9,12 15,12 15,22"/>
+                  <line x1="9" y1="6" x2="9" y2="6.01"/>
+                  <line x1="12" y1="6" x2="12" y2="6.01"/>
+                  <line x1="15" y1="6" x2="15" y2="6.01"/>
+                </svg>
+              </div>
+            </div>
+            <div class="nav-content">
+              <span class="nav-title">Estado Cartera</span>
+              <span class="nav-description">Listado de cartera</span>
+            </div>
+          </div>
+          <div class="nav-accent"></div>
+        </a>
+
         <!-- Cargue Siniestros - Solo para ADMIN y USER -->
         <a class="nav-link"
            *ngIf="!auth.hasRole('ROLE_AFIANZADO')"

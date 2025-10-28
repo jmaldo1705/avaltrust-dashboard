@@ -147,4 +147,38 @@ export class PortfolioService {
     }
     return this.http.get<{ sumValorAval: number; porcentajeCapitalizacion: number }>(`${this.baseUrl}/sum-valor-aval`, { params: queryParams });
   }
+
+  /**
+   * Obtener todos los registros de cartera del aliado estratégico del usuario
+   * Si se pasa aliadoId (solo ADMIN), filtra por ese aliado específico
+   */
+  getAllPortfolios(params: { aliadoId?: number } = {}): Observable<any[]> {
+    const queryParams: any = {};
+    if (params.aliadoId) {
+      queryParams.aliadoId = params.aliadoId.toString();
+    }
+    return this.http.get<any[]>(`${this.baseUrl}/all`, { params: queryParams });
+  }
+
+  /**
+   * Crear una actualización de pago (historial)
+   */
+  createActualizacionPago(data: any): Observable<any> {
+    const headers = new HttpHeaders({
+      'Content-Type': 'application/json'
+    });
+
+    // Agregar el usuario logueado a los datos de auditoría
+    const user = this.authService.user();
+    const dataWithAudit = {
+      ...data,
+      creadoPor: user?.username || 'sistema'
+    };
+
+    return this.http.post<any>(
+      `${this.baseUrl}/actualizacion-pago`,
+      dataWithAudit,
+      { headers }
+    );
+  }
 }

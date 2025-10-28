@@ -197,13 +197,13 @@ export class PortfolioComponent implements OnInit {
   calculateTotalDebt() {
     const formValue = this.portfolioForm.value;
     const valorDesembolso = Number(formValue.valorDesembolso) || 0;
-    const valorAval = Number(formValue.valorAval) || 0;
     const interes = Number(formValue.interes) || 0;
     const otrosConceptos = Number(formValue.otrosConceptos) || 0;
-    const abonoAval = Number(formValue.abonoAval) || 0;
     const abonoCapital = Number(formValue.abonoCapital) || 0;
 
-    const totalDeuda = valorDesembolso + valorAval + interes + otrosConceptos - abonoAval - abonoCapital;
+    // FÓRMULA CORRECTA: Total Deuda = Valor Desembolso + Interés + Otros Conceptos - Abono Capital
+    // NO incluye Valor Aval (fianza) ni Abono Aval
+    const totalDeuda = valorDesembolso + interes + otrosConceptos - abonoCapital;
 
     this.portfolioForm.patchValue({ totalDeuda: totalDeuda }, { emitEvent: false });
   }
