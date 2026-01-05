@@ -120,8 +120,8 @@
 </div>
 
 <!-- Modal -->
-<div class="modal-overlay" *ngIf="showModal" (click)="onOverlayClick($event)">
-  <div class="modal-content" (click)="$event.stopPropagation()" (mousedown)="$event.stopPropagation()">
+<div class="modal-overlay" *ngIf="showModal">
+  <div class="modal-content" (click)="$event.stopPropagation()">
     <div class="modal-header">
       <h2>{{ modalMode === 'create' ? 'Nuevo Aliado Estratégico' : 'Editar Aliado Estratégico' }}</h2>
       <button class="btn-close" (click)="closeModal()">×</button>

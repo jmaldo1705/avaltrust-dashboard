@@ -9,12 +9,15 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
   const router = inject(Router);
   const token = authService.getAccessToken();
 
-  // No agregar token a requests de auth
-  if (req.url.includes('/api/auth/')) {
+  // No agregar token solo a los endpoints públicos de auth
+  const publicAuthEndpoints = ['/api/auth/login', '/api/auth/register', '/api/auth/refresh'];
+  const isPublicAuthEndpoint = publicAuthEndpoints.some(endpoint => req.url.includes(endpoint));
+  
+  if (isPublicAuthEndpoint) {
     return next(req);
   }
 
-  // Agregar token si está disponible
+  // Agregar token si está disponible (incluyendo /api/auth/change-password)
   const authReq = token
     ? req.clone({
       setHeaders: {

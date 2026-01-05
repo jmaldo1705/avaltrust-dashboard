@@ -235,6 +235,40 @@
                     {{ getFieldError('tipoCliente') }}
                   </div>
                 </div>
+
+                <!-- WhatsApp -->
+                <div class="form-group">
+                  <label for="whatsapp" class="form-label">
+                    Número de WhatsApp
+                  </label>
+                  <input
+                    id="whatsapp"
+                    type="tel"
+                    formControlName="whatsapp"
+                    class="form-control"
+                    placeholder="Ej: +57 300 1234567"
+                    [class.error]="getFieldError('whatsapp')">
+                  <div class="error-message" *ngIf="getFieldError('whatsapp')">
+                    {{ getFieldError('whatsapp') }}
+                  </div>
+                </div>
+
+                <!-- Correo Electrónico -->
+                <div class="form-group">
+                  <label for="email" class="form-label">
+                    Correo Electrónico
+                  </label>
+                  <input
+                    id="email"
+                    type="email"
+                    formControlName="email"
+                    class="form-control"
+                    placeholder="correo@ejemplo.com"
+                    [class.error]="getFieldError('email')">
+                  <div class="error-message" *ngIf="getFieldError('email')">
+                    {{ getFieldError('email') }}
+                  </div>
+                </div>
               </div>
             </div>
 

@@ -1,6 +1,7 @@
 import { Routes } from '@angular/router';
 import { authGuard } from './auth/auth.guard';
 import { LoginComponent } from './login/login.component';
+import { ChangePasswordComponent } from './auth/change-password.component';
 import { DashboardComponent } from './dashboard/dashboard.component';
 import { PortfolioComponent } from './portfolio/portfolio.component';
 import { ReportsComponent } from './reports/reports.component';
@@ -26,6 +27,12 @@ export const routes: Routes = [
     path: 'login',
     component: LoginComponent,
     title: 'Iniciar sesión - Avaltrust'
+  },
+  {
+    path: 'change-password',
+    component: ChangePasswordComponent,
+    canActivate: [authGuard],
+    title: 'Cambiar Contraseña - Avaltrust'
   },
   {
     path: 'documentos',

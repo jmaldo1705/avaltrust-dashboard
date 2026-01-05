@@ -37,9 +37,18 @@ export class LoginComponent {
     this.auth.login(this.username.trim(), this.password)
       .subscribe({
         next: () => {
-          const returnUrl = this.route.snapshot.queryParamMap.get('returnUrl');
-
           this.loading.set(false);
+
+          // Verificar si debe cambiar contraseña
+          const user = this.auth.user();
+          if (user && (user as any).mustChangePassword) {
+            // Redirigir al cambio de contraseña
+            this.router.navigate(['/change-password']);
+            return;
+          }
+
+          // Si no necesita cambiar contraseña, redirigir normalmente
+          const returnUrl = this.route.snapshot.queryParamMap.get('returnUrl');
 
           if (returnUrl && returnUrl !== '/admin' && returnUrl !== '/user') {
             this.router.navigateByUrl(returnUrl);

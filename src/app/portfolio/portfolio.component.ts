@@ -166,6 +166,8 @@ export class PortfolioComponent implements OnInit {
       nombres: ['', [Validators.required]],
       apellidos: ['', [Validators.required]],
       tipoCliente: ['', [Validators.required]],
+      whatsapp: [''],
+      email: ['', [Validators.email]],
       fechaDesembolso: ['', [Validators.required]],
       plazoInicial: ['', [Validators.required, Validators.min(1), Validators.max(360)]],
       valorDesembolso: ['', [Validators.required, Validators.min(0.01)]],

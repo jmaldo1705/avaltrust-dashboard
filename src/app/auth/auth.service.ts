@@ -13,6 +13,7 @@ export type AuthUser = {
   roles?: string[];
   email?: string;
   isAdmin?: boolean;
+  mustChangePassword?: boolean;
 };
 
 export type UserProfile = {
@@ -42,6 +43,7 @@ export type LoginResponse = {
   accessToken: string;
   refreshToken: string;
   expiresIn: number;
+  mustChangePassword?: boolean;
 };
 
 export type RefreshRequest = {
@@ -202,7 +204,8 @@ export class AuthService {
             username: response.username,
             accessToken: response.accessToken,
             refreshToken: response.refreshToken,
-            expiresIn: Math.floor(Date.now() / 1000) + response.expiresIn
+            expiresIn: Math.floor(Date.now() / 1000) + response.expiresIn,
+            mustChangePassword: response.mustChangePassword || false
           };
 
           this._user.set(user);
@@ -522,5 +525,38 @@ export class AuthService {
     } else {
       return 'Error desconocido. Intenta nuevamente.';
     }
+  }
+
+  /**
+   * Cambia la contraseña del usuario autenticado
+   */
+  changePassword(currentPassword: string, newPassword: string): Observable<any> {
+    const httpOptions = {
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json'
+      }
+    };
+
+    return this.http.post(`${this.API_URL}/change-password`, {
+      currentPassword,
+      newPassword
+    }, httpOptions).pipe(
+      tap((response: any) => {
+        // Actualizar el flag mustChangePassword en el usuario
+        const currentUser = this._user();
+        if (currentUser) {
+          const updatedUser: AuthUser = {
+            ...currentUser,
+            mustChangePassword: false
+          };
+          this._user.set(updatedUser);
+          this.writeToStorage(updatedUser);
+        }
+      }),
+      catchError((error: HttpErrorResponse) => {
+        throw new Error(this.getErrorMessage(error));
+      })
+    );
   }
 }
