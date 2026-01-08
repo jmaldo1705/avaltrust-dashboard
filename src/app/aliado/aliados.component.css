@@ -346,6 +346,30 @@ textarea.form-control {
   min-height: 80px;
 }
 
+/* Divisor de sección en formularios */
+.form-section-divider {
+  display: flex;
+  align-items: center;
+  margin: 1.5rem 0;
+  color: #64748b;
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.form-section-divider::before,
+.form-section-divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, #e2e8f0, transparent);
+}
+
+.form-section-divider span {
+  padding: 0 1rem;
+  background: #f8fafc;
+  white-space: nowrap;
+}
+
 /* Estados de carga */
 .loading-spinner,
 .no-data {

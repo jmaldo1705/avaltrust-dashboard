@@ -16,6 +16,7 @@ import { AdminCursosComponent } from './admin/cursos/admin-cursos.component';
 import { CursoFormComponent } from './admin/cursos/curso-form.component';
 import { EvaluacionFormComponent } from './admin/cursos/evaluacion-form.component';
 import { EstadoCarteraComponent } from './estado-cartera/estado-cartera.component';
+import { CertificadosComponent } from './certificados/certificados.component';
 
 export const routes: Routes = [
   { 
@@ -39,6 +40,13 @@ export const routes: Routes = [
     component: ReportsComponent,
     canActivate: [authGuard],
     data: { roles: ['ROLE_ADMIN', 'ROLE_USER'] } // NO para AFIANZADO
+  },
+  {
+    path: 'certificados',
+    component: CertificadosComponent,
+    canActivate: [authGuard],
+    data: { roles: ['ROLE_ADMIN', 'ROLE_USER'] }, // NO para AFIANZADO
+    title: 'Certificados - Avaltrust'
   },
   {
     path: 'dashboard',

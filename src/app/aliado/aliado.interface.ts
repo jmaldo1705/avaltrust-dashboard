@@ -15,6 +15,10 @@ export interface AliadoEstrategico {
   usuarioModificacion?: string;
   observaciones?: string;
   porcentajeCapitalizacion?: number;
+  // Campos para Certificado de Ingresos para Terceros
+  nombreContador?: string;
+  tarjetaProfesionalContador?: string;
+  nombreRepresentanteLegal?: string;
 }
 
 /**
@@ -29,6 +33,10 @@ export interface AliadoEstrategicoRequest {
   activo?: boolean;
   observaciones?: string;
   porcentajeCapitalizacion?: number;
+  // Campos para Certificado de Ingresos para Terceros
+  nombreContador?: string;
+  tarjetaProfesionalContador?: string;
+  nombreRepresentanteLegal?: string;
 }
 
 /**
