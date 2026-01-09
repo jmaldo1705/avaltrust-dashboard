@@ -33,6 +33,15 @@
         </p>
       </div>
       <div class="header-actions">
+        <!-- Botón de eliminar cartera (Solo ADMIN) -->
+        <button 
+          *ngIf="isAdmin"
+          class="btn-delete-bulk" 
+          (click)="openDeleteModal()" 
+          title="Eliminar cartera por fechas">
+          <span class="btn-icon">🗑️</span>
+          Eliminar Cartera
+        </button>
         <button class="btn-upload" (click)="openUploadModal()" title="Carga Masiva">
           <span class="btn-icon">📂</span>
           Carga Masiva
@@ -171,7 +180,7 @@
               <th>Valor Desembolso</th>
               <th>Valor Fianza</th>
               <th>Total Deuda</th>
-              <th>Fecha Vencimiento</th>
+              <th>Fecha Desembolso</th>
               <th>Días Mora</th>
               <th>Estado</th>
               <th class="th-actions">Acciones</th>
@@ -190,7 +199,7 @@
               <td class="td-amount">{{ formatCurrency(portfolio.valorDesembolso) }}</td>
               <td class="td-amount">{{ formatCurrency(portfolio.valorAval) }}</td>
               <td class="td-amount td-total">{{ formatCurrency(portfolio.totalDeuda) }}</td>
-              <td>{{ formatDate(portfolio.fechaVencimiento) }}</td>
+              <td>{{ formatDate(portfolio.fechaDesembolso) }}</td>
               <td class="td-mora" [class.has-mora]="portfolio.diasMora > 0">
                 {{ portfolio.diasMora }}
               </td>
@@ -380,5 +389,157 @@
       </div>
     </div>
   </div>
-</div>
 
+  <!-- Modal de Confirmación de Eliminación -->
+  <div class="modal-overlay" *ngIf="isDeleteModalOpen" (click)="closeDeleteModal()">
+    <div class="modal-container delete-modal" (click)="$event.stopPropagation()">
+      <div class="modal-header delete-modal-header">
+        <h3>🗑️ Eliminar Cartera por Fecha de Carga</h3>
+        <button class="btn-close" (click)="closeDeleteModal()" type="button">✕</button>
+      </div>
+      
+      <div class="modal-content delete-modal-content">
+        <div class="delete-warning">
+          <div class="warning-icon">⚠️</div>
+          <p class="warning-text">Esta acción eliminará <strong>DEFINITIVAMENTE</strong> los registros seleccionados</p>
+        </div>
+
+        <div class="delete-form">
+          <!-- Selector de Aliado (si es admin y hay aliados) -->
+          <div class="form-group" *ngIf="isAdmin && aliados.length > 0">
+            <label class="form-label">Aliado Estratégico (opcional)</label>
+            <select 
+              [(ngModel)]="deleteAliadoId" 
+              class="form-control"
+              (change)="contarRegistrosAEliminar()">
+              <option [ngValue]="null">Todos los aliados</option>
+              <option *ngFor="let aliado of aliados" [ngValue]="aliado.id">
+                {{ aliado.nombre }}
+              </option>
+            </select>
+          </div>
+
+          <!-- Fecha Inicio -->
+          <div class="form-group">
+            <label class="form-label">Fecha de Carga Desde <span class="required">*</span></label>
+            <input 
+              type="date" 
+              [(ngModel)]="deleteFechaInicio"
+              class="form-control"
+              (change)="contarRegistrosAEliminar()">
+          </div>
+
+          <!-- Fecha Fin -->
+          <div class="form-group">
+            <label class="form-label">Fecha de Carga Hasta <span class="required">*</span></label>
+            <input 
+              type="date" 
+              [(ngModel)]="deleteFechaFin"
+              class="form-control"
+              (change)="contarRegistrosAEliminar()">
+          </div>
+
+          <!-- Contador de registros -->
+          <div class="records-count" *ngIf="deleteFechaInicio && deleteFechaFin">
+            <div class="count-box" [class.has-records]="registrosAEliminar > 0">
+              <span *ngIf="isCountingRecords" class="counting">Contando...</span>
+              <span *ngIf="!isCountingRecords">
+                <strong>{{ registrosAEliminar }}</strong> registro(s) serán eliminados
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <p class="delete-note danger">
+          <strong>⚠️ ADVERTENCIA:</strong> Los registros eliminados NO podrán ser recuperados. 
+          Esta acción es irreversible.
+        </p>
+      </div>
+
+      <div class="modal-footer delete-modal-footer">
+        <button 
+          type="button" 
+          class="btn-cancel" 
+          (click)="closeDeleteModal()"
+          [disabled]="isDeleting">
+          Cancelar
+        </button>
+        <button 
+          type="button" 
+          class="btn-confirm-delete" 
+          (click)="confirmarEliminacion()"
+          [disabled]="isDeleting || !deleteFechaInicio || !deleteFechaFin || registrosAEliminar === 0">
+          <span *ngIf="isDeleting" class="loading-spinner"></span>
+          {{ isDeleting ? 'Eliminando...' : 'Eliminar Definitivamente' }}
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal de Exportación Excel -->
+  <div class="modal-overlay" *ngIf="isExportModalOpen" (click)="closeExportModal()">
+    <div class="modal-container export-modal" (click)="$event.stopPropagation()">
+      <div class="modal-header export-modal-header">
+        <h3>📊 Exportar Cartera a Excel</h3>
+        <button class="btn-close" (click)="closeExportModal()" type="button">✕</button>
+      </div>
+      
+      <div class="modal-content export-modal-content">
+        <p class="export-description">
+          Seleccione los filtros para exportar la cartera. Si no selecciona fechas, se exportará toda la cartera.
+        </p>
+
+        <div class="export-form">
+          <!-- Selector de Aliado (si es admin y hay aliados) -->
+          <div class="form-group" *ngIf="isAdmin && aliados.length > 0">
+            <label class="form-label">Aliado Estratégico (opcional)</label>
+            <select 
+              [(ngModel)]="exportAliadoId" 
+              class="form-control">
+              <option [ngValue]="null">Todos los aliados</option>
+              <option *ngFor="let aliado of aliados" [ngValue]="aliado.id">
+                {{ aliado.nombre }}
+              </option>
+            </select>
+          </div>
+
+          <!-- Fecha Inicio -->
+          <div class="form-group">
+            <label class="form-label">Fecha de Carga Desde (opcional)</label>
+            <input 
+              type="date" 
+              [(ngModel)]="exportFechaInicio"
+              class="form-control">
+          </div>
+
+          <!-- Fecha Fin -->
+          <div class="form-group">
+            <label class="form-label">Fecha de Carga Hasta (opcional)</label>
+            <input 
+              type="date" 
+              [(ngModel)]="exportFechaFin"
+              class="form-control">
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-footer export-modal-footer">
+        <button 
+          type="button" 
+          class="btn-cancel" 
+          (click)="closeExportModal()"
+          [disabled]="isExporting">
+          Cancelar
+        </button>
+        <button 
+          type="button" 
+          class="btn-export-confirm" 
+          (click)="confirmarExportacion()"
+          [disabled]="isExporting">
+          <span *ngIf="isExporting" class="loading-spinner"></span>
+          {{ isExporting ? 'Exportando...' : 'Descargar Excel' }}
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

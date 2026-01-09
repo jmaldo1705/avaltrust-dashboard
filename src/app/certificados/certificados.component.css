@@ -4,7 +4,7 @@
 }
 
 .main-content {
-  margin-left: 0;
+  margin-left: 280px;
   padding: 80px 20px 20px;
   transition: margin-left 0.3s ease;
 }
@@ -484,7 +484,26 @@
   background: #f8fafc;
 }
 
-/* Responsive */
+/* Responsive - Pantallas medianas */
+@media (max-width: 1024px) {
+  .main-content {
+    margin-left: 0 !important;
+  }
+
+  .main-content.sidebar-open {
+    margin-left: 0;
+  }
+
+  .certificates-container {
+    padding: 1.5rem;
+  }
+
+  .certificate-types-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* Responsive - Pantallas pequeñas */
 @media (max-width: 768px) {
   .main-content {
     padding: 70px 15px 15px;

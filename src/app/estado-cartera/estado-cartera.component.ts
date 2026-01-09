@@ -105,6 +105,22 @@ export class EstadoCarteraComponent implements OnInit {
   isDragging = false;
   uploadResult: any = null;
 
+  // Modal de eliminación por rango de fechas
+  isDeleteModalOpen = false;
+  isDeleting = false;
+  deleteFechaInicio = '';
+  deleteFechaFin = '';
+  deleteAliadoId: number | null = null;
+  registrosAEliminar = 0;
+  isCountingRecords = false;
+
+  // Modal de exportación Excel
+  isExportModalOpen = false;
+  isExporting = false;
+  exportFechaInicio = '';
+  exportFechaFin = '';
+  exportAliadoId: number | null = null;
+
   ngOnInit() {
     this.checkUserRole();
     if (this.isAdmin) {
@@ -251,8 +267,46 @@ export class EstadoCarteraComponent implements OnInit {
   }
 
   exportToExcel() {
-    // TODO: Implementar exportación a Excel
-    console.log('Exportar a Excel');
+    // Abrir modal de exportación
+    this.isExportModalOpen = true;
+    this.exportFechaInicio = '';
+    this.exportFechaFin = '';
+    this.exportAliadoId = this.selectedAliadoId; // Pre-seleccionar el aliado actual si hay uno
+  }
+
+  closeExportModal() {
+    this.isExportModalOpen = false;
+    this.isExporting = false;
+  }
+
+  confirmarExportacion() {
+    this.isExporting = true;
+    
+    this.portfolioService.exportarCarteraExcel(
+      this.exportFechaInicio || undefined,
+      this.exportFechaFin || undefined,
+      this.exportAliadoId || undefined
+    ).subscribe({
+      next: (blob) => {
+        // Crear enlace de descarga
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `cartera_${new Date().toISOString().split('T')[0]}.xlsx`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        window.URL.revokeObjectURL(url);
+        
+        this.toastService.success('Excel descargado correctamente');
+        this.closeExportModal();
+      },
+      error: (error) => {
+        console.error('Error al exportar:', error);
+        this.toastService.error('Error al exportar la cartera');
+        this.isExporting = false;
+      }
+    });
   }
 
   exportToPDF() {
@@ -497,5 +551,88 @@ export class EstadoCarteraComponent implements OnInit {
       }
     });
   }
-}
 
+  // ========== Métodos de eliminación por rango de fechas ==========
+
+  /**
+   * Abre el modal de eliminación por rango de fechas
+   */
+  openDeleteModal() {
+    this.isDeleteModalOpen = true;
+    this.deleteFechaInicio = '';
+    this.deleteFechaFin = '';
+    this.deleteAliadoId = this.selectedAliadoId;
+    this.registrosAEliminar = 0;
+  }
+
+  /**
+   * Cierra el modal de eliminación
+   */
+  closeDeleteModal() {
+    this.isDeleteModalOpen = false;
+    this.deleteFechaInicio = '';
+    this.deleteFechaFin = '';
+    this.registrosAEliminar = 0;
+  }
+
+  /**
+   * Cuenta los registros que serían eliminados
+   */
+  contarRegistrosAEliminar() {
+    if (!this.deleteFechaInicio || !this.deleteFechaFin) {
+      this.registrosAEliminar = 0;
+      return;
+    }
+
+    this.isCountingRecords = true;
+    this.portfolioService.contarPorRangoFecha(
+      this.deleteFechaInicio,
+      this.deleteFechaFin,
+      this.deleteAliadoId || undefined
+    ).subscribe({
+      next: (response) => {
+        this.registrosAEliminar = response.cantidad || 0;
+        this.isCountingRecords = false;
+      },
+      error: (error) => {
+        console.error('Error al contar registros:', error);
+        this.registrosAEliminar = 0;
+        this.isCountingRecords = false;
+      }
+    });
+  }
+
+  /**
+   * Confirma y ejecuta la eliminación definitiva por rango de fechas
+   */
+  confirmarEliminacion() {
+    if (!this.deleteFechaInicio || !this.deleteFechaFin) {
+      this.toastService.error('Debe seleccionar un rango de fechas');
+      return;
+    }
+
+    if (this.registrosAEliminar === 0) {
+      this.toastService.warning('No hay registros para eliminar en el rango seleccionado');
+      return;
+    }
+
+    this.isDeleting = true;
+    this.portfolioService.eliminarPorRangoFecha(
+      this.deleteFechaInicio,
+      this.deleteFechaFin,
+      this.deleteAliadoId || undefined
+    ).subscribe({
+      next: (response) => {
+        this.toastService.success(response.message || `${response.eliminados} registros eliminados definitivamente`);
+        this.closeDeleteModal();
+        this.loadPortfolioData();
+        this.isDeleting = false;
+      },
+      error: (error) => {
+        console.error('Error al eliminar registros:', error);
+        this.toastService.error(error.error?.message || 'Error al eliminar los registros');
+        this.isDeleting = false;
+      }
+    });
+  }
+}

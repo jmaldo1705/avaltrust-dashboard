@@ -216,4 +216,57 @@ export class PortfolioService {
       { headers }
     );
   }
+
+  /**
+   * Contar registros por rango de fecha de desembolso
+   * Solo disponible para administradores
+   */
+  contarPorRangoFecha(fechaInicio: string, fechaFin: string, aliadoId?: number): Observable<{ success: boolean; cantidad: number }> {
+    const params: any = { fechaInicio, fechaFin };
+    if (aliadoId) {
+      params.aliadoId = aliadoId.toString();
+    }
+    return this.http.get<{ success: boolean; cantidad: number }>(`${this.baseUrl}/contar-por-fecha`, { params });
+  }
+
+  /**
+   * Eliminar DEFINITIVAMENTE registros por rango de fecha de desembolso
+   * Solo disponible para administradores
+   */
+  eliminarPorRangoFecha(fechaInicio: string, fechaFin: string, aliadoId?: number): Observable<{ success: boolean; message: string; eliminados: number }> {
+    const params: any = { fechaInicio, fechaFin };
+    if (aliadoId) {
+      params.aliadoId = aliadoId.toString();
+    }
+    return this.http.delete<{ success: boolean; message: string; eliminados: number }>(`${this.baseUrl}/por-fecha`, { params });
+  }
+
+  /**
+   * Exportar cartera a Excel con filtros opcionales
+   * @param fechaInicio Fecha de inicio del rango (opcional)
+   * @param fechaFin Fecha de fin del rango (opcional)
+   * @param aliadoId ID del aliado estratégico (opcional)
+   */
+  exportarCarteraExcel(fechaInicio?: string, fechaFin?: string, aliadoId?: number): Observable<Blob> {
+    const params: any = {};
+    if (fechaInicio) {
+      params.fechaInicio = fechaInicio;
+    }
+    if (fechaFin) {
+      params.fechaFin = fechaFin;
+    }
+    if (aliadoId) {
+      params.aliadoId = aliadoId.toString();
+    }
+
+    const headers = new HttpHeaders({
+      'Accept': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/octet-stream'
+    });
+
+    return this.http.get(`${this.baseUrl}/exportar-excel`, {
+      responseType: 'blob',
+      params,
+      headers
+    });
+  }
 }

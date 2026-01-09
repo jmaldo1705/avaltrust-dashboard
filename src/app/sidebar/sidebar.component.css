@@ -396,8 +396,22 @@
 }
 
 /* Responsive */
-@media (min-width: 768px) {
+@media (min-width: 1025px) {
   .sidebar {
+    left: 0;
+  }
+}
+
+@media (max-width: 1024px) {
+  .sidebar {
+    width: 280px;
+    left: -280px;
+    top: 64px;
+    height: calc(100vh - 64px);
+    z-index: 1100;
+  }
+
+  .sidebar.open {
     left: 0;
   }
 }
