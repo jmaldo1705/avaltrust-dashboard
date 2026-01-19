@@ -1361,18 +1361,45 @@
    ===================================================== */
 
 .export-modal {
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
   max-width: 480px;
   width: 95%;
+  max-height: 90vh;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  animation: slideIn 0.3s ease-out;
 }
 
 .export-modal-header {
   background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
   color: white;
   padding: 1.25rem 1.5rem;
-  border-radius: 12px 12px 0 0;
+  border-radius: 0;
   display: flex;
   justify-content: space-between;
   align-items: center;
+}
+
+.export-modal-header .btn-close {
+  background: rgba(255, 255, 255, 0.2);
+  border: none;
+  color: white;
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 1.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s ease;
+}
+
+.export-modal-header .btn-close:hover {
+  background: rgba(255, 255, 255, 0.3);
 }
 
 .export-modal-header h3 {
