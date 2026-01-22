@@ -57,6 +57,14 @@ export interface DelinquentUserDto {
   aliadoEstrategicoNombre?: string;
 }
 
+export interface DelinquentUsersPageDto {
+  content: DelinquentUserDto[];
+  page: number;
+  size: number;
+  totalElements: number;
+  totalPages: number;
+}
+
 export interface MoraTimelineItemDto {
   date: string; // ISO string
   categories: MoraCategoryDto[];
@@ -143,6 +151,31 @@ export class DashboardService {
   getTopDelinquents(params: { aliadoIds?: number[] } = {}): Observable<DelinquentUserDto[]> {
     const queryParams = this.buildAliadoParams(params.aliadoIds);
     return this.http.get<DelinquentUserDto[]>(`${this.baseUrl}/api/users/top-delinquents`, { params: queryParams });
+  }
+
+  /**
+   * Obtiene usuarios con mora paginados desde el backend.
+   */
+  getDelinquentUsers(params: {
+    page?: number;
+    size?: number;
+    filter?: string;
+    sortBy?: string;
+    sortDir?: string;
+    aliadoIds?: number[];
+  } = {}): Observable<DelinquentUsersPageDto> {
+    const queryParams: any = {};
+    
+    if (params.page !== undefined) queryParams.page = params.page.toString();
+    if (params.size !== undefined) queryParams.size = params.size.toString();
+    if (params.filter) queryParams.filter = params.filter;
+    if (params.sortBy) queryParams.sortBy = params.sortBy;
+    if (params.sortDir) queryParams.sortDir = params.sortDir;
+    if (params.aliadoIds && params.aliadoIds.length > 0) {
+      queryParams.aliadoIds = params.aliadoIds.join(',');
+    }
+    
+    return this.http.get<DelinquentUsersPageDto>(`${this.baseUrl}/api/users/delinquents`, { params: queryParams });
   }
 
   private buildAliadoParams(aliadoIds?: number[]): any {

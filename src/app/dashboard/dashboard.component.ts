@@ -135,12 +135,18 @@ export class DashboardComponent implements OnInit {
 
   topDelinquentUsers: DelinquentUser[] = [];
 
-  // Controles de tabla: filtro, orden y paginación (Usuarios con Mayor Mora)
+  // Controles de tabla: filtro, orden y paginación (Usuarios con Mora) - paginación desde backend
   delinquentsFilter: string = '';
   delinquentsSortBy: 'name' | 'debtAmount' | 'delayDays' | 'guaranteeRate' = 'delayDays';
   delinquentsSortDir: 'asc' | 'desc' = 'desc';
-  delinquentsPageSize: number = 5;
+  delinquentsPageSize: number = 10;
   delinquentsCurrentPage: number = 1;
+  delinquentsTotalElements: number = 0;
+  delinquentsTotalPages: number = 1;
+  delinquentsLoading: boolean = false;
+
+  // Debounce para filtro de texto
+  private delinquentsFilterTimeout: any = null;
 
 
   // Modal detalle de usuario moroso
@@ -208,19 +214,50 @@ export class DashboardComponent implements OnInit {
       error: (err) => console.error('Error cargando alertas', err)
     });
 
-    // Top usuarios morosos
-    this.dashboardService.getTopDelinquents(params).subscribe({
-      next: (data: any[]) => {
-        this.topDelinquentUsers = (data || []).map((u: any) => {
-          const uid = u.userId ?? u.user_id ?? u.uid ?? u.userUid ?? u.usuarioUid ?? u.clienteUid ?? u.cliente_id ?? u.id;
-          return { ...u, id: uid } as any;
-        });
-      },
-      error: (err) => console.error('Error cargando top morosos', err)
-    });
+    // Cargar usuarios con mora (paginado desde backend)
+    this.loadDelinquentUsers();
 
     // Datos dependientes del período seleccionado
     this.loadPaymentData();
+  }
+
+  /**
+   * Carga usuarios con mora desde el backend con paginación.
+   */
+  private loadDelinquentUsers() {
+    this.delinquentsLoading = true;
+    
+    const params: any = {
+      page: this.delinquentsCurrentPage,
+      size: this.delinquentsPageSize,
+      sortBy: this.delinquentsSortBy,
+      sortDir: this.delinquentsSortDir
+    };
+    
+    if (this.delinquentsFilter && this.delinquentsFilter.trim()) {
+      params.filter = this.delinquentsFilter.trim();
+    }
+    
+    if (this.selectedAliadoIds && this.selectedAliadoIds.length > 0) {
+      params.aliadoIds = this.selectedAliadoIds;
+    }
+    
+    this.dashboardService.getDelinquentUsers(params).subscribe({
+      next: (response: any) => {
+        this.topDelinquentUsers = (response.content || []).map((u: any) => {
+          const uid = u.userId ?? u.user_id ?? u.uid ?? u.userUid ?? u.usuarioUid ?? u.clienteUid ?? u.cliente_id ?? u.id;
+          return { ...u, id: uid } as any;
+        });
+        this.delinquentsTotalElements = response.totalElements || 0;
+        this.delinquentsTotalPages = response.totalPages || 1;
+        this.delinquentsCurrentPage = response.page || 1;
+        this.delinquentsLoading = false;
+      },
+      error: (err) => {
+        console.error('Error cargando usuarios con mora', err);
+        this.delinquentsLoading = false;
+      }
+    });
   }
 
   // Cobertura: traer valor desde el servicio y dividir entre 1.19 y luego aplicar porcentaje de capitalización
@@ -318,64 +355,21 @@ export class DashboardComponent implements OnInit {
     return 'critical';
   }
 
-  // ===== Tabla "Usuarios con Mayor Mora" — Filtro, Orden y Paginación =====
-  get processedDelinquents(): DelinquentUser[] {
-    let arr = [...(this.topDelinquentUsers || [])];
-
-    const q = (this.delinquentsFilter || '').trim().toLowerCase();
-    if (q) {
-      const normDigits = q.replace(/\D+/g, '');
-      arr = arr.filter(u => {
-        const name = (u.name || '').toLowerCase();
-        const id = (u.identification || '').replace(/\D+/g, '');
-        const oblig = (u.guaranteeRate || '').toLowerCase();
-        return name.includes(q) || (!!normDigits && id.includes(normDigits)) || oblig.includes(q);
-      });
-    }
-
-    const dir = this.delinquentsSortDir === 'asc' ? 1 : -1;
-    const field = this.delinquentsSortBy;
-    arr.sort((a: any, b: any) => {
-      let va = a[field];
-      let vb = b[field];
-      if (field === 'name' || field === 'guaranteeRate') {
-        va = (va || '').toString().toLowerCase();
-        vb = (vb || '').toString().toLowerCase();
-        if (va < vb) return -1 * dir;
-        if (va > vb) return 1 * dir;
-        return 0;
-      } else {
-        va = Number(va) || 0;
-        vb = Number(vb) || 0;
-        return (va - vb) * dir;
-      }
-    });
-
-    return arr;
-  }
-
-  get delinquentsTotalPages(): number {
-    const total = this.processedDelinquents.length;
-    return total === 0 ? 1 : Math.ceil(total / this.delinquentsPageSize);
-  }
-
+  // ===== Tabla "Usuarios con Mora" — Filtro, Orden y Paginación desde Backend =====
+  
+  // Los datos ya vienen procesados del backend, solo mostramos lo que tenemos
   get visibleDelinquentUsers(): DelinquentUser[] {
-    const totalPages = this.delinquentsTotalPages;
-    if (this.delinquentsCurrentPage > totalPages) {
-      this.delinquentsCurrentPage = totalPages;
-    }
-    const start = (this.delinquentsCurrentPage - 1) * this.delinquentsPageSize;
-    const end = start + this.delinquentsPageSize;
-    return this.processedDelinquents.slice(start, end);
+    return this.topDelinquentUsers || [];
   }
 
   get delinquentsRangeStart(): number {
+    if (this.delinquentsTotalElements === 0) return 0;
     return (this.delinquentsCurrentPage - 1) * this.delinquentsPageSize;
   }
 
   get delinquentsRangeEnd(): number {
-    const end = this.delinquentsRangeStart + this.delinquentsPageSize;
-    return Math.min(end, this.processedDelinquents.length);
+    const end = this.delinquentsRangeStart + this.topDelinquentUsers.length;
+    return Math.min(end, this.delinquentsTotalElements);
   }
 
   get delinquentsPagesArray(): number[] {
@@ -391,11 +385,19 @@ export class DashboardComponent implements OnInit {
   }
 
   onDelinquentsFilterChange() {
-    this.delinquentsCurrentPage = 1;
+    // Usar debounce para evitar llamadas excesivas al backend
+    if (this.delinquentsFilterTimeout) {
+      clearTimeout(this.delinquentsFilterTimeout);
+    }
+    this.delinquentsFilterTimeout = setTimeout(() => {
+      this.delinquentsCurrentPage = 1;
+      this.loadDelinquentUsers();
+    }, 400);
   }
 
   onDelinquentsPageSizeChange(_event?: any) {
     this.delinquentsCurrentPage = 1;
+    this.loadDelinquentUsers();
   }
 
   changeDelinquentsSort(field: 'name' | 'debtAmount' | 'delayDays' | 'guaranteeRate') {
@@ -406,6 +408,7 @@ export class DashboardComponent implements OnInit {
       this.delinquentsSortDir = (field === 'delayDays' || field === 'debtAmount') ? 'desc' : 'asc';
     }
     this.delinquentsCurrentPage = 1;
+    this.loadDelinquentUsers();
   }
 
   getDelinquentsSortIcon(field: 'name' | 'debtAmount' | 'delayDays' | 'guaranteeRate'): string {
@@ -414,16 +417,23 @@ export class DashboardComponent implements OnInit {
   }
 
   prevDelinquentsPage() {
-    if (this.delinquentsCurrentPage > 1) this.delinquentsCurrentPage--;
+    if (this.delinquentsCurrentPage > 1) {
+      this.delinquentsCurrentPage--;
+      this.loadDelinquentUsers();
+    }
   }
 
   nextDelinquentsPage() {
-    if (this.delinquentsCurrentPage < this.delinquentsTotalPages) this.delinquentsCurrentPage++;
+    if (this.delinquentsCurrentPage < this.delinquentsTotalPages) {
+      this.delinquentsCurrentPage++;
+      this.loadDelinquentUsers();
+    }
   }
 
   goToDelinquentsPage(p: number) {
-    if (p >= 1 && p <= this.delinquentsTotalPages) {
+    if (p >= 1 && p <= this.delinquentsTotalPages && p !== this.delinquentsCurrentPage) {
       this.delinquentsCurrentPage = p;
+      this.loadDelinquentUsers();
     }
   }
 
@@ -555,47 +565,74 @@ export class DashboardComponent implements OnInit {
   }
 
   exportTopDelinquents() {
-    try {
-      const data = this.processedDelinquents || [];
-      if (!data.length) {
-        alert('No hay datos para exportar.');
-        return;
-      }
-
-      // Preparar filas con encabezados legibles en español
-      const rows = data.map(u => ({
-        'Nombre': u.name,
-        'Documento': u.identification,
-        'Monto Adeudado': u.debtAmount,
-        'Días de Mora': u.delayDays,
-        'Obligación': u.guaranteeRate
-      }));
-
-      const ws = XLSX.utils.json_to_sheet(rows, {
-        header: ['Nombre', 'Documento', 'Monto Adeudado', 'Días de Mora', 'Obligación']
-      });
-
-      // Ajustar anchos de columna básicos
-      (ws as any)['!cols'] = [
-        { wch: 28 }, // Nombre
-        { wch: 18 }, // Documento
-        { wch: 18 }, // Monto Adeudado
-        { wch: 14 }, // Días de Mora
-        { wch: 16 }  // Obligación
-      ];
-
-      const wb = XLSX.utils.book_new();
-      XLSX.utils.book_append_sheet(wb, ws, 'Mayor mora');
-
-      const pad = (n: number) => n.toString().padStart(2, '0');
-      const now = new Date();
-      const fileName = `usuarios_mayor_mora_${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}_${pad(now.getHours())}-${pad(now.getMinutes())}.xlsx`;
-
-      XLSX.writeFile(wb, fileName);
-    } catch (e) {
-      console.error('Error exportando a Excel', e);
-      alert('Ocurrió un error al exportar el archivo.');
+    // Exportar todos los usuarios con mora (no solo la página actual)
+    // Hacemos una llamada al backend sin paginación (tamaño grande) para obtener todos
+    const params: any = {
+      page: 1,
+      size: 10000, // Obtener todos para exportación
+      sortBy: this.delinquentsSortBy,
+      sortDir: this.delinquentsSortDir
+    };
+    
+    if (this.delinquentsFilter && this.delinquentsFilter.trim()) {
+      params.filter = this.delinquentsFilter.trim();
     }
+    
+    if (this.selectedAliadoIds && this.selectedAliadoIds.length > 0) {
+      params.aliadoIds = this.selectedAliadoIds;
+    }
+    
+    this.dashboardService.getDelinquentUsers(params).subscribe({
+      next: (response: any) => {
+        try {
+          const data = response.content || [];
+          if (!data.length) {
+            alert('No hay datos para exportar.');
+            return;
+          }
+
+          // Preparar filas con encabezados legibles en español
+          const rows = data.map((u: any) => ({
+            'Nombre': u.name,
+            'Documento': u.identification,
+            'Monto Adeudado': u.debtAmount,
+            'Días de Mora': u.delayDays,
+            'Obligación': u.guaranteeRate,
+            'Aliado Estratégico': u.aliadoEstrategicoNombre || 'Sin Aliado'
+          }));
+
+          const ws = XLSX.utils.json_to_sheet(rows, {
+            header: ['Nombre', 'Documento', 'Monto Adeudado', 'Días de Mora', 'Obligación', 'Aliado Estratégico']
+          });
+
+          // Ajustar anchos de columna básicos
+          (ws as any)['!cols'] = [
+            { wch: 28 }, // Nombre
+            { wch: 18 }, // Documento
+            { wch: 18 }, // Monto Adeudado
+            { wch: 14 }, // Días de Mora
+            { wch: 16 }, // Obligación
+            { wch: 22 }  // Aliado Estratégico
+          ];
+
+          const wb = XLSX.utils.book_new();
+          XLSX.utils.book_append_sheet(wb, ws, 'Usuarios con Mora');
+
+          const pad = (n: number) => n.toString().padStart(2, '0');
+          const now = new Date();
+          const fileName = `usuarios_con_mora_${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}_${pad(now.getHours())}-${pad(now.getMinutes())}.xlsx`;
+
+          XLSX.writeFile(wb, fileName);
+        } catch (e) {
+          console.error('Error exportando a Excel', e);
+          alert('Ocurrió un error al exportar el archivo.');
+        }
+      },
+      error: (err) => {
+        console.error('Error obteniendo datos para exportar', err);
+        alert('Ocurrió un error al obtener los datos para exportar.');
+      }
+    });
   }
 
   viewPortfolioDetail(portfolioId: string) {

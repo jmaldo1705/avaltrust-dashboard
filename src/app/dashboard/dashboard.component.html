@@ -179,10 +179,10 @@
 
     </div>
 
-    <!-- Top usuarios con mayor mora -->
+    <!-- Top usuarios con mora -->
     <div class="top-delinquents-card">
       <div class="card-header">
-        <h3>Usuarios con Mayor Mora</h3>
+        <h3>Usuarios con Mora</h3>
         <button class="export-btn" (click)="exportTopDelinquents()">
           <span>📊</span> Exportar
         </button>
@@ -191,7 +191,7 @@
       <div class="table-toolbar">
         <div class="left">
           <input class="search-input" type="text" [(ngModel)]="delinquentsFilter" (ngModelChange)="onDelinquentsFilterChange()" placeholder="Filtrar por nombre, documento u obligación">
-          <span class="result-count">{{ processedDelinquents.length }} resultados</span>
+          <span class="result-count">{{ delinquentsTotalElements }} resultados</span>
         </div>
         <div class="right">
           <span>Por página:</span>
@@ -204,7 +204,7 @@
         </div>
       </div>
 
-      <div class="delinquents-table">
+      <div class="delinquents-table" [class.loading]="delinquentsLoading">
         <div class="table-header">
           <div class="col-name">
             <span class="sortable" [class.active]="delinquentsSortBy==='name'" (click)="changeDelinquentsSort('name')">
@@ -256,19 +256,22 @@
             <button class="action-btn-small" (click)="viewUserDetail(user.id)">Ver</button>
           </div>
         </div>
-        <div class="empty-state" *ngIf="processedDelinquents.length === 0">
-          No hay usuarios para mostrar.
+        <div class="loading-state" *ngIf="delinquentsLoading">
+          <span>Cargando...</span>
+        </div>
+        <div class="empty-state" *ngIf="!delinquentsLoading && visibleDelinquentUsers.length === 0">
+          No hay usuarios con mora para mostrar.
         </div>
       </div>
 
-      <div class="pagination" *ngIf="processedDelinquents.length > 0">
+      <div class="pagination" *ngIf="delinquentsTotalElements > 0">
         <div class="result-count">
-          Mostrando {{ delinquentsRangeStart + 1 }}–{{ delinquentsRangeEnd }} de {{ processedDelinquents.length }}
+          Mostrando {{ delinquentsRangeStart + 1 }}–{{ delinquentsRangeEnd }} de {{ delinquentsTotalElements }}
         </div>
         <div class="page-controls">
-          <button class="page-btn" (click)="prevDelinquentsPage()" [disabled]="delinquentsCurrentPage === 1">«</button>
-          <button class="page-btn" *ngFor="let p of delinquentsPagesArray" [class.active]="p === delinquentsCurrentPage" (click)="goToDelinquentsPage(p)">{{ p }}</button>
-          <button class="page-btn" (click)="nextDelinquentsPage()" [disabled]="delinquentsCurrentPage === delinquentsTotalPages">»</button>
+          <button class="page-btn" (click)="prevDelinquentsPage()" [disabled]="delinquentsCurrentPage === 1 || delinquentsLoading">«</button>
+          <button class="page-btn" *ngFor="let p of delinquentsPagesArray" [class.active]="p === delinquentsCurrentPage" (click)="goToDelinquentsPage(p)" [disabled]="delinquentsLoading">{{ p }}</button>
+          <button class="page-btn" (click)="nextDelinquentsPage()" [disabled]="delinquentsCurrentPage === delinquentsTotalPages || delinquentsLoading">»</button>
         </div>
       </div>
     </div>

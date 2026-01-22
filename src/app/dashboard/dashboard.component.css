@@ -692,6 +692,41 @@
   width: 100%;
   overflow-x: auto;
   box-sizing: border-box;
+  position: relative;
+}
+
+.delinquents-table.loading {
+  opacity: 0.6;
+  pointer-events: none;
+}
+
+.loading-state {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 2rem;
+  color: #64748b;
+  font-size: 0.95rem;
+}
+
+.loading-state span {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.loading-state span::before {
+  content: '';
+  width: 18px;
+  height: 18px;
+  border: 2px solid #e2e8f0;
+  border-top-color: #10b981;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
 }
 
 /* Cabecera ordenable */
