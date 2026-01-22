@@ -565,13 +565,13 @@ export class DashboardComponent implements OnInit {
   }
 
   exportTopDelinquents() {
-    // Exportar todos los usuarios con mora (no solo la página actual)
-    // Hacemos una llamada al backend sin paginación (tamaño grande) para obtener todos
+    // Exportar todos los usuarios con mora que cumplan con los filtros actuales
     const params: any = {
       page: 1,
-      size: 10000, // Obtener todos para exportación
+      size: 50000, // Obtener todos para exportación
       sortBy: this.delinquentsSortBy,
-      sortDir: this.delinquentsSortDir
+      sortDir: this.delinquentsSortDir,
+      exportAll: true // Indicar al backend que es para exportación
     };
     
     if (this.delinquentsFilter && this.delinquentsFilter.trim()) {

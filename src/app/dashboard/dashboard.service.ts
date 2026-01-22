@@ -163,6 +163,7 @@ export class DashboardService {
     sortBy?: string;
     sortDir?: string;
     aliadoIds?: number[];
+    exportAll?: boolean;
   } = {}): Observable<DelinquentUsersPageDto> {
     const queryParams: any = {};
     
@@ -174,6 +175,7 @@ export class DashboardService {
     if (params.aliadoIds && params.aliadoIds.length > 0) {
       queryParams.aliadoIds = params.aliadoIds.join(',');
     }
+    if (params.exportAll) queryParams.exportAll = 'true';
     
     return this.http.get<DelinquentUsersPageDto>(`${this.baseUrl}/api/users/delinquents`, { params: queryParams });
   }
