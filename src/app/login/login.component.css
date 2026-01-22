@@ -1,5 +1,5 @@
 :host{ display:block; min-height:100dvh; }
-.login-page{ position:relative; min-height:100dvh; display:grid; align-items:center; justify-items:center; overflow:hidden; background: radial-gradient(1200px 600px at top right, rgba(59,130,246,0.18) 0%, rgba(17,24,39,0.85) 40%, #0b1220 80%), radial-gradient(800px 400px at bottom left, rgba(236,72,153,0.12) 0%, transparent 70%), linear-gradient(180deg, #0b1220 0%, #0a0f1c 100%); color:#e5e7eb; padding: calc(env(safe-area-inset-top) + 12px) 12px env(safe-area-inset-bottom); }
+.login-page{ position:relative; min-height:100dvh; display:grid; align-items:start; justify-items:center; overflow:hidden; background: radial-gradient(1200px 600px at top right, rgba(59,130,246,0.18) 0%, rgba(17,24,39,0.85) 40%, #0b1220 80%), radial-gradient(800px 400px at bottom left, rgba(236,72,153,0.12) 0%, transparent 70%), linear-gradient(180deg, #0b1220 0%, #0a0f1c 100%); color:#e5e7eb; padding: calc(env(safe-area-inset-top) + 40px) 12px env(safe-area-inset-bottom); }
 
 .bg .grid{ position:absolute; inset:0; background-image: linear-gradient(rgba(15,23,42,0.05) 1px, transparent 1px), linear-gradient(90deg, rgba(15,23,42,0.05) 1px, transparent 1px); background-size: 50px 50px, 50px 50px; mask-image: radial-gradient(ellipse at center, black 40%, transparent 75%); opacity:.5; animation: float 18s linear infinite; }
 .bg .orb{ position:absolute; width:520px; height:520px; border-radius:50%; filter: blur(70px); opacity:.45; animation: drift 22s ease-in-out infinite; will-change: transform; }
@@ -24,15 +24,15 @@ h2{ margin:10px 0 4px; font-size: 24px; font-weight:700; color:#111827; letter-s
 
 form{ display:grid; gap:16px; }
 .field{ position:relative; }
-label{ position:absolute; top:-9px; left:12px; font-size: 11px; color:#334155; background: rgba(255,255,255,.9); padding:2px 6px; border-radius: 999px; border:1px solid rgba(99,102,241,.18);}
+.field label{ position:absolute; top:-9px; left:12px; font-size: 11px; color:#334155; background: rgba(255,255,255,.9); padding:2px 6px; border-radius: 999px; border:1px solid rgba(99,102,241,.18);}
 input{ width:100%; height:44px; padding: 10px 14px; border-radius:12px; border:1px solid rgba(99,102,241,.25); background: rgba(255,255,255,.9); color:#0f172a; outline: none; transition: border .25s, box-shadow .25s, transform .2s; font-family: "Inter", system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; }
 input:focus{ border-color: #60a5fa; box-shadow: 0 0 0 4px rgba(96,165,250,.15); transform: translateY(-1px); }
 .focus{ position:absolute; inset:-2px; border-radius:14px; pointer-events:none; opacity:0; transition: opacity .25s; background: radial-gradient(120px 40px at 50% 0%, rgba(125,211,252,.25), transparent 60%); }
 input:focus + .focus{ opacity:1; }
 
 .terms-checkbox{ display:flex; align-items:flex-start; gap:10px; margin-top:4px; padding:12px; background:rgba(241,245,249,0.8); border-radius:10px; border:1px solid rgba(99,102,241,.15); }
-.terms-checkbox input[type="checkbox"]{ margin-top:4px; width:18px; height:18px; flex-shrink:0; accent-color:#4f46e5; cursor:pointer; }
-.terms-checkbox label{ font-size:11px; color:#475569; line-height:1.5; cursor:pointer; }
+.terms-checkbox input[type="checkbox"]{ width:18px; height:18px; min-width:18px; flex-shrink:0; accent-color:#4f46e5; cursor:pointer; margin-top:2px; }
+.terms-checkbox label{ position:static; font-size:11px; color:#475569; line-height:1.5; cursor:pointer; background:none; padding:0; border:none; border-radius:0; }
 .terms-checkbox label a{ color:#4f46e5; font-weight:600; text-decoration:none; }
 .terms-checkbox label a:hover{ text-decoration:underline; }
 
@@ -48,7 +48,7 @@ input:focus + .focus{ opacity:1; }
 .muted{ color:#4f46e5; text-decoration:none; font-size:12px; opacity:.9; }
 
 @media (max-width: 420px){
-  .card{ width: 100%; padding: 22px; border-radius: 16px; margin-top: -10vh; }
+  .card{ width: 100%; padding: 22px; border-radius: 16px; }
   h2{ font-size: 22px; }
   .subtitle{ font-size: 13px; }
   .bg .orb{ width:380px; height:380px; filter: blur(50px);}
