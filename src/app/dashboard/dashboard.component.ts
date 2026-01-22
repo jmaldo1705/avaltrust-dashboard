@@ -591,27 +591,86 @@ export class DashboardComponent implements OnInit {
             return;
           }
 
-          // Preparar filas con encabezados legibles en español
+          // Helper para formatear fechas
+          const formatDate = (dateStr: string | null | undefined): string => {
+            if (!dateStr) return '';
+            try {
+              const date = new Date(dateStr);
+              return date.toLocaleDateString('es-CO');
+            } catch {
+              return dateStr;
+            }
+          };
+
+          // Helper para formatear moneda
+          const formatCurrency = (value: number | null | undefined): string => {
+            if (value === null || value === undefined) return '';
+            return new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', minimumFractionDigits: 0 }).format(value);
+          };
+
+          // Helper para formatear porcentaje
+          const formatPercent = (value: number | null | undefined): string => {
+            if (value === null || value === undefined) return '';
+            return `${value}%`;
+          };
+
+          // Preparar filas con información completa igual al detalle
           const rows = data.map((u: any) => ({
-            'Nombre': u.name,
-            'Documento': u.identification,
-            'Monto Adeudado': u.debtAmount,
-            'Días de Mora': u.delayDays,
-            'Obligación': u.guaranteeRate,
+            'Obligación': u.guaranteeRate || '',
+            'Tipo Documento': u.tipoDocumento || '',
+            'Número Documento': u.numeroDocumento || '',
+            'Nombres': u.name || '',
+            'Tipo Cliente': u.tipoCliente || '',
+            'Fecha Desembolso': formatDate(u.fechaDesembolso),
+            'Plazo Inicial': u.plazoInicial ? `${u.plazoInicial} meses` : '',
+            'Valor Desembolso': formatCurrency(u.valorDesembolso),
+            'Valor Fianza': formatCurrency(u.valorAval),
+            'Interés': formatCurrency(u.interes),
+            'Tasa Fianza': formatPercent(u.tasaAval),
+            'Otros Conceptos': formatCurrency(u.otrosConceptos),
+            'Abono Fianza': formatCurrency(u.abonoAval),
+            'Abono Capital': formatCurrency(u.abonoCapital),
+            'Total Deuda': formatCurrency(u.debtAmount),
+            'Fecha Vencimiento': formatDate(u.fechaVencimiento),
+            'Días de Mora': u.delayDays || 0,
+            'Fecha Último Pago': formatDate(u.fechaPago),
+            'Estado del Crédito': u.estadoCredito || '',
+            'Periodicidad': u.periodicidad || '',
             'Aliado Estratégico': u.aliadoEstrategicoNombre || 'Sin Aliado'
           }));
 
-          const ws = XLSX.utils.json_to_sheet(rows, {
-            header: ['Nombre', 'Documento', 'Monto Adeudado', 'Días de Mora', 'Obligación', 'Aliado Estratégico']
-          });
+          const headers = [
+            'Obligación', 'Tipo Documento', 'Número Documento', 'Nombres', 'Tipo Cliente',
+            'Fecha Desembolso', 'Plazo Inicial', 'Valor Desembolso', 'Valor Fianza', 'Interés',
+            'Tasa Fianza', 'Otros Conceptos', 'Abono Fianza', 'Abono Capital', 'Total Deuda',
+            'Fecha Vencimiento', 'Días de Mora', 'Fecha Último Pago', 'Estado del Crédito',
+            'Periodicidad', 'Aliado Estratégico'
+          ];
 
-          // Ajustar anchos de columna básicos
+          const ws = XLSX.utils.json_to_sheet(rows, { header: headers });
+
+          // Ajustar anchos de columna
           (ws as any)['!cols'] = [
-            { wch: 28 }, // Nombre
-            { wch: 18 }, // Documento
-            { wch: 18 }, // Monto Adeudado
+            { wch: 18 }, // Obligación
+            { wch: 14 }, // Tipo Documento
+            { wch: 16 }, // Número Documento
+            { wch: 28 }, // Nombres
+            { wch: 12 }, // Tipo Cliente
+            { wch: 16 }, // Fecha Desembolso
+            { wch: 14 }, // Plazo Inicial
+            { wch: 18 }, // Valor Desembolso
+            { wch: 16 }, // Valor Fianza
+            { wch: 14 }, // Interés
+            { wch: 12 }, // Tasa Fianza
+            { wch: 16 }, // Otros Conceptos
+            { wch: 14 }, // Abono Fianza
+            { wch: 14 }, // Abono Capital
+            { wch: 16 }, // Total Deuda
+            { wch: 18 }, // Fecha Vencimiento
             { wch: 14 }, // Días de Mora
-            { wch: 16 }, // Obligación
+            { wch: 18 }, // Fecha Último Pago
+            { wch: 16 }, // Estado del Crédito
+            { wch: 14 }, // Periodicidad
             { wch: 22 }  // Aliado Estratégico
           ];
 

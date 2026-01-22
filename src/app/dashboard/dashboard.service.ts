@@ -55,6 +55,24 @@ export interface DelinquentUserDto {
   guaranteeRate: string;
   aliadoEstrategicoId?: number;
   aliadoEstrategicoNombre?: string;
+  
+  // Campos adicionales para exportación completa
+  tipoDocumento?: string;
+  numeroDocumento?: string;
+  tipoCliente?: string;
+  fechaDesembolso?: string;
+  plazoInicial?: number;
+  valorDesembolso?: number;
+  valorAval?: number;
+  interes?: number;
+  tasaAval?: number;
+  otrosConceptos?: number;
+  abonoAval?: number;
+  abonoCapital?: number;
+  fechaVencimiento?: string;
+  fechaPago?: string;
+  estadoCredito?: string;
+  periodicidad?: string;
 }
 
 export interface DelinquentUsersPageDto {
