@@ -18,6 +18,7 @@ export class LoginComponent {
 
   username = '';
   password = '';
+  acceptTerms = false;
   loading = signal(false);
   error = signal('');
   focused: 'user' | 'pass' | '' = '';

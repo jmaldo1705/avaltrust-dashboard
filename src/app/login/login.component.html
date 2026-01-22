@@ -25,7 +25,14 @@
         <div class="focus"></div>
       </div>
 
-      <button class="btn" type="submit" [disabled]="loading()">{{ loading() ? 'Ingresando…' : 'Ingresar' }}</button>
+      <div class="terms-checkbox">
+        <input type="checkbox" id="acceptTerms" [(ngModel)]="acceptTerms" name="acceptTerms" />
+        <label for="acceptTerms">
+          Declaro que he leído y acepto los <a href="https://avaltrust.co/terminos-condiciones.html" target="_blank">Términos y Condiciones</a> de Uso y la <a href="https://avaltrust.co/politica-privacidad.html" target="_blank">Política de Privacidad</a> y Tratamiento de Datos Personales de AvalTrust S.A.S., y que conozco y acepto expresamente la diferencia entre el servicio de aval o fianza digital y los servicios tecnológicos y en la nube, los cuales son servicios independientes, con naturaleza jurídica y alcance distinto.
+        </label>
+      </div>
+
+      <button class="btn" type="submit" [disabled]="loading() || !acceptTerms">{{ loading() ? 'Ingresando…' : 'Ingresar' }}</button>
       @if (error()) {
         <div class="error">{{ error() }}</div>
       }
