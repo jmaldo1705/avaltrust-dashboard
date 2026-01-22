@@ -119,10 +119,18 @@
 }
 
 .card-content .amount {
-  font-size: 1.5rem;
+  font-size: clamp(1rem, 2.5vw, 1.5rem);
   font-weight: bold;
   margin: 0;
   color: #FFFFFF;
+  word-break: break-word;
+  overflow-wrap: break-word;
+}
+
+.card-content {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
 }
 
 /* Card variations - Colores mejorados con saturación unificada */
@@ -287,6 +295,10 @@
 
   .card {
     padding: 1rem;
+  }
+
+  .card-content .amount {
+    font-size: clamp(0.9rem, 4vw, 1.3rem);
   }
 
   .obligaciones-section {
