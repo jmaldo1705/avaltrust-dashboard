@@ -2,6 +2,7 @@ import { Component, inject, OnInit, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
+import * as XLSX from 'xlsx';
 
 import { AuthService } from '../auth/auth.service';
 import { UiStateService } from '../ui-state.service';
@@ -282,28 +283,126 @@ export class EstadoCarteraComponent implements OnInit {
   confirmarExportacion() {
     this.isExporting = true;
     
-    this.portfolioService.exportarCarteraExcel(
-      this.exportFechaInicio || undefined,
-      this.exportFechaFin || undefined,
-      this.exportAliadoId || undefined
-    ).subscribe({
-      next: (blob) => {
-        // Crear enlace de descarga
-        const url = window.URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `cartera_${new Date().toISOString().split('T')[0]}.xlsx`;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        window.URL.revokeObjectURL(url);
-        
-        this.toastService.success('Excel descargado correctamente');
-        this.closeExportModal();
+    // Obtener datos usando el endpoint existente de records (que sí funciona)
+    const params: any = {};
+    if (this.exportAliadoId) {
+      params.aliadoId = this.exportAliadoId;
+    }
+    
+    this.portfolioService.getAllPortfolios(params).subscribe({
+      next: (data: any[]) => {
+        try {
+          // Filtrar por fechas si se especificaron
+          let filteredData = data;
+          if (this.exportFechaInicio) {
+            const fechaInicio = new Date(this.exportFechaInicio);
+            filteredData = filteredData.filter(item => {
+              const fechaDesembolso = new Date(item.fechaDesembolso);
+              return fechaDesembolso >= fechaInicio;
+            });
+          }
+          if (this.exportFechaFin) {
+            const fechaFin = new Date(this.exportFechaFin);
+            filteredData = filteredData.filter(item => {
+              const fechaDesembolso = new Date(item.fechaDesembolso);
+              return fechaDesembolso <= fechaFin;
+            });
+          }
+
+          if (!filteredData.length) {
+            this.toastService.warning('No hay datos para exportar con los filtros seleccionados');
+            this.isExporting = false;
+            return;
+          }
+
+          // Helper para formatear fechas
+          const formatDate = (dateStr: string | null | undefined): string => {
+            if (!dateStr) return '';
+            try {
+              const date = new Date(dateStr);
+              return date.toLocaleDateString('es-CO');
+            } catch {
+              return dateStr;
+            }
+          };
+
+          // Helper para formatear moneda
+          const formatCurrency = (value: number | null | undefined): string => {
+            if (value === null || value === undefined) return '';
+            return new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', minimumFractionDigits: 0 }).format(value);
+          };
+
+          // Helper para formatear porcentaje
+          const formatPercent = (value: number | null | undefined): string => {
+            if (value === null || value === undefined) return '';
+            return `${value}%`;
+          };
+
+          // Preparar filas con toda la información
+          const rows = filteredData.map((item: any) => ({
+            'Obligación': item.obligacion || '',
+            'Tipo Documento': item.tipoDocumento || '',
+            'Número Documento': item.numeroDocumento || '',
+            'Nombres': item.nombres || '',
+            'Apellidos': item.apellidos || '',
+            'Tipo Cliente': item.tipoCliente || '',
+            'Fecha Desembolso': formatDate(item.fechaDesembolso),
+            'Plazo Inicial': item.plazoInicial ? `${item.plazoInicial} meses` : '',
+            'Valor Desembolso': formatCurrency(item.valorDesembolso),
+            'Valor Fianza': formatCurrency(item.valorAval),
+            'Interés': formatCurrency(item.interes),
+            'Tasa Fianza': formatPercent(item.tasaAval),
+            'Otros Conceptos': formatCurrency(item.otrosConceptos),
+            'Abono Fianza': formatCurrency(item.abonoAval),
+            'Abono Capital': formatCurrency(item.abonoCapital),
+            'Total Deuda': formatCurrency(item.totalDeuda),
+            'Fecha Vencimiento': formatDate(item.fechaVencimiento),
+            'Días de Mora': item.diasMora || 0,
+            'Fecha Último Pago': formatDate(item.fechaPago),
+            'Estado del Crédito': item.estadoCredito || '',
+            'Periodicidad': item.periodicidad || '',
+            'Aliado Estratégico': item.aliadoEstrategicoNombre || 'Sin Aliado'
+          }));
+
+          const headers = [
+            'Obligación', 'Tipo Documento', 'Número Documento', 'Nombres', 'Apellidos',
+            'Tipo Cliente', 'Fecha Desembolso', 'Plazo Inicial', 'Valor Desembolso',
+            'Valor Fianza', 'Interés', 'Tasa Fianza', 'Otros Conceptos', 'Abono Fianza',
+            'Abono Capital', 'Total Deuda', 'Fecha Vencimiento', 'Días de Mora',
+            'Fecha Último Pago', 'Estado del Crédito', 'Periodicidad', 'Aliado Estratégico'
+          ];
+
+          const ws = XLSX.utils.json_to_sheet(rows, { header: headers });
+
+          // Ajustar anchos de columna
+          (ws as any)['!cols'] = [
+            { wch: 18 }, { wch: 14 }, { wch: 16 }, { wch: 20 }, { wch: 20 },
+            { wch: 12 }, { wch: 16 }, { wch: 14 }, { wch: 18 }, { wch: 16 },
+            { wch: 14 }, { wch: 12 }, { wch: 16 }, { wch: 14 }, { wch: 14 },
+            { wch: 16 }, { wch: 18 }, { wch: 14 }, { wch: 18 }, { wch: 16 },
+            { wch: 14 }, { wch: 22 }
+          ];
+
+          const wb = XLSX.utils.book_new();
+          XLSX.utils.book_append_sheet(wb, ws, 'Estado de Cartera');
+
+          const pad = (n: number) => n.toString().padStart(2, '0');
+          const now = new Date();
+          const fileName = `estado_cartera_${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}_${pad(now.getHours())}-${pad(now.getMinutes())}.xlsx`;
+
+          XLSX.writeFile(wb, fileName);
+          
+          this.toastService.success('Excel descargado correctamente');
+          this.closeExportModal();
+        } catch (e) {
+          console.error('Error generando Excel:', e);
+          this.toastService.error('Error al generar el archivo Excel');
+          this.isExporting = false;
+        }
       },
       error: (error) => {
-        console.error('Error al exportar:', error);
-        this.toastService.error('Error al exportar la cartera');
+        console.error('Error al obtener datos:', error);
+        this.toastService.error('Error al obtener los datos para exportar');
         this.isExporting = false;
       }
     });
