@@ -438,11 +438,8 @@ export class UsersComponent implements OnInit {
     const clean = (role || '').replace(/^ROLE_/i, '');
     switch (clean.toLowerCase()) {
       case 'admin': return 'Administrador';
-      case 'manager': return 'Gerente';
-      case 'supervisor': return 'Supervisor';
-      case 'analyst': return 'Analista';
       case 'user': return 'Usuario';
-      case 'guest': return 'Invitado';
+      case 'afianzado': return 'Afianzado';
       default:
         return clean.charAt(0).toUpperCase() + clean.slice(1).toLowerCase().replace(/_/g, ' ');
     }

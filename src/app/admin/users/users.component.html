@@ -55,6 +55,7 @@
             <option value="all">Todos los roles</option>
             <option value="ROLE_ADMIN">Administrador</option>
             <option value="ROLE_USER">Usuario</option>
+            <option value="ROLE_AFIANZADO">Afianzado</option>
           </select>
         </div>
         
@@ -143,7 +144,10 @@
               <td class="roles-col">
                 <div class="roles-list">
                   <ng-container *ngIf="u.roles && u.roles.length; else noRoles">
-                    <span class="role-badge" *ngFor="let r of u.roles" [class.admin]="r==='ROLE_ADMIN'" [class.user]="r==='ROLE_USER'">
+                    <span class="role-badge" *ngFor="let r of u.roles" 
+                          [class.admin]="r==='ROLE_ADMIN'" 
+                          [class.user]="r==='ROLE_USER'"
+                          [class.afianzado]="r==='ROLE_AFIANZADO'">
                       {{ formatRole(r) }}
                     </span>
                   </ng-container>
