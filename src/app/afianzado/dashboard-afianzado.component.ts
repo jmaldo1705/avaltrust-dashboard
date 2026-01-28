@@ -84,20 +84,26 @@ export class DashboardAfianzadoComponent implements OnInit {
     this.router.navigate(['/login']);
   }
 
-  descargarCertificado(numeroObligacion: string): void {
-    this.afianzadoService.descargarCertificado(numeroObligacion).subscribe({
+  descargarCertificado(obligacion: Obligacion): void {
+    if (!obligacion.aliadoEstrategicoId) {
+      alert('No se puede descargar el certificado. Información del aliado estratégico no disponible.');
+      return;
+    }
+    
+    this.afianzadoService.descargarCertificado(obligacion.numeroObligacion, obligacion.aliadoEstrategicoId).subscribe({
       next: (blob) => {
         // Crear un enlace temporal para descargar el archivo
         const url = window.URL.createObjectURL(blob);
         const link = document.createElement('a');
         link.href = url;
-        link.download = `Certificado_Fianza_${numeroObligacion}.pdf`;
+        link.download = `Certificado_Fianza_${obligacion.numeroObligacion}_${obligacion.nombreEmpresa}.pdf`;
         link.click();
         window.URL.revokeObjectURL(url);
       },
       error: (err) => {
         console.error('Error al descargar certificado:', err);
-        alert('No se pudo descargar el certificado. Por favor, intente de nuevo.');
+        const errorMessage = err.error?.message || 'No se pudo descargar el certificado. Por favor, intente de nuevo.';
+        alert(errorMessage);
       }
     });
   }

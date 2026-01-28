@@ -16,8 +16,8 @@ export class AfianzadoService {
     return this.http.get<DashboardAfianzado>(`${this.apiUrl}/dashboard`);
   }
 
-  descargarCertificado(numeroObligacion: string): Observable<Blob> {
-    return this.http.get(`${this.apiUrl}/certificado/${numeroObligacion}`, {
+  descargarCertificado(numeroObligacion: string, aliadoEstrategicoId: number): Observable<Blob> {
+    return this.http.get(`${this.apiUrl}/certificado/${numeroObligacion}/${aliadoEstrategicoId}`, {
       responseType: 'blob'
     });
   }
