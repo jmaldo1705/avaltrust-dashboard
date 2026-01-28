@@ -149,7 +149,7 @@
           <!-- Opciones de Formato -->
           <div class="form-section" *ngIf="selectedReportType">
             <h2 class="section-title">Opciones del Reporte</h2>
-            
+
             <!-- Formato de salida -->
             <div class="output-format-section">
               <label class="format-label">Formato de salida:</label>
@@ -225,17 +225,6 @@
                 <circle cx="12" cy="12" r="3"/>
               </svg>
               Vista Previa
-            </button>
-            <button
-              type="button"
-              class="btn btn-outline"
-              (click)="toggleHistory()"
-              [disabled]="isLoading">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <circle cx="12" cy="12" r="10"/>
-                <polyline points="12 6 12 12 16 14"/>
-              </svg>
-              Historial
             </button>
             <button
               type="button"
@@ -322,7 +311,7 @@
             </div>
             <div class="preview-body" *ngIf="previewData">
               <h4>{{ previewData.title }}</h4>
-              
+
               <!-- Resumen -->
               <div class="preview-summary" *ngIf="previewData.summary">
                 <h5>Resumen</h5>
