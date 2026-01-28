@@ -261,10 +261,12 @@ export class PortfolioComponent implements OnInit {
         .pipe(
           catchError(error => {
             console.error('Error al guardar registro:', error);
+            // Usar el mensaje del backend si está disponible
+            const backendMessage = error.error?.message || 'Error al guardar el registro. Por favor, inténtelo nuevamente.';
             return of({
               success: false,
-              message: 'Error al guardar el registro. Por favor, inténtelo nuevamente.',
-              errors: error.error?.errors || ['Error de conexión con el servidor']
+              message: backendMessage,
+              errors: error.error?.errors || []
             });
           }),
           finalize(() => {
