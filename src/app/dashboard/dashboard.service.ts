@@ -202,7 +202,8 @@ export class DashboardService {
     if (!aliadoIds || aliadoIds.length === 0) {
       return {};
     }
-    return { aliadoIds: aliadoIds.join(',') };
+    // Enviar como array para que Spring lo parsee como List<Long>
+    return { aliadoIds: aliadoIds };
   }
 
   getPortfolioDetail(portfolioId: string): Observable<UserDetailDto> {
