@@ -101,9 +101,9 @@
           <div class="nav-accent"></div>
         </a>
 
-        <!-- Cargue Cartera - Solo para ADMIN y USER -->
+        <!-- Cargue Cartera - Solo para ADMIN y USER (no CONSULTA) -->
         <a class="nav-link"
-           *ngIf="!auth.hasRole('ROLE_AFIANZADO')"
+           *ngIf="!auth.hasRole('ROLE_AFIANZADO') && !auth.hasRole('ROLE_CONSULTA')"
            [class.active]="isActive('/portfolio')"
            (click)="navigateTo('/portfolio')">
           <div class="nav-link-inner">
@@ -151,9 +151,9 @@
           <div class="nav-accent"></div>
         </a>
 
-        <!-- Cargue Siniestros - Solo para ADMIN y USER -->
+        <!-- Cargue Siniestros - Solo para ADMIN y USER (no CONSULTA) -->
         <a class="nav-link"
-           *ngIf="!auth.hasRole('ROLE_AFIANZADO')"
+           *ngIf="!auth.hasRole('ROLE_AFIANZADO') && !auth.hasRole('ROLE_CONSULTA')"
            [class.active]="isActive('/claims')"
            (click)="navigateTo('/claims')">
           <div class="nav-link-inner">

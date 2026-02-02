@@ -65,6 +65,10 @@ export class SidebarComponent {
       return 'Afianzado';
     }
 
+    if (this.auth.hasRole('ROLE_CONSULTA')) {
+      return 'Consulta';
+    }
+
     if (this.auth.hasRole('ROLE_USER')) {
       return 'Usuario';
     }

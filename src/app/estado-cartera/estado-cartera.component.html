@@ -42,7 +42,11 @@
           <span class="btn-icon">🗑️</span>
           Eliminar Cartera
         </button>
-        <button class="btn-upload" (click)="openUploadModal()" title="Carga Masiva">
+        <button 
+          *ngIf="!isConsulta"
+          class="btn-upload" 
+          (click)="openUploadModal()" 
+          title="Carga Masiva">
           <span class="btn-icon">📂</span>
           Carga Masiva
         </button>

@@ -39,20 +39,20 @@ export const routes: Routes = [
     path: 'documentos',
     component: ReportsComponent,
     canActivate: [authGuard],
-    data: { roles: ['ROLE_ADMIN', 'ROLE_USER'] } // NO para AFIANZADO
+    data: { roles: ['ROLE_ADMIN', 'ROLE_USER', 'ROLE_CONSULTA'] } // NO para AFIANZADO
   },
   {
     path: 'certificados',
     component: CertificadosComponent,
     canActivate: [authGuard],
-    data: { roles: ['ROLE_ADMIN', 'ROLE_USER'] }, // NO para AFIANZADO
+    data: { roles: ['ROLE_ADMIN', 'ROLE_USER', 'ROLE_CONSULTA'] }, // NO para AFIANZADO
     title: 'Certificados - Avaltrust'
   },
   {
     path: 'dashboard',
     component: DashboardComponent,
     canActivate: [authGuard],
-    data: { roles: ['ROLE_ADMIN', 'ROLE_USER'] }, // NO para AFIANZADO
+    data: { roles: ['ROLE_ADMIN', 'ROLE_USER', 'ROLE_CONSULTA'] }, // NO para AFIANZADO
     title: 'Dashboard - Avaltrust'
   },
   {
@@ -94,7 +94,7 @@ export const routes: Routes = [
     path: 'estado-cartera',
     component: EstadoCarteraComponent,
     canActivate: [authGuard],
-    data: { roles: ['ROLE_ADMIN', 'ROLE_USER'] }, // NO para AFIANZADO
+    data: { roles: ['ROLE_ADMIN', 'ROLE_USER', 'ROLE_CONSULTA'] }, // NO para AFIANZADO
     title: 'Estado de Cartera - Avaltrust'
   },
   {

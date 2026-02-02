@@ -70,7 +70,8 @@ export class UsersComponent implements OnInit {
   availableRoles = [
     { value: 'ROLE_USER', label: 'Usuario' },
     { value: 'ROLE_ADMIN', label: 'Administrador' },
-    { value: 'ROLE_AFIANZADO', label: 'Afianzado' }
+    { value: 'ROLE_AFIANZADO', label: 'Afianzado' },
+    { value: 'ROLE_CONSULTA', label: 'Consulta' }
   ];
 
   // Getters/Setters para ngModel
@@ -440,6 +441,7 @@ export class UsersComponent implements OnInit {
       case 'admin': return 'Administrador';
       case 'user': return 'Usuario';
       case 'afianzado': return 'Afianzado';
+      case 'consulta': return 'Consulta';
       default:
         return clean.charAt(0).toUpperCase() + clean.slice(1).toLowerCase().replace(/_/g, ' ');
     }

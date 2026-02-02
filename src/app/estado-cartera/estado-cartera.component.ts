@@ -76,6 +76,7 @@ export class EstadoCarteraComponent implements OnInit {
   aliados: AliadoEstrategico[] = [];
   selectedAliadoId: number | null = null;
   isAdmin = false;
+  isConsulta = false;
   
   // Filtros
   searchTerm = '';
@@ -133,6 +134,7 @@ export class EstadoCarteraComponent implements OnInit {
   checkUserRole() {
     const currentUser = this.auth.user();
     this.isAdmin = currentUser?.roles?.includes('ROLE_ADMIN') || false;
+    this.isConsulta = currentUser?.roles?.includes('ROLE_CONSULTA') || false;
   }
 
   loadAliados() {
