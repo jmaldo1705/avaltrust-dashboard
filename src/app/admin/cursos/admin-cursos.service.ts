@@ -1,5 +1,5 @@
 import { Injectable, inject } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../environments/environment';
 
@@ -12,6 +12,7 @@ export interface CursoAdmin {
   introduccion: string;
   mensajeCierre: string;
   orden: number;
+  activo?: boolean;
   objetivos: string[];
   secciones: SeccionAdmin[];
 }
@@ -60,6 +61,18 @@ export interface EvaluacionAdmin {
   preguntas: PreguntaAdmin[];
 }
 
+export interface PageResponse<T> {
+  content: T[];
+  number: number;
+  size: number;
+  totalElements: number;
+  totalPages: number;
+  numberOfElements: number;
+  first: boolean;
+  last: boolean;
+  empty: boolean;
+}
+
 @Injectable({
   providedIn: 'root'
 })
@@ -70,6 +83,22 @@ export class AdminCursosService {
   // CRUD de Cursos
   listarCursos(): Observable<CursoAdmin[]> {
     return this.http.get<CursoAdmin[]>(this.apiUrl);
+  }
+
+  listarCursosPaginados(page: number, size: number): Observable<PageResponse<CursoAdmin>> {
+    const params = new HttpParams()
+      .set('page', page)
+      .set('size', size);
+
+    return this.http.get<PageResponse<CursoAdmin>>(`${this.apiUrl}/paginados`, { params });
+  }
+
+  contarCursos(): Observable<number> {
+    return this.http.get<number>(`${this.apiUrl}/count`);
+  }
+
+  obtenerSiguienteOrden(): Observable<number> {
+    return this.http.get<number>(`${this.apiUrl}/siguiente-orden`);
   }
 
   obtenerCurso(id: number): Observable<CursoAdmin> {
