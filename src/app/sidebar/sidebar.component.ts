@@ -1,13 +1,40 @@
 import { Component, inject, Input, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
+import {
+  LucideBadgeCheck,
+  LucideBookOpen,
+  LucideBuilding2,
+  LucideClipboardCheck,
+  LucideFileSpreadsheet,
+  LucideFileText,
+  LucideGraduationCap,
+  LucideHouse,
+  LucideLayoutDashboard,
+  LucideShieldCheck,
+  LucideUsersRound
+} from '@lucide/angular';
 import { AuthService } from '../auth/auth.service';
 import { HasRoleDirective } from '../auth/has-role.directive';
 
 @Component({
   selector: 'app-sidebar',
   standalone: true,
-  imports: [CommonModule, HasRoleDirective],
+  imports: [
+    CommonModule,
+    HasRoleDirective,
+    LucideBadgeCheck,
+    LucideBookOpen,
+    LucideBuilding2,
+    LucideClipboardCheck,
+    LucideFileSpreadsheet,
+    LucideFileText,
+    LucideGraduationCap,
+    LucideHouse,
+    LucideLayoutDashboard,
+    LucideShieldCheck,
+    LucideUsersRound
+  ],
   templateUrl: './sidebar.component.html',
   styleUrls: ['./sidebar.component.css']
 })

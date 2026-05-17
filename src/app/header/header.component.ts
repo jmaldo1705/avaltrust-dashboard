@@ -1,12 +1,29 @@
 import { Component, inject, Input, Output, EventEmitter } from '@angular/core';
 import {CommonModule, NgOptimizedImage} from '@angular/common';
+import {
+  LucideChevronDown,
+  LucideCircleUserRound,
+  LucideLogOut,
+  LucideMenu,
+  LucideSettings,
+  LucideUserRound
+} from '@lucide/angular';
 import { AuthService } from '../auth/auth.service';
 import { UiStateService } from '../ui-state.service';
 
 @Component({
   selector: 'app-header',
   standalone: true,
-  imports: [CommonModule, NgOptimizedImage],
+  imports: [
+    CommonModule,
+    NgOptimizedImage,
+    LucideChevronDown,
+    LucideCircleUserRound,
+    LucideLogOut,
+    LucideMenu,
+    LucideSettings,
+    LucideUserRound
+  ],
   templateUrl: './header.component.html',
   styleUrls: ['./header.component.css']
 })
