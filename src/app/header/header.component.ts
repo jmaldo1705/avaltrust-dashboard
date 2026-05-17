@@ -54,10 +54,13 @@ export class HeaderComponent {
   }
 
   onNavigate(route: string) {
+    this.uiState.closeUserMenu();
+    this.closeUserMenu.emit();
     this.navigate.emit(route);
   }
 
   onLogout() {
+    this.uiState.closeAllMenus();
     this.logout.emit();
   }
 

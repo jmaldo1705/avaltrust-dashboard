@@ -72,16 +72,16 @@
 
       <section class="command-main">
         <div class="command-header">
-          <div>
+          <div class="command-title">
             <span class="section-kicker">AvalTrust Financial and Fintech</span>
             <h1>Gestion de cartera</h1>
-          </div>
-
-          <div class="command-actions">
             <div class="filter-shell" *ngIf="isAliadoFilterVisible">
               <svg lucideListFilter></svg>
               <app-filtro-aliados (selectionChange)="onAliadoFilterChange($event)"></app-filtro-aliados>
             </div>
+          </div>
+
+          <div class="command-actions">
             <button class="refresh-button" type="button" (click)="refreshDashboard()" [disabled]="isDashboardLoading">
               <svg lucideRefreshCw [class.spinning]="isDashboardLoading"></svg>
               Actualizar

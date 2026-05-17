@@ -1,0 +1,132 @@
+<div class="dashboard-layout">
+  <app-header
+    [isSidebarOpen]="isSidebarOpen"
+    [isUserMenuOpen]="isUserMenuOpen"
+    (toggleSidebar)="toggleSidebar()"
+    (toggleUserMenu)="toggleUserMenu()"
+    (closeUserMenu)="closeUserMenu()"
+    (navigate)="onHeaderNavigate($event)"
+    (logout)="logout()">
+  </app-header>
+
+  <div
+    class="overlay"
+    [class.active]="isSidebarOpen || isUserMenuOpen"
+    (click)="closeSidebar(); closeUserMenu()">
+  </div>
+
+  <app-sidebar
+    [isSidebarOpen]="isSidebarOpen"
+    (sidebarClose)="onSidebarClose()"
+    (navigate)="navigateTo($event)">
+  </app-sidebar>
+
+  <main class="main-content profile-page">
+    <section class="profile-hero">
+      <div class="hero-pattern"></div>
+
+      <div class="profile-avatar" aria-hidden="true">
+        {{ initials }}
+      </div>
+
+      <div class="profile-summary">
+        <span class="section-kicker">Mi perfil</span>
+        <h1>{{ userProfile()?.username || user()?.username || 'Usuario' }}</h1>
+        <p>{{ userProfile()?.email || user()?.email || 'Correo no registrado' }}</p>
+      </div>
+
+      <button class="ghost-button" type="button" (click)="refreshProfile()" [disabled]="isLoading">
+        <svg lucideRefreshCw [class.spinning]="isLoading"></svg>
+        Actualizar
+      </button>
+    </section>
+
+    <div class="profile-alert" *ngIf="profileError">
+      <svg lucideShieldCheck></svg>
+      <span>{{ profileError }}</span>
+    </div>
+
+    <section class="profile-grid">
+      <article class="profile-card identity-card">
+        <div class="card-header">
+          <span class="card-icon"><svg lucideCircleUserRound></svg></span>
+          <div>
+            <span class="section-kicker">Cuenta</span>
+            <h2>Informacion personal</h2>
+          </div>
+        </div>
+
+        <div class="info-list">
+          <div class="info-row">
+            <span>Usuario</span>
+            <strong>{{ userProfile()?.username || user()?.username || 'Sin usuario' }}</strong>
+          </div>
+          <div class="info-row">
+            <span>Correo</span>
+            <strong>{{ userProfile()?.email || user()?.email || 'Sin correo registrado' }}</strong>
+          </div>
+          <div class="info-row">
+            <span>Rol principal</span>
+            <strong>{{ primaryRole }}</strong>
+          </div>
+        </div>
+      </article>
+
+      <article class="profile-card access-card">
+        <div class="card-header">
+          <span class="card-icon"><svg lucideBadgeCheck></svg></span>
+          <div>
+            <span class="section-kicker">Acceso</span>
+            <h2>Roles y permisos</h2>
+          </div>
+        </div>
+
+        <div class="role-list">
+          <span class="role-chip" *ngFor="let role of roleLabels">
+            <svg lucideShieldCheck></svg>
+            {{ role }}
+          </span>
+        </div>
+
+        <div class="permission-strip" *ngIf="userPermissions()?.permissions as permissions">
+          <div>
+            <span>Panel admin</span>
+            <strong>{{ permissions['canViewAdminPanel'] ? 'Habilitado' : 'No habilitado' }}</strong>
+          </div>
+          <div>
+            <span>Gestion usuarios</span>
+            <strong>{{ permissions['canManageUsers'] ? 'Habilitado' : 'No habilitado' }}</strong>
+          </div>
+        </div>
+      </article>
+
+      <article class="profile-card security-card">
+        <div class="card-header">
+          <span class="card-icon"><svg lucideKeyRound></svg></span>
+          <div>
+            <span class="section-kicker">Seguridad</span>
+            <h2>Sesion y contrasena</h2>
+          </div>
+        </div>
+
+        <div class="security-status">
+          <div>
+            <svg lucideCalendarClock></svg>
+            <span>Expira</span>
+            <strong>{{ expiresAt ? (expiresAt | date:'short') : 'Sin fecha' }}</strong>
+          </div>
+          <div>
+            <svg lucideMail></svg>
+            <span>Correo</span>
+            <strong>{{ userProfile()?.email ? 'Verificado' : 'Pendiente' }}</strong>
+          </div>
+        </div>
+
+        <button class="primary-button" type="button" (click)="goToChangePassword()">
+          <svg lucideKeyRound></svg>
+          Cambiar contrasena
+        </button>
+      </article>
+    </section>
+  </main>
+</div>

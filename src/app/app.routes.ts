@@ -18,6 +18,7 @@ import { CursoFormComponent } from './admin/cursos/curso-form.component';
 import { EvaluacionFormComponent } from './admin/cursos/evaluacion-form.component';
 import { EstadoCarteraComponent } from './estado-cartera/estado-cartera.component';
 import { CertificadosComponent } from './certificados/certificados.component';
+import { ProfileComponent } from './user/profile/profile.component';
 
 export const routes: Routes = [
   { 
@@ -40,6 +41,12 @@ export const routes: Routes = [
     path: 'reset-password',
     component: ResetPasswordComponent,
     title: 'Restablecer Contraseña - AvalTrust'
+  },
+  {
+    path: 'user/profile',
+    component: ProfileComponent,
+    canActivate: [authGuard],
+    title: 'Mi perfil - Avaltrust'
   },
   {
     path: 'documentos',
