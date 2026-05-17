@@ -1,17 +1,4 @@
 <div class="dashboard-layout">
-  <!-- Sidebar Component -->
-  <app-sidebar
-    [isSidebarOpen]="isSidebarOpen"
-    [isOpen]="isSidebarOpen"
-    (navigate)="onSidebarNavigate($event)"
-    (close)="onSidebarClose()"
-    (sidebarClose)="closeSidebar()">
-  </app-sidebar>
-
-  <!-- Overlay para móvil -->
-  <div class="overlay" [class.active]="isSidebarOpen || isUserMenuOpen" (click)="closeSidebar(); closeUserMenu()"></div>
-
-  <!-- Header Component -->
   <app-header
     [isSidebarOpen]="isSidebarOpen"
     [isUserMenuOpen]="isUserMenuOpen"
@@ -22,643 +9,439 @@
     (logout)="logout()">
   </app-header>
 
-  <!-- Contenido Principal -->
-  <main class="main-content">
-    <!-- Header de la página -->
-    <div class="content-header">
-      <h2>Cargue de Cartera</h2>
-      <p class="welcome-message">
-        Administre los registros de cartera mediante formulario manual o carga masiva de archivos
-      </p>
-    </div>
+  <div
+    class="overlay"
+    [class.active]="isSidebarOpen || isUserMenuOpen"
+    (click)="closeSidebar(); closeUserMenu()">
+  </div>
 
-    <!-- Resultado de la operación -->
-    <div class="result-container" *ngIf="uploadResult">
-      <div class="result-card" [ngClass]="uploadResult.success ? 'success' : 'error'">
-        <div class="result-icon">
-          {{ uploadResult.success ? '✅' : '❌' }}
+  <app-sidebar
+    [isSidebarOpen]="isSidebarOpen"
+    (sidebarClose)="onSidebarClose()"
+    (navigate)="onSidebarNavigate($event)">
+  </app-sidebar>
+
+  <main class="main-content portfolio-page">
+    <section class="portfolio-command">
+      <aside class="command-card">
+        <div class="panel-pattern"></div>
+        <span class="control-chip">
+          <svg lucideFileSpreadsheet></svg>
+          Cargue cartera
+        </span>
+        <h1>Gestion de registros</h1>
+        <div class="command-stats">
+          <div>
+            <span>Modo activo</span>
+            <strong>{{ activeTab === 'form' ? 'Manual' : 'Masivo' }}</strong>
+          </div>
+          <div>
+            <span>Aliados</span>
+            <strong>{{ isAdmin ? aliados.length : 'Asignado' }}</strong>
+          </div>
         </div>
-        <div class="result-content">
-          <h4>{{ uploadResult.success ? 'Operación Exitosa' : 'Error en la Operación' }}</h4>
-          <p>{{ uploadResult.message }}</p>
-          <div class="result-details" *ngIf="uploadResult.records">
-            <span>Registros procesados: <strong>{{ uploadResult.records }}</strong></span>
+        <div class="command-note">
+          <svg lucideShieldCheck></svg>
+          Datos listos para validacion operativa
+        </div>
+      </aside>
+
+      <section class="command-main">
+        <div class="command-header">
+          <div>
+            <span class="section-kicker">AvalTrust Financial and Fintech</span>
+            <h2>Operacion de cartera</h2>
           </div>
-          <div class="error-list" *ngIf="uploadResult.errors && uploadResult.errors.length > 0">
-            <h5>Errores encontrados:</h5>
-            <ul>
-              <li *ngFor="let error of uploadResult.errors">{{ error }}</li>
-            </ul>
+
+          <div class="mode-switch" role="tablist" aria-label="Modo de cargue">
+            <button
+              type="button"
+              class="mode-btn"
+              [class.active]="activeTab === 'form'"
+              (click)="setActiveTab('form')">
+              <svg lucideClipboardPenLine></svg>
+              Manual
+            </button>
+            <button
+              type="button"
+              class="mode-btn"
+              [class.active]="activeTab === 'upload'"
+              (click)="setActiveTab('upload')">
+              <svg lucideCloudUpload></svg>
+              Masivo
+            </button>
           </div>
         </div>
-        <button
-          type="button"
-          class="result-close"
-          (click)="uploadResult = null">
-          ✕
-        </button>
-      </div>
-    </div>
 
-    <!-- Navegación por pestañas -->
-    <div class="tabs-container">
-      <div class="tabs-nav">
-        <button
-          class="tab-btn"
-          [class.active]="activeTab === 'form'"
-          (click)="setActiveTab('form')">
-          <span class="tab-icon">📝</span>
-          <span class="tab-text">Formulario Manual</span>
-        </button>
-        <button
-          class="tab-btn"
-          [class.active]="activeTab === 'upload'"
-          (click)="setActiveTab('upload')">
-          <span class="tab-icon">📂</span>
-          <span class="tab-text">Carga Masiva</span>
-        </button>
-      </div>
-    </div>
-
-    <!-- Contenido de pestañas -->
-    <div class="tab-content">
-
-      <!-- Pestaña: Formulario Manual -->
-      <div class="tab-panel" [class.active]="activeTab === 'form'">
-        <div class="form-container">
-          <div class="form-header">
-            <h3>Nuevo Registro de Cartera</h3>
-            <p>Complete todos los campos obligatorios para agregar un nuevo registro</p>
+        <div class="result-card" *ngIf="uploadResult" [ngClass]="uploadResult.success ? 'success' : 'error'">
+          <div class="result-icon">
+            <svg *ngIf="uploadResult.success" lucideCheckCircle></svg>
+            <svg *ngIf="!uploadResult.success" lucideCircleAlert></svg>
           </div>
-
-          <form [formGroup]="portfolioForm" (ngSubmit)="onSubmitForm()" class="portfolio-form">
-
-            <!-- Sección: Selección de Aliado (Solo ADMIN) -->
-            <div class="form-section" *ngIf="isAdmin">
-              <div class="section-header">
-                <h4>Asignación de Aliado Estratégico</h4>
-              </div>
-
-              <div class="form-grid">
-                <div class="form-group">
-                  <label for="aliadoEstrategicoId" class="form-label">
-                    Empresa / Aliado Estratégico <span class="required">*</span>
-                  </label>
-                  <select
-                    id="aliadoEstrategicoId"
-                    formControlName="aliadoEstrategicoId"
-                    class="form-control"
-                    [class.error]="getFieldError('aliadoEstrategicoId')">
-                    <option value="">Seleccione un aliado</option>
-                    <option *ngFor="let aliado of aliados" [value]="aliado.id">
-                      {{ aliado.nombre }} (NIT: {{ aliado.nit }})
-                    </option>
-                  </select>
-                  <div class="info-message">
-                    Seleccione la empresa a la que se asignará esta cartera
-                  </div>
-                </div>
-              </div>
+          <div class="result-content">
+            <h3>{{ uploadResult.success ? 'Operacion exitosa' : 'Operacion con errores' }}</h3>
+            <p>{{ uploadResult.message }}</p>
+            <div class="result-details" *ngIf="uploadResult.records">
+              <span>Registros procesados</span>
+              <strong>{{ uploadResult.records }}</strong>
             </div>
-
-            <!-- Sección: Información del Cliente -->
-            <div class="form-section">
-              <div class="section-header">
-                <h4>Información del Cliente</h4>
-              </div>
-
-              <div class="form-grid">
-                <!-- Obligación -->
-                <div class="form-group">
-                  <label for="obligacion" class="form-label">
-                    Obligación <span class="required">*</span>
-                  </label>
-                  <input
-                    id="obligacion"
-                    type="text"
-                    formControlName="obligacion"
-                    class="form-control"
-                    placeholder="Ej: OBL-2025-0001"
-                    [class.error]="getFieldError('obligacion')">
-                  <div class="error-message" *ngIf="getFieldError('obligacion')">
-                    {{ getFieldError('obligacion') }}
-                  </div>
-                </div>
-
-                <!-- Tipo de Documento -->
-                <div class="form-group">
-                  <label for="tipoDocumento" class="form-label">
-                    Tipo de Documento <span class="required">*</span>
-                  </label>
-                  <select
-                    id="tipoDocumento"
-                    formControlName="tipoDocumento"
-                    class="form-control"
-                    [class.error]="getFieldError('tipoDocumento')">
-                    <option value="">Seleccione tipo</option>
-                    <option *ngFor="let type of documentTypes" [value]="type.value">
-                      {{ type.label }}
-                    </option>
-                  </select>
-                  <div class="error-message" *ngIf="getFieldError('tipoDocumento')">
-                    {{ getFieldError('tipoDocumento') }}
-                  </div>
-                </div>
-
-                <!-- Número de Documento -->
-                <div class="form-group">
-                  <label for="numeroDocumento" class="form-label">
-                    Número de Documento <span class="required">*</span>
-                  </label>
-                  <input
-                    id="numeroDocumento"
-                    type="text"
-                    formControlName="numeroDocumento"
-                    class="form-control"
-                    placeholder="Solo números"
-                    [class.error]="getFieldError('numeroDocumento')">
-                  <div class="error-message" *ngIf="getFieldError('numeroDocumento')">
-                    {{ getFieldError('numeroDocumento') }}
-                  </div>
-                </div>
-
-                <!-- Nombres -->
-                <div class="form-group">
-                  <label for="nombres" class="form-label">
-                    Nombres <span class="required">*</span>
-                  </label>
-                  <input
-                    id="nombres"
-                    type="text"
-                    formControlName="nombres"
-                    class="form-control"
-                    placeholder="Nombres completos"
-                    [class.error]="getFieldError('nombres')">
-                  <div class="error-message" *ngIf="getFieldError('nombres')">
-                    {{ getFieldError('nombres') }}
-                  </div>
-                </div>
-
-                <!-- Apellidos -->
-                <div class="form-group">
-                  <label for="apellidos" class="form-label">
-                    Apellidos <span class="required">*</span>
-                  </label>
-                  <input
-                    id="apellidos"
-                    type="text"
-                    formControlName="apellidos"
-                    class="form-control"
-                    placeholder="Apellidos completos"
-                    [class.error]="getFieldError('apellidos')">
-                  <div class="error-message" *ngIf="getFieldError('apellidos')">
-                    {{ getFieldError('apellidos') }}
-                  </div>
-                </div>
-
-                <!-- Tipo Cliente -->
-                <div class="form-group">
-                  <label for="tipoCliente" class="form-label">
-                    Tipo de Cliente <span class="required">*</span>
-                  </label>
-                  <select
-                    id="tipoCliente"
-                    formControlName="tipoCliente"
-                    class="form-control"
-                    [class.error]="getFieldError('tipoCliente')">
-                    <option value="">Seleccione tipo</option>
-                    <option *ngFor="let type of clientTypes" [value]="type.value">
-                      {{ type.label }}
-                    </option>
-                  </select>
-                  <div class="error-message" *ngIf="getFieldError('tipoCliente')">
-                    {{ getFieldError('tipoCliente') }}
-                  </div>
-                </div>
-
-                <!-- WhatsApp -->
-                <div class="form-group">
-                  <label for="whatsapp" class="form-label">
-                    Número de WhatsApp
-                  </label>
-                  <input
-                    id="whatsapp"
-                    type="tel"
-                    formControlName="whatsapp"
-                    class="form-control"
-                    placeholder="Ej: +57 300 1234567"
-                    [class.error]="getFieldError('whatsapp')">
-                  <div class="error-message" *ngIf="getFieldError('whatsapp')">
-                    {{ getFieldError('whatsapp') }}
-                  </div>
-                </div>
-
-                <!-- Correo Electrónico -->
-                <div class="form-group">
-                  <label for="email" class="form-label">
-                    Correo Electrónico
-                  </label>
-                  <input
-                    id="email"
-                    type="email"
-                    formControlName="email"
-                    class="form-control"
-                    placeholder="correo@ejemplo.com"
-                    [class.error]="getFieldError('email')">
-                  <div class="error-message" *ngIf="getFieldError('email')">
-                    {{ getFieldError('email') }}
-                  </div>
-                </div>
-              </div>
+            <div class="error-list" *ngIf="uploadResult.errors && uploadResult.errors.length > 0">
+              <strong>Errores encontrados</strong>
+              <ul>
+                <li *ngFor="let error of uploadResult.errors">{{ error }}</li>
+              </ul>
             </div>
-
-            <!-- Sección: Información Financiera -->
-            <div class="form-section">
-              <div class="section-header">
-                <h4>Información Financiera</h4>
-              </div>
-
-              <div class="form-grid">
-                <!-- Fecha Desembolso -->
-                <div class="form-group">
-                  <label for="fechaDesembolso" class="form-label">
-                    Fecha de Desembolso <span class="required">*</span>
-                  </label>
-                  <input
-                    id="fechaDesembolso"
-                    type="date"
-                    formControlName="fechaDesembolso"
-                    class="form-control"
-                    [class.error]="getFieldError('fechaDesembolso')">
-                  <div class="error-message" *ngIf="getFieldError('fechaDesembolso')">
-                    {{ getFieldError('fechaDesembolso') }}
-                  </div>
-                </div>
-
-                <!-- Plazo Inicial -->
-                <div class="form-group">
-                  <label for="plazoInicial" class="form-label">
-                    Cuotas <span class="required">*</span>
-                  </label>
-                  <input
-                    id="plazoInicial"
-                    type="number"
-                    formControlName="plazoInicial"
-                    class="form-control"
-                    placeholder="Ej: 360"
-                    min="1"
-                    max="360"
-                    [class.error]="getFieldError('plazoInicial')">
-                  <div class="error-message" *ngIf="getFieldError('plazoInicial')">
-                    {{ getFieldError('plazoInicial') }}
-                  </div>
-                </div>
-
-                <!-- Valor Desembolso -->
-                <div class="form-group">
-                  <label for="valorDesembolso" class="form-label">
-                    Valor Desembolso <span class="required">*</span>
-                  </label>
-                  <input
-                    id="valorDesembolso"
-                    type="number"
-                    formControlName="valorDesembolso"
-                    class="form-control"
-                    placeholder="0.00"
-                    step="0.01"
-                    min="0.01"
-                    [class.error]="getFieldError('valorDesembolso')">
-                  <div class="error-message" *ngIf="getFieldError('valorDesembolso')">
-                    {{ getFieldError('valorDesembolso') }}
-                  </div>
-                </div>
-
-                <!-- Valor Aval -->
-                <div class="form-group">
-                  <label for="valorAval" class="form-label">
-                    Valor Fianza <span class="required">*</span>
-                  </label>
-                  <input
-                    id="valorAval"
-                    type="number"
-                    formControlName="valorAval"
-                    class="form-control"
-                    placeholder="0.00"
-                    step="0.01"
-                    min="0"
-                    [class.error]="getFieldError('valorAval')">
-                  <div class="error-message" *ngIf="getFieldError('valorAval')">
-                    {{ getFieldError('valorAval') }}
-                  </div>
-                </div>
-
-                <!-- Interés -->
-                <div class="form-group">
-                  <label for="interes" class="form-label">
-                    Interés <span class="required">*</span>
-                  </label>
-                  <input
-                    id="interes"
-                    type="number"
-                    formControlName="interes"
-                    class="form-control"
-                    placeholder="0.00"
-                    step="0.01"
-                    min="0"
-                    [class.error]="getFieldError('interes')">
-                  <div class="error-message" *ngIf="getFieldError('interes')">
-                    {{ getFieldError('interes') }}
-                  </div>
-                </div>
-
-                <!-- Tasa Aval -->
-                <div class="form-group">
-                  <label for="tasaAval" class="form-label">
-                    Tasa Fianza (%) <span class="required">*</span>
-                  </label>
-                  <input
-                    id="tasaAval"
-                    type="number"
-                    formControlName="tasaAval"
-                    class="form-control"
-                    placeholder="Ej: 18.5"
-                    step="0.1"
-                    min="0"
-                    max="100"
-                    [class.error]="getFieldError('tasaAval')">
-                  <div class="error-message" *ngIf="getFieldError('tasaAval')">
-                    {{ getFieldError('tasaAval') }}
-                  </div>
-                </div>
-
-                <!-- Otros Conceptos -->
-                <div class="form-group">
-                  <label for="otrosConceptos" class="form-label">Otros Conceptos</label>
-                  <input
-                    id="otrosConceptos"
-                    type="number"
-                    formControlName="otrosConceptos"
-                    class="form-control"
-                    placeholder="0.00"
-                    step="0.01"
-                    min="0">
-                </div>
-
-                <!-- Abono Aval -->
-                <div class="form-group">
-                  <label for="abonoAval" class="form-label">Abono Fianza</label>
-                  <input
-                    id="abonoAval"
-                    type="number"
-                    formControlName="abonoAval"
-                    class="form-control"
-                    placeholder="0.00"
-                    step="0.01"
-                    min="0">
-                </div>
-
-                <!-- Abono Capital -->
-                <div class="form-group">
-                  <label for="abonoCapital" class="form-label">Abono Capital</label>
-                  <input
-                    id="abonoCapital"
-                    type="number"
-                    formControlName="abonoCapital"
-                    class="form-control"
-                    placeholder="0.00"
-                    step="0.01"
-                    min="0">
-                </div>
-
-                <!-- Total Deuda (calculado automáticamente) -->
-                <div class="form-group">
-                  <label for="totalDeuda" class="form-label">
-                    Total Deuda <span class="required">*</span>
-                  </label>
-                  <input
-                    id="totalDeuda"
-                    type="number"
-                    formControlName="totalDeuda"
-                    class="form-control auto-calculated"
-                    placeholder="0.00"
-                    readonly
-                    [class.error]="getFieldError('totalDeuda')">
-                  <small class="form-hint">Se calcula automáticamente</small>
-                  <div class="error-message" *ngIf="getFieldError('totalDeuda')">
-                    {{ getFieldError('totalDeuda') }}
-                  </div>
-                </div>
-
-                <!-- Fecha Vencimiento -->
-                <div class="form-group">
-                  <label for="fechaVencimiento" class="form-label">
-                    Fecha de Vencimiento <span class="required">*</span>
-                  </label>
-                  <input
-                    id="fechaVencimiento"
-                    type="date"
-                    formControlName="fechaVencimiento"
-                    class="form-control"
-                    [class.error]="getFieldError('fechaVencimiento')">
-                  <div class="error-message" *ngIf="getFieldError('fechaVencimiento')">
-                    {{ getFieldError('fechaVencimiento') }}
-                  </div>
-                </div>
-
-                <!-- Días de Mora -->
-                <div class="form-group">
-                  <label for="diasMora" class="form-label">Días de Mora</label>
-                  <input
-                    id="diasMora"
-                    type="number"
-                    formControlName="diasMora"
-                    class="form-control"
-                    placeholder="0"
-                    min="0">
-                </div>
-
-                <!-- Fecha de Pago -->
-                <div class="form-group">
-                  <label for="fechaPago" class="form-label">Fecha de Pago</label>
-                  <input
-                    id="fechaPago"
-                    type="date"
-                    formControlName="fechaPago"
-                    class="form-control">
-                </div>
-
-                <!-- Estado del Crédito -->
-                <div class="form-group">
-                  <label for="estadoCredito" class="form-label">
-                    Estado del Crédito <span class="required">*</span>
-                  </label>
-                  <select
-                    id="estadoCredito"
-                    formControlName="estadoCredito"
-                    class="form-control"
-                    [class.error]="getFieldError('estadoCredito')">
-                    <option value="">Seleccione estado</option>
-                    <option *ngFor="let state of creditStates" [value]="state.value">
-                      {{ state.label }}
-                    </option>
-                  </select>
-                  <div class="error-message" *ngIf="getFieldError('estadoCredito')">
-                    {{ getFieldError('estadoCredito') }}
-                  </div>
-                </div>
-
-                <!-- Periodicidad -->
-                <div class="form-group">
-                  <label for="periodicidad" class="form-label">
-                    Periodicidad <span class="required">*</span>
-                  </label>
-                  <select
-                    id="periodicidad"
-                    formControlName="periodicidad"
-                    class="form-control"
-                    [class.error]="getFieldError('periodicidad')">
-                    <option value="">Seleccione periodicidad</option>
-                    <option *ngFor="let option of periodicityOptions" [value]="option.value">
-                      {{ option.label }}
-                    </option>
-                  </select>
-                  <div class="error-message" *ngIf="getFieldError('periodicidad')">
-                    {{ getFieldError('periodicidad') }}
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <!-- Botones de acción -->
-            <div class="form-actions">
-              <button
-                type="button"
-                class="btn-secondary"
-                (click)="portfolioForm.reset()"
-                [disabled]="isLoading">
-                Limpiar Formulario
-              </button>
-              <button
-                type="submit"
-                class="btn-primary"
-                [disabled]="isLoading || portfolioForm.invalid">
-                <span *ngIf="isLoading" class="loading-spinner"></span>
-                {{ isLoading ? 'Guardando...' : 'Guardar Registro' }}
-              </button>
-            </div>
-          </form>
+          </div>
+          <button type="button" class="icon-button muted" aria-label="Cerrar resultado" (click)="uploadResult = null">
+            <svg lucideX></svg>
+          </button>
         </div>
-      </div>
 
-      <!-- Pestaña: Carga Masiva -->
-      <div class="tab-panel" [class.active]="activeTab === 'upload'">
-        <div class="upload-container">
-          <div class="upload-header">
-            <h3>Carga Masiva de Registros</h3>
-            <p>Cargue múltiples registros de cartera usando archivos Excel o CSV</p>
+        <section class="workflow-grid">
+          <article class="workflow-card">
+            <div class="workflow-icon">
+              <svg lucideClipboardPenLine></svg>
+            </div>
+            <div>
+              <span>Formulario</span>
+              <strong>Registro individual</strong>
+            </div>
+          </article>
+          <article class="workflow-card">
+            <div class="workflow-icon">
+              <svg lucideCloudUpload></svg>
+            </div>
+            <div>
+              <span>Archivo</span>
+              <strong>Excel o CSV</strong>
+            </div>
+          </article>
+          <article class="workflow-card">
+            <div class="workflow-icon">
+              <svg lucideBuilding2></svg>
+            </div>
+            <div>
+              <span>Asignacion</span>
+              <strong>{{ isAdmin ? 'Por aliado' : 'Automatica' }}</strong>
+            </div>
+          </article>
+        </section>
+      </section>
+    </section>
+
+    <section class="tab-panel" *ngIf="activeTab === 'form'">
+      <form [formGroup]="portfolioForm" (ngSubmit)="onSubmitForm()" class="portfolio-form">
+        <div class="form-shell">
+          <div class="form-intro">
+            <span class="section-kicker">Formulario manual</span>
+            <h2>Nuevo registro de cartera</h2>
           </div>
 
-          <!-- Selección de Aliado (Solo ADMIN) -->
+          <div class="form-section" *ngIf="isAdmin">
+            <div class="section-header">
+              <div class="section-icon">
+                <svg lucideBuilding2></svg>
+              </div>
+              <h3>Aliado estrategico</h3>
+            </div>
+
+            <div class="form-grid one-col">
+              <div class="form-group">
+                <label for="aliadoEstrategicoId" class="form-label">
+                  Empresa / Aliado Estrategico <span class="required">*</span>
+                </label>
+                <select
+                  id="aliadoEstrategicoId"
+                  formControlName="aliadoEstrategicoId"
+                  class="form-control"
+                  [class.error]="getFieldError('aliadoEstrategicoId')">
+                  <option value="">Seleccione un aliado</option>
+                  <option *ngFor="let aliado of aliados" [value]="aliado.id">
+                    {{ aliado.nombre }} (NIT: {{ aliado.nit }})
+                  </option>
+                </select>
+                <div class="info-message">
+                  <svg lucideInfo></svg>
+                  <span>Esta cartera quedara asociada al aliado seleccionado.</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="form-section">
+            <div class="section-header">
+              <div class="section-icon">
+                <svg lucideUsersRound></svg>
+              </div>
+              <h3>Cliente</h3>
+            </div>
+
+            <div class="form-grid">
+              <div class="form-group">
+                <label for="obligacion" class="form-label">Obligacion <span class="required">*</span></label>
+                <input id="obligacion" type="text" formControlName="obligacion" class="form-control" placeholder="OBL-2026-0001" [class.error]="getFieldError('obligacion')">
+                <div class="error-message" *ngIf="getFieldError('obligacion')">{{ getFieldError('obligacion') }}</div>
+              </div>
+
+              <div class="form-group">
+                <label for="tipoDocumento" class="form-label">Tipo de documento <span class="required">*</span></label>
+                <select id="tipoDocumento" formControlName="tipoDocumento" class="form-control" [class.error]="getFieldError('tipoDocumento')">
+                  <option value="">Seleccione tipo</option>
+                  <option *ngFor="let type of documentTypes" [value]="type.value">{{ type.label }}</option>
+                </select>
+                <div class="error-message" *ngIf="getFieldError('tipoDocumento')">{{ getFieldError('tipoDocumento') }}</div>
+              </div>
+
+              <div class="form-group">
+                <label for="numeroDocumento" class="form-label">Numero de documento <span class="required">*</span></label>
+                <input id="numeroDocumento" type="text" formControlName="numeroDocumento" class="form-control" placeholder="Solo numeros" [class.error]="getFieldError('numeroDocumento')">
+                <div class="error-message" *ngIf="getFieldError('numeroDocumento')">{{ getFieldError('numeroDocumento') }}</div>
+              </div>
+
+              <div class="form-group">
+                <label for="nombres" class="form-label">Nombres <span class="required">*</span></label>
+                <input id="nombres" type="text" formControlName="nombres" class="form-control" placeholder="Nombres completos" [class.error]="getFieldError('nombres')">
+                <div class="error-message" *ngIf="getFieldError('nombres')">{{ getFieldError('nombres') }}</div>
+              </div>
+
+              <div class="form-group">
+                <label for="apellidos" class="form-label">Apellidos <span class="required">*</span></label>
+                <input id="apellidos" type="text" formControlName="apellidos" class="form-control" placeholder="Apellidos completos" [class.error]="getFieldError('apellidos')">
+                <div class="error-message" *ngIf="getFieldError('apellidos')">{{ getFieldError('apellidos') }}</div>
+              </div>
+
+              <div class="form-group">
+                <label for="tipoCliente" class="form-label">Tipo de cliente <span class="required">*</span></label>
+                <select id="tipoCliente" formControlName="tipoCliente" class="form-control" [class.error]="getFieldError('tipoCliente')">
+                  <option value="">Seleccione tipo</option>
+                  <option *ngFor="let type of clientTypes" [value]="type.value">{{ type.label }}</option>
+                </select>
+                <div class="error-message" *ngIf="getFieldError('tipoCliente')">{{ getFieldError('tipoCliente') }}</div>
+              </div>
+
+              <div class="form-group">
+                <label for="whatsapp" class="form-label">WhatsApp</label>
+                <input id="whatsapp" type="tel" formControlName="whatsapp" class="form-control" placeholder="+57 300 1234567" [class.error]="getFieldError('whatsapp')">
+                <div class="error-message" *ngIf="getFieldError('whatsapp')">{{ getFieldError('whatsapp') }}</div>
+              </div>
+
+              <div class="form-group">
+                <label for="email" class="form-label">Correo electronico</label>
+                <input id="email" type="email" formControlName="email" class="form-control" placeholder="correo@ejemplo.com" [class.error]="getFieldError('email')">
+                <div class="error-message" *ngIf="getFieldError('email')">{{ getFieldError('email') }}</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="form-section">
+            <div class="section-header">
+              <div class="section-icon">
+                <svg lucideWalletCards></svg>
+              </div>
+              <h3>Condiciones financieras</h3>
+            </div>
+
+            <div class="form-grid">
+              <div class="form-group">
+                <label for="fechaDesembolso" class="form-label">Fecha de desembolso <span class="required">*</span></label>
+                <input id="fechaDesembolso" type="date" formControlName="fechaDesembolso" class="form-control" [class.error]="getFieldError('fechaDesembolso')">
+                <div class="error-message" *ngIf="getFieldError('fechaDesembolso')">{{ getFieldError('fechaDesembolso') }}</div>
+              </div>
+
+              <div class="form-group">
+                <label for="plazoInicial" class="form-label">Cuotas <span class="required">*</span></label>
+                <input id="plazoInicial" type="number" formControlName="plazoInicial" class="form-control" placeholder="360" min="1" max="360" [class.error]="getFieldError('plazoInicial')">
+                <div class="error-message" *ngIf="getFieldError('plazoInicial')">{{ getFieldError('plazoInicial') }}</div>
+              </div>
+
+              <div class="form-group">
+                <label for="valorDesembolso" class="form-label">Valor desembolso <span class="required">*</span></label>
+                <input id="valorDesembolso" type="number" formControlName="valorDesembolso" class="form-control" placeholder="0.00" step="0.01" min="0.01" [class.error]="getFieldError('valorDesembolso')">
+                <div class="error-message" *ngIf="getFieldError('valorDesembolso')">{{ getFieldError('valorDesembolso') }}</div>
+              </div>
+
+              <div class="form-group">
+                <label for="valorAval" class="form-label">Valor fianza <span class="required">*</span></label>
+                <input id="valorAval" type="number" formControlName="valorAval" class="form-control" placeholder="0.00" step="0.01" min="0" [class.error]="getFieldError('valorAval')">
+                <div class="error-message" *ngIf="getFieldError('valorAval')">{{ getFieldError('valorAval') }}</div>
+              </div>
+
+              <div class="form-group">
+                <label for="interes" class="form-label">Interes <span class="required">*</span></label>
+                <input id="interes" type="number" formControlName="interes" class="form-control" placeholder="0.00" step="0.01" min="0" [class.error]="getFieldError('interes')">
+                <div class="error-message" *ngIf="getFieldError('interes')">{{ getFieldError('interes') }}</div>
+              </div>
+
+              <div class="form-group">
+                <label for="tasaAval" class="form-label">Tasa fianza (%) <span class="required">*</span></label>
+                <input id="tasaAval" type="number" formControlName="tasaAval" class="form-control" placeholder="18.5" step="0.1" min="0" max="100" [class.error]="getFieldError('tasaAval')">
+                <div class="error-message" *ngIf="getFieldError('tasaAval')">{{ getFieldError('tasaAval') }}</div>
+              </div>
+
+              <div class="form-group">
+                <label for="otrosConceptos" class="form-label">Otros conceptos</label>
+                <input id="otrosConceptos" type="number" formControlName="otrosConceptos" class="form-control" placeholder="0.00" step="0.01" min="0">
+              </div>
+
+              <div class="form-group">
+                <label for="abonoAval" class="form-label">Abono fianza</label>
+                <input id="abonoAval" type="number" formControlName="abonoAval" class="form-control" placeholder="0.00" step="0.01" min="0">
+              </div>
+
+              <div class="form-group">
+                <label for="abonoCapital" class="form-label">Abono capital</label>
+                <input id="abonoCapital" type="number" formControlName="abonoCapital" class="form-control" placeholder="0.00" step="0.01" min="0">
+              </div>
+
+              <div class="form-group total-field">
+                <label for="totalDeuda" class="form-label">Total deuda <span class="required">*</span></label>
+                <input id="totalDeuda" type="number" formControlName="totalDeuda" class="form-control auto-calculated" placeholder="0.00" readonly [class.error]="getFieldError('totalDeuda')">
+                <small class="form-hint">Calculado automaticamente</small>
+                <div class="error-message" *ngIf="getFieldError('totalDeuda')">{{ getFieldError('totalDeuda') }}</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="form-section">
+            <div class="section-header">
+              <div class="section-icon">
+                <svg lucideShieldCheck></svg>
+              </div>
+              <h3>Estado y vencimiento</h3>
+            </div>
+
+            <div class="form-grid">
+              <div class="form-group">
+                <label for="fechaVencimiento" class="form-label">Fecha de vencimiento <span class="required">*</span></label>
+                <input id="fechaVencimiento" type="date" formControlName="fechaVencimiento" class="form-control" [class.error]="getFieldError('fechaVencimiento')">
+                <div class="error-message" *ngIf="getFieldError('fechaVencimiento')">{{ getFieldError('fechaVencimiento') }}</div>
+              </div>
+
+              <div class="form-group">
+                <label for="diasMora" class="form-label">Dias de mora</label>
+                <input id="diasMora" type="number" formControlName="diasMora" class="form-control" placeholder="0" min="0">
+              </div>
+
+              <div class="form-group">
+                <label for="fechaPago" class="form-label">Fecha de pago</label>
+                <input id="fechaPago" type="date" formControlName="fechaPago" class="form-control">
+              </div>
+
+              <div class="form-group">
+                <label for="estadoCredito" class="form-label">Estado del credito <span class="required">*</span></label>
+                <select id="estadoCredito" formControlName="estadoCredito" class="form-control" [class.error]="getFieldError('estadoCredito')">
+                  <option value="">Seleccione estado</option>
+                  <option *ngFor="let state of creditStates" [value]="state.value">{{ state.label }}</option>
+                </select>
+                <div class="error-message" *ngIf="getFieldError('estadoCredito')">{{ getFieldError('estadoCredito') }}</div>
+              </div>
+
+              <div class="form-group">
+                <label for="periodicidad" class="form-label">Periodicidad <span class="required">*</span></label>
+                <select id="periodicidad" formControlName="periodicidad" class="form-control" [class.error]="getFieldError('periodicidad')">
+                  <option value="">Seleccione periodicidad</option>
+                  <option *ngFor="let option of periodicityOptions" [value]="option.value">{{ option.label }}</option>
+                </select>
+                <div class="error-message" *ngIf="getFieldError('periodicidad')">{{ getFieldError('periodicidad') }}</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="sticky-actions">
+          <button type="button" class="secondary-btn" (click)="portfolioForm.reset()" [disabled]="isLoading">
+            Limpiar
+          </button>
+          <button type="submit" class="primary-btn" [disabled]="isLoading || portfolioForm.invalid">
+            <svg *ngIf="isLoading" lucideLoaderCircle class="spinning"></svg>
+            {{ isLoading ? 'Guardando...' : 'Guardar registro' }}
+          </button>
+        </div>
+      </form>
+    </section>
+
+    <section class="tab-panel" *ngIf="activeTab === 'upload'">
+      <div class="upload-shell">
+        <aside class="upload-aside">
+          <span class="section-kicker">Carga masiva</span>
+          <h2>Archivo de cartera</h2>
+
+          <div class="upload-rules">
+            <div><strong>.xls .xlsx .csv</strong><span>Formatos permitidos</span></div>
+            <div><strong>10 MB</strong><span>Tamano maximo</span></div>
+            <div><strong>5.000</strong><span>Registros por archivo</span></div>
+          </div>
+
+          <button type="button" class="template-btn" (click)="downloadTemplate()">
+            <svg lucideDownload></svg>
+            Descargar plantilla
+          </button>
+        </aside>
+
+        <section class="upload-workbench">
           <div class="aliado-selection" *ngIf="isAdmin">
             <div class="form-group">
               <label for="aliadoSelect" class="form-label">
-                Empresa / Aliado Estratégico <span class="required">*</span>
+                Empresa / Aliado Estrategico <span class="required">*</span>
               </label>
-              <select
-                id="aliadoSelect"
-                [(ngModel)]="selectedAliadoId"
-                class="form-control">
+              <select id="aliadoSelect" [(ngModel)]="selectedAliadoId" class="form-control">
                 <option [value]="null">Seleccione un aliado</option>
                 <option *ngFor="let aliado of aliados" [value]="aliado.id">
                   {{ aliado.nombre }} (NIT: {{ aliado.nit }})
                 </option>
               </select>
               <div class="info-message">
-                Todos los registros del archivo se asignarán a esta empresa
+                <svg lucideInfo></svg>
+                <span>Todos los registros del archivo usaran esta asignacion.</span>
               </div>
             </div>
           </div>
 
-          <!-- Instrucciones -->
-          <div class="upload-instructions">
-            <h4>📋 Instrucciones de Carga</h4>
-            <ul>
-              <li>Descargue la plantilla oficial para evitar errores de formato</li>
-              <li>Complete todos los campos obligatorios en el archivo</li>
-              <li>Formatos soportados: Excel (.xls, .xlsx) y CSV (.csv)</li>
-              <li>Tamaño máximo del archivo: 10MB</li>
-              <li>Máximo 5,000 registros por archivo</li>
-            </ul>
+          <div
+            class="drop-zone"
+            (drop)="onFileDrop($event)"
+            (dragover)="onDragOver($event)"
+            (dragleave)="onDragLeave($event)"
+            [class.drag-over]="isDragging"
+            [class.has-file]="uploadedFile">
+            <input
+              id="fileInput"
+              type="file"
+              accept=".xls,.xlsx,.csv"
+              (change)="onFileSelected($event)"
+              class="file-input">
+            <label for="fileInput" class="drop-label">
+              <span class="drop-icon">
+                <svg lucideCloudUpload></svg>
+              </span>
+              <span class="primary-text">
+                {{ uploadedFile ? uploadedFile.name : 'Seleccionar archivo' }}
+              </span>
+              <span class="secondary-text">Arrastra un archivo o haz clic para buscarlo</span>
+            </label>
           </div>
 
-          <!-- Descargar plantilla -->
-          <div class="template-section">
-            <button
-              type="button"
-              class="btn-template"
-              (click)="downloadTemplate()">
-              <span class="btn-icon">📥</span>
-              Descargar Plantilla Excel
+          <div class="file-info" *ngIf="uploadedFile">
+            <div class="file-avatar">
+              <svg lucideFileSpreadsheet></svg>
+            </div>
+            <div class="file-details">
+              <strong>{{ uploadedFile.name }}</strong>
+              <span>{{ (uploadedFile.size / 1024 / 1024).toFixed(2) }} MB</span>
+            </div>
+            <button type="button" class="icon-button danger" (click)="removeSelectedFile()" title="Quitar archivo">
+              <svg lucideX></svg>
             </button>
           </div>
 
-          <!-- Área de carga de archivos -->
-          <div class="upload-area">
-            <div class="file-input-container"
-                 (drop)="onFileDrop($event)"
-                 (dragover)="onDragOver($event)"
-                 (dragleave)="onDragLeave($event)"
-                 [class.drag-over]="isDragging">
-              <input
-                id="fileInput"
-                type="file"
-                accept=".xls,.xlsx,.csv"
-                (change)="onFileSelected($event)"
-                class="file-input">
-              <label for="fileInput" class="file-input-label">
-                <div class="upload-icon">📂</div>
-                <div class="upload-text">
-                  <span class="primary-text">
-                    {{ uploadedFile ? uploadedFile.name : 'Seleccionar archivo' }}
-                  </span>
-                  <span class="secondary-text">
-                    Arrastra un archivo aquí o haz clic para seleccionar
-                  </span>
-                </div>
-              </label>
-            </div>
-
-            <!-- Información del archivo seleccionado -->
-            <div class="file-info" *ngIf="uploadedFile">
-              <div class="file-details">
-                <div class="file-info-left">
-                  <span class="file-name">{{ uploadedFile.name }}</span>
-                  <span class="file-size">{{ (uploadedFile.size / 1024 / 1024).toFixed(2) }} MB</span>
-                </div>
-                <button
-                  type="button"
-                  class="btn-remove-file"
-                  (click)="removeSelectedFile()"
-                  title="Quitar archivo">
-                  ✕
-                </button>
-              </div>
-            </div>
-
-            <!-- Botón de carga -->
-            <div class="upload-actions" *ngIf="uploadedFile">
-              <button
-                type="button"
-                class="btn-primary btn-upload"
-                (click)="onUploadFile()"
-                [disabled]="isLoading">
-                <span *ngIf="isLoading" class="loading-spinner"></span>
-                {{ isLoading ? 'Procesando archivo...' : 'Cargar Archivo' }}
-              </button>
-            </div>
+          <div class="upload-actions" *ngIf="uploadedFile">
+            <button type="button" class="primary-btn wide" (click)="onUploadFile()" [disabled]="isLoading">
+              <svg *ngIf="isLoading" lucideLoaderCircle class="spinning"></svg>
+              {{ isLoading ? 'Procesando archivo...' : 'Cargar archivo' }}
+            </button>
           </div>
-        </div>
+        </section>
       </div>
-    </div>
+    </section>
   </main>
 </div>

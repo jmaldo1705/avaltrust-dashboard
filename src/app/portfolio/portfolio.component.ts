@@ -4,6 +4,21 @@ import { Router } from '@angular/router';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule, FormsModule } from '@angular/forms';
 import { catchError, finalize } from 'rxjs/operators';
 import { of } from 'rxjs';
+import {
+  LucideBuilding2,
+  LucideCheckCircle,
+  LucideCircleAlert,
+  LucideClipboardPenLine,
+  LucideCloudUpload,
+  LucideDownload,
+  LucideFileSpreadsheet,
+  LucideInfo,
+  LucideLoaderCircle,
+  LucideShieldCheck,
+  LucideUsersRound,
+  LucideWalletCards,
+  LucideX
+} from '@lucide/angular';
 
 import { AuthService } from '../auth/auth.service';
 import { UiStateService } from '../ui-state.service';
@@ -18,7 +33,26 @@ import * as XLSX from 'xlsx';
 @Component({
   selector: 'app-portfolio',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, FormsModule, HeaderComponent, SidebarComponent],
+  imports: [
+    CommonModule,
+    ReactiveFormsModule,
+    FormsModule,
+    HeaderComponent,
+    SidebarComponent,
+    LucideBuilding2,
+    LucideCheckCircle,
+    LucideCircleAlert,
+    LucideClipboardPenLine,
+    LucideCloudUpload,
+    LucideDownload,
+    LucideFileSpreadsheet,
+    LucideInfo,
+    LucideLoaderCircle,
+    LucideShieldCheck,
+    LucideUsersRound,
+    LucideWalletCards,
+    LucideX
+  ],
   templateUrl: './portfolio.component.html',
   styleUrls: ['./portfolio.component.css']
 })

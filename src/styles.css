@@ -165,3 +165,111 @@
   .chart-content { padding: 1rem; }
   .metric-value { font-size: clamp(0.9rem, 3.5vw, 1.2rem); }
 }
+
+/* Dashboard detail modal */
+.dashboard-page .modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  background: rgba(5, 18, 34, 0.62);
+}
+
+.dashboard-page .modal {
+  display: flex;
+  flex-direction: column;
+  width: min(820px, 100%);
+  max-height: 86vh;
+  overflow: hidden;
+  background: #ffffff;
+  border-radius: 8px;
+  box-shadow: 0 24px 70px rgba(0, 0, 0, 0.24);
+}
+
+.dashboard-page .modal-header {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  align-items: center;
+  padding: 1rem 1.15rem;
+  border-bottom: 1px solid #d9e4ef;
+}
+
+.dashboard-page .modal-header h3 {
+  margin: 0.2rem 0 0;
+  color: #102033;
+}
+
+.dashboard-page .modal-close {
+  width: 36px;
+  height: 36px;
+  color: #12365f;
+  background: #edf6fb;
+  border: 0;
+}
+
+.dashboard-page .modal-body {
+  padding: 1.1rem;
+  overflow: auto;
+}
+
+.dashboard-page .modal-error {
+  justify-content: flex-start;
+  color: #991b1b;
+  background: #fff1f2;
+  border: 1px solid #fecdd3;
+  border-radius: 8px;
+}
+
+.dashboard-page .detail-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.65rem;
+}
+
+.dashboard-page .detail-row {
+  display: grid;
+  gap: 0.35rem;
+  padding: 0.75rem;
+  background: #f7fafc;
+  border: 1px solid #e6edf5;
+  border-radius: 8px;
+}
+
+.dashboard-page .detail-row.highlight {
+  background: #eaf9fb;
+  border-color: #b9edf4;
+}
+
+.dashboard-page .detail-label {
+  color: #64748b;
+  font-size: 0.76rem;
+  font-weight: 700;
+}
+
+.dashboard-page .detail-value {
+  color: #102033;
+  font-weight: 800;
+  word-break: break-word;
+}
+
+.dashboard-page .modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  padding: 0.9rem 1.15rem;
+  border-top: 1px solid #d9e4ef;
+}
+
+.dashboard-page .primary-btn {
+  min-height: 38px;
+  padding: 0.55rem 0.9rem;
+  color: white;
+  background: #12365f;
+}
+
+@media (max-width: 767px) {
+  .dashboard-page .detail-grid { grid-template-columns: 1fr; }
+}

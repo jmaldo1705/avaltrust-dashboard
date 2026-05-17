@@ -6,6 +6,7 @@ import { Observable, Subject, Subscription, of } from 'rxjs';
 import { catchError, finalize, takeUntil } from 'rxjs/operators';
 import {
   LucideAlertTriangle,
+  LucideBadgeDollarSign,
   LucideBell,
   LucideBuilding2,
   LucideCalendarClock,
@@ -16,15 +17,17 @@ import {
   LucideChevronsUpDown,
   LucideDownload,
   LucideEye,
+  LucideGauge,
   LucideInfo,
+  LucideLayoutDashboard,
   LucideLoaderCircle,
+  LucideListFilter,
   LucideRefreshCw,
   LucideSearch,
   LucideShieldCheck,
   LucideTrendingDown,
   LucideTrendingUp,
   LucideUsersRound,
-  LucideWalletCards,
   LucideX
 } from '@lucide/angular';
 
@@ -109,6 +112,7 @@ interface DelinquentUser {
     SidebarComponent,
     FiltroAliadosComponent,
     LucideAlertTriangle,
+    LucideBadgeDollarSign,
     LucideBell,
     LucideBuilding2,
     LucideCalendarClock,
@@ -119,15 +123,17 @@ interface DelinquentUser {
     LucideChevronsUpDown,
     LucideDownload,
     LucideEye,
+    LucideGauge,
     LucideInfo,
+    LucideLayoutDashboard,
     LucideLoaderCircle,
+    LucideListFilter,
     LucideRefreshCw,
     LucideSearch,
     LucideShieldCheck,
     LucideTrendingDown,
     LucideTrendingUp,
     LucideUsersRound,
-    LucideWalletCards,
     LucideX
   ],
   templateUrl: './dashboard.component.html',
@@ -696,6 +702,35 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
   get moraUsersCount(): number {
     return this.moraDistribution.reduce((total, category) => total + category.count, 0);
+  }
+
+  get riskUsersCount(): number {
+    return this.moraDistribution
+      .filter(category => category.severity === 'high' || category.severity === 'critical')
+      .reduce((total, category) => total + category.count, 0);
+  }
+
+  get riskAmount(): number {
+    return this.moraDistribution
+      .filter(category => category.severity === 'high' || category.severity === 'critical')
+      .reduce((total, category) => total + category.amount, 0);
+  }
+
+  get highRiskPercentage(): number {
+    const total = this.moraUsersCount;
+    if (!total) return 0;
+    return Math.max(0, Math.min(100, (this.riskUsersCount / total) * 100));
+  }
+
+  get coverageRatio(): number {
+    const portfolio = this.toNumber(this.portfolioStats.totalPortfolio);
+    if (portfolio <= 0) return 0;
+    return Math.max(0, (this.toNumber(this.totalValorAval) / portfolio) * 100);
+  }
+
+  get riskMeterBackground(): string {
+    const risk = this.highRiskPercentage;
+    return `conic-gradient(#f45f9a 0 ${risk}%, rgba(2, 199, 217, 0.2) ${risk}% 100%)`;
   }
 
   get delinquentsRangeStart(): number {
