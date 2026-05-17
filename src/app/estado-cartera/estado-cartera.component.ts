@@ -3,6 +3,20 @@ import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import * as XLSX from 'xlsx';
+import {
+  LucideAlertTriangle,
+  LucideBadgeDollarSign,
+  LucideBuilding2,
+  LucideCloudUpload,
+  LucideDownload,
+  LucideFileSpreadsheet,
+  LucideLoaderCircle,
+  LucideRefreshCw,
+  LucideSearch,
+  LucideShieldCheck,
+  LucideTrash2,
+  LucideWalletCards
+} from '@lucide/angular';
 
 import { AuthService } from '../auth/auth.service';
 import { UiStateService } from '../ui-state.service';
@@ -43,7 +57,25 @@ interface PortfolioItem {
 @Component({
   selector: 'app-estado-cartera',
   standalone: true,
-  imports: [CommonModule, FormsModule, HeaderComponent, SidebarComponent, ActualizacionPagoModalComponent],
+  imports: [
+    CommonModule,
+    FormsModule,
+    HeaderComponent,
+    SidebarComponent,
+    ActualizacionPagoModalComponent,
+    LucideAlertTriangle,
+    LucideBadgeDollarSign,
+    LucideBuilding2,
+    LucideCloudUpload,
+    LucideDownload,
+    LucideFileSpreadsheet,
+    LucideLoaderCircle,
+    LucideRefreshCw,
+    LucideSearch,
+    LucideShieldCheck,
+    LucideTrash2,
+    LucideWalletCards
+  ],
   templateUrl: './estado-cartera.component.html',
   styleUrls: ['./estado-cartera.component.css']
 })

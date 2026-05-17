@@ -23,7 +23,92 @@
   </app-header>
 
   <!-- Contenido Principal -->
-  <main class="main-content">
+  <main class="main-content estado-page">
+    <section class="estado-command">
+      <aside class="command-card">
+        <div class="panel-pattern"></div>
+        <span class="control-chip">
+          <svg lucideFileSpreadsheet></svg>
+          Estado cartera
+        </span>
+        <h1>Resumen cartera</h1>
+        <div class="command-stats">
+          <div>
+            <span>Registros</span>
+            <strong>{{ totalRegistros }}</strong>
+          </div>
+          <div>
+            <span>Aliados</span>
+            <strong>{{ isAdmin ? (selectedAliadoId ? 'Filtrado' : aliados.length) : 'Asignado' }}</strong>
+          </div>
+        </div>
+        <div class="command-note">
+          <svg lucideShieldCheck></svg>
+          Seguimiento operativo actualizado
+        </div>
+      </aside>
+
+      <section class="command-main">
+        <div class="command-header">
+          <div>
+            <span class="section-kicker">AvalTrust Financial and Fintech</span>
+            <h2>Estado de cartera</h2>
+          </div>
+          <div class="header-actions">
+            <button
+              *ngIf="isAdmin"
+              class="toolbar-btn danger btn-delete-bulk"
+              (click)="openDeleteModal()"
+              title="Eliminar cartera por fechas">
+              <svg lucideTrash2></svg>
+              Eliminar
+            </button>
+            <button
+              *ngIf="!isConsulta"
+              class="toolbar-btn primary btn-upload"
+              (click)="openUploadModal()"
+              title="Carga Masiva">
+              <svg lucideCloudUpload></svg>
+              Carga masiva
+            </button>
+            <button class="toolbar-btn secondary btn-export" (click)="exportToExcel()" title="Exportar a Excel">
+              <svg lucideDownload></svg>
+              Excel
+            </button>
+          </div>
+        </div>
+
+        <div class="statistics-grid command-metrics">
+          <article class="stat-card stat-records">
+            <div class="stat-icon">
+              <svg lucideFileSpreadsheet></svg>
+            </div>
+            <div class="stat-content">
+              <span class="stat-label">Total registros</span>
+              <span class="stat-value">{{ totalRegistros }}</span>
+            </div>
+          </article>
+          <article class="stat-card stat-guarantee">
+            <div class="stat-icon">
+              <svg lucideBadgeDollarSign></svg>
+            </div>
+            <div class="stat-content">
+              <span class="stat-label">Valor fianza total</span>
+              <span class="stat-value">{{ formatCurrency(sumaValorAval) }}</span>
+            </div>
+          </article>
+          <article class="stat-card stat-debt">
+            <div class="stat-icon">
+              <svg lucideWalletCards></svg>
+            </div>
+            <div class="stat-content">
+              <span class="stat-label">Deuda total</span>
+              <span class="stat-value">{{ formatCurrency(sumaTotalDeuda) }}</span>
+            </div>
+          </article>
+        </div>
+      </section>
+    </section>
     <!-- Header de la página -->
     <div class="content-header">
       <div class="header-left">
@@ -88,6 +173,7 @@
       <div class="aliado-filter" *ngIf="isAdmin">
         <div class="filter-group-aliado">
           <label for="aliadoSelect" class="filter-label-aliado">
+            <svg lucideBuilding2></svg>
             <span class="filter-label-icon">🏢</span>
             Aliado Estratégico
           </label>
@@ -106,7 +192,10 @@
 
       <div class="filters-grid">
         <div class="filter-group">
-          <label for="searchTerm" class="filter-label">Buscar</label>
+          <label for="searchTerm" class="filter-label">
+            <svg lucideSearch></svg>
+            Buscar
+          </label>
           <input
             id="searchTerm"
             type="text"
@@ -146,7 +235,8 @@
 
         <div class="filter-actions">
           <button class="btn-clear-filters" (click)="clearFilters()">
-            Limpiar Filtros
+            <svg lucideRefreshCw></svg>
+            Limpiar filtros
           </button>
         </div>
       </div>
@@ -154,13 +244,14 @@
 
     <!-- Loading -->
     <div class="loading-container" *ngIf="isLoading">
-      <div class="spinner"></div>
+      <svg lucideLoaderCircle class="spinning loading-icon"></svg>
       <p>Cargando datos de cartera...</p>
     </div>
 
     <!-- Error -->
     <div class="error-container" *ngIf="errorMessage && !isLoading">
       <div class="error-card">
+        <span class="error-icon"><svg lucideAlertTriangle></svg></span>
         <span class="error-icon">⚠️</span>
         <p>{{ errorMessage }}</p>
         <button class="btn-retry" (click)="loadPortfolioData()">Reintentar</button>
@@ -213,6 +304,7 @@
                   class="btn-action"
                   (click)="openActualizacionModal(portfolio)"
                   title="Actualizar pago">
+                  <svg lucideWalletCards></svg>
                   💰
                 </button>
               </td>
@@ -223,6 +315,7 @@
 
       <!-- Sin resultados -->
       <div class="no-results" *ngIf="filteredPortfolios.length === 0">
+        <div class="no-results-icon"><svg lucideFileSpreadsheet></svg></div>
         <div class="no-results-icon">📭</div>
         <h3>No se encontraron registros</h3>
         <p>No hay registros que coincidan con los filtros aplicados</p>
@@ -276,7 +369,7 @@
     <div class="modal-container upload-modal" (click)="$event.stopPropagation()">
       <!-- Header -->
       <div class="modal-header">
-        <h3>Carga Masiva de Cartera</h3>
+        <h3><svg lucideCloudUpload></svg>Carga Masiva de Cartera</h3>
         <button class="btn-close" (click)="closeUploadModal()" type="button">✕</button>
       </div>
 
@@ -286,6 +379,8 @@
         <div class="result-container" *ngIf="uploadResult">
           <div class="result-card" [ngClass]="uploadResult.success ? 'success' : 'error'">
             <div class="result-icon">
+              <svg *ngIf="uploadResult.success" lucideShieldCheck></svg>
+              <svg *ngIf="!uploadResult.success" lucideAlertTriangle></svg>
               {{ uploadResult.success ? '✅' : '❌' }}
             </div>
             <div class="result-content">
@@ -326,6 +421,7 @@
         <!-- Botón de descarga de plantilla -->
         <div class="template-download">
           <button type="button" class="btn-download" (click)="downloadTemplate()">
+            <svg lucideDownload></svg>
             <span class="btn-icon">📥</span>
             Descargar Plantilla Excel
           </button>
