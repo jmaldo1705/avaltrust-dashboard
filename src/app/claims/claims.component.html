@@ -23,7 +23,113 @@
   </app-header>
 
   <!-- Contenido Principal -->
-  <main class="main-content">
+  <main class="main-content portfolio-page claims-page">
+    <section class="portfolio-command">
+      <aside class="command-card">
+        <div class="panel-pattern"></div>
+        <span class="control-chip">
+          <svg lucideShieldCheck></svg>
+          Cargue siniestros
+        </span>
+        <h1>Resumen siniestros</h1>
+        <div class="command-stats">
+          <div>
+            <span>Modo activo</span>
+            <strong>{{ activeTab === 'form' ? 'Manual' : 'Masivo' }}</strong>
+          </div>
+          <div>
+            <span>Archivo</span>
+            <strong>{{ uploadedFile ? 'Listo' : 'Pendiente' }}</strong>
+          </div>
+        </div>
+        <div class="command-note">
+          <svg lucideInfo></svg>
+          Gestion operativa de reclamaciones
+        </div>
+      </aside>
+
+      <section class="command-main">
+        <div class="command-header">
+          <div>
+            <span class="section-kicker">AvalTrust Financial and Fintech</span>
+            <h2>Operacion de siniestros</h2>
+          </div>
+
+          <div class="mode-switch" role="tablist" aria-label="Modo de cargue de siniestros">
+            <button
+              type="button"
+              class="mode-btn"
+              [class.active]="activeTab === 'form'"
+              (click)="setActiveTab('form')">
+              <svg lucideClipboardPenLine></svg>
+              Manual
+            </button>
+            <button
+              type="button"
+              class="mode-btn"
+              [class.active]="activeTab === 'upload'"
+              (click)="setActiveTab('upload')">
+              <svg lucideCloudUpload></svg>
+              Masivo
+            </button>
+          </div>
+        </div>
+
+        <div class="result-card" *ngIf="uploadResult" [ngClass]="uploadResult.success ? 'success' : 'error'">
+          <div class="result-icon">
+            <svg *ngIf="uploadResult.success" lucideCheckCircle></svg>
+            <svg *ngIf="!uploadResult.success" lucideCircleAlert></svg>
+          </div>
+          <div class="result-content">
+            <h3>{{ uploadResult.success ? 'Operacion exitosa' : 'Operacion con errores' }}</h3>
+            <p>{{ uploadResult.message }}</p>
+            <div class="result-details" *ngIf="uploadResult.records">
+              <span>Registros procesados</span>
+              <strong>{{ uploadResult.records }}</strong>
+            </div>
+            <div class="error-list" *ngIf="uploadResult.errors && uploadResult.errors.length > 0">
+              <strong>Errores encontrados</strong>
+              <ul>
+                <li *ngFor="let error of uploadResult.errors">{{ error }}</li>
+              </ul>
+            </div>
+          </div>
+          <button type="button" class="icon-button muted" aria-label="Cerrar resultado" (click)="uploadResult = null">
+            <svg lucideX></svg>
+          </button>
+        </div>
+
+        <section class="workflow-grid">
+          <article class="workflow-card">
+            <div class="workflow-icon">
+              <svg lucideClipboardPenLine></svg>
+            </div>
+            <div>
+              <span>Formulario</span>
+              <strong>Registro individual</strong>
+            </div>
+          </article>
+          <article class="workflow-card">
+            <div class="workflow-icon">
+              <svg lucideCloudUpload></svg>
+            </div>
+            <div>
+              <span>Archivo</span>
+              <strong>Excel o CSV</strong>
+            </div>
+          </article>
+          <article class="workflow-card">
+            <div class="workflow-icon">
+              <svg lucideFileSpreadsheet></svg>
+            </div>
+            <div>
+              <span>Plantilla</span>
+              <strong>Formato oficial</strong>
+            </div>
+          </article>
+        </section>
+      </section>
+    </section>
     <!-- Header de la página -->
     <div class="content-header">
       <h2>Cargue de Siniestros</h2>
@@ -364,6 +470,7 @@
                 type="submit"
                 class="btn-primary"
                 [disabled]="isLoading || claimsForm.invalid">
+                <svg *ngIf="isLoading" lucideLoaderCircle class="spinning"></svg>
                 <span *ngIf="isLoading" class="loading-spinner"></span>
                 {{ isLoading ? 'Guardando...' : 'Guardar Siniestro' }}
               </button>
@@ -398,6 +505,7 @@
               type="button"
               class="btn-template"
               (click)="downloadTemplate()">
+              <svg lucideDownload></svg>
               <span class="btn-icon">📥</span>
               Descargar Plantilla Excel
             </button>
@@ -417,7 +525,9 @@
                 (change)="onFileSelected($event)"
                 class="file-input">
               <label for="fileInput" class="file-input-label">
-                <div class="upload-icon">📂</div>
+                <div class="upload-icon">
+                  <svg lucideCloudUpload></svg>
+                </div>
                 <div class="upload-text">
                   <span class="primary-text">
                     {{ uploadedFile ? uploadedFile.name : 'Seleccionar archivo' }}
@@ -453,6 +563,7 @@
                 class="btn-primary btn-upload"
                 (click)="onUploadFile()"
                 [disabled]="isLoading">
+                <svg *ngIf="isLoading" lucideLoaderCircle class="spinning"></svg>
                 <span *ngIf="isLoading" class="loading-spinner"></span>
                 {{ isLoading ? 'Procesando archivo...' : 'Cargar Archivo' }}
               </button>

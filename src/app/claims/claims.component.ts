@@ -4,6 +4,18 @@ import { Router } from '@angular/router';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { catchError, finalize } from 'rxjs/operators';
 import { of } from 'rxjs';
+import {
+  LucideCheckCircle,
+  LucideCircleAlert,
+  LucideClipboardPenLine,
+  LucideCloudUpload,
+  LucideDownload,
+  LucideFileSpreadsheet,
+  LucideInfo,
+  LucideLoaderCircle,
+  LucideShieldCheck,
+  LucideX
+} from '@lucide/angular';
 
 import { AuthService } from '../auth/auth.service';
 import { UiStateService } from '../ui-state.service';
@@ -15,7 +27,22 @@ import { ClaimsTemplateService } from './claims-template.service';
 @Component({
   selector: 'app-claims',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, HeaderComponent, SidebarComponent],
+  imports: [
+    CommonModule,
+    ReactiveFormsModule,
+    HeaderComponent,
+    SidebarComponent,
+    LucideCheckCircle,
+    LucideCircleAlert,
+    LucideClipboardPenLine,
+    LucideCloudUpload,
+    LucideDownload,
+    LucideFileSpreadsheet,
+    LucideInfo,
+    LucideLoaderCircle,
+    LucideShieldCheck,
+    LucideX
+  ],
   templateUrl: './claims.component.html',
   styleUrls: ['./claims.component.css']
 })
