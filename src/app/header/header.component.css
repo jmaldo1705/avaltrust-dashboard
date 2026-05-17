@@ -20,21 +20,19 @@
   align-items: center;
   height: 64px;
   padding: 0 1.4rem;
-  background: linear-gradient(90deg, var(--brand-navy) 0 280px, rgba(255, 255, 255, 0.96) 280px 100%);
-  border-bottom: 1px solid rgba(217, 228, 239, 0.95);
-  box-shadow: 0 12px 28px rgba(5, 18, 34, 0.08);
+  background: linear-gradient(135deg, #06101f 0%, #0a203b 48%, #07182f 100%);
+  border-bottom: 1px solid rgba(2, 199, 217, 0.18);
+  box-shadow: 0 14px 30px rgba(3, 10, 24, 0.28);
   backdrop-filter: blur(14px);
 }
 
 .top-bar::before {
   content: "";
   position: absolute;
-  inset: 0 auto 0 0;
-  width: 280px;
+  inset: 0;
   background:
-    linear-gradient(90deg, rgba(2, 199, 217, 0.07) 1px, transparent 1px),
-    repeating-linear-gradient(135deg, rgba(255, 255, 255, 0.04) 0 1px, transparent 1px 24px);
-  background-size: 34px 34px, auto;
+    radial-gradient(circle at 18% 50%, rgba(2, 199, 217, 0.13), transparent 34%),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.045), transparent 36%, rgba(34, 199, 169, 0.05));
   pointer-events: none;
 }
 
@@ -45,8 +43,8 @@
   right: 0;
   bottom: -1px;
   height: 2px;
-  background: linear-gradient(90deg, var(--brand-cyan), var(--brand-green), rgba(244, 95, 154, 0.75), transparent 72%);
-  opacity: 0.9;
+  background: linear-gradient(90deg, transparent, rgba(2, 199, 217, 0.9), rgba(34, 199, 169, 0.9), transparent);
+  opacity: 0.68;
 }
 
 .top-bar > * {
@@ -127,17 +125,17 @@
   justify-content: center;
   width: 40px;
   height: 40px;
-  color: var(--brand-blue);
-  background: var(--surface);
-  border: 1px solid var(--line);
+  color: #dffcff;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.14);
   border-radius: 8px;
 }
 
 .menu-toggle:hover,
 .user-menu-trigger:hover,
 .user-menu-trigger.open {
-  background: #f0fbfc;
-  border-color: rgba(2, 199, 217, 0.38);
+  background: rgba(255, 255, 255, 0.12);
+  border-color: rgba(2, 199, 217, 0.45);
 }
 
 .top-bar-right {
@@ -152,11 +150,11 @@
   gap: 0.65rem;
   min-height: 44px;
   padding: 0.35rem 0.6rem 0.35rem 0.45rem;
-  color: var(--ink);
-  background: var(--surface);
-  border: 1px solid var(--line);
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.15);
   border-radius: 8px;
-  box-shadow: 0 8px 18px rgba(15, 23, 42, 0.06);
+  box-shadow: 0 8px 18px rgba(3, 10, 24, 0.18);
 }
 
 .user-avatar,
@@ -187,7 +185,7 @@
 .user-name {
   max-width: 160px;
   overflow: hidden;
-  color: var(--ink);
+  color: #ffffff;
   font-size: 0.86rem;
   font-weight: 800;
   text-overflow: ellipsis;
@@ -195,14 +193,14 @@
 }
 
 .user-role-compact {
-  color: #70849b;
+  color: #9fc2dd;
   font-size: 0.68rem;
   font-weight: 800;
   text-transform: uppercase;
 }
 
 .dropdown-arrow {
-  color: #7890a8;
+  color: #b7cae1;
   transition: transform 0.18s ease;
 }
 
@@ -319,21 +317,14 @@
 @media (max-width: 767px) {
   .top-bar {
     padding: 0 0.85rem;
-    background: rgba(255, 255, 255, 0.96);
-  }
-
-  .top-bar::before {
-    display: none;
+    background: linear-gradient(135deg, #06101f 0%, #0a203b 48%, #07182f 100%);
   }
 
   .brand-container {
     height: 42px;
     padding: 0 0.65rem;
-    background:
-      linear-gradient(90deg, rgba(2, 199, 217, 0.1) 1px, transparent 1px),
-      linear-gradient(135deg, var(--brand-navy), #0c2e51);
-    background-size: 24px 24px, auto;
-    border: 1px solid rgba(2, 199, 217, 0.24);
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(2, 199, 217, 0.2);
     border-radius: 8px;
     box-shadow: 0 10px 22px rgba(7, 24, 47, 0.14);
   }

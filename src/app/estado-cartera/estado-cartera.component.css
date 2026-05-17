@@ -1493,10 +1493,10 @@
   padding: 2.5rem;
   color: #102033;
   background:
-    linear-gradient(90deg, rgba(2, 199, 217, 0.08) 1px, transparent 1px),
-    linear-gradient(180deg, rgba(34, 199, 169, 0.06) 1px, transparent 1px),
+    radial-gradient(circle at 18% 120px, rgba(2, 199, 217, 0.1), transparent 28%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.04) 0, transparent 250px),
     linear-gradient(180deg, #06101f 0, #0b1f3d 300px, #edf4f9 300px, #f7fafc 100%);
-  background-size: 44px 44px, 44px 44px, auto;
+  background-size: auto;
   overflow-x: hidden;
 }
 
@@ -1529,9 +1529,9 @@
   padding: 1rem;
   color: #ffffff;
   background:
-    linear-gradient(135deg, rgba(7, 24, 47, 0.98), rgba(12, 46, 81, 0.98)),
-    repeating-linear-gradient(135deg, rgba(255, 255, 255, 0.12) 0 1px, transparent 1px 28px);
-  border: 1px solid rgba(2, 199, 217, 0.22);
+    radial-gradient(circle at 86% 50%, rgba(2, 199, 217, 0.16), transparent 31%),
+    linear-gradient(135deg, rgba(7, 24, 47, 0.99), rgba(12, 46, 81, 0.98));
+  border: 1px solid rgba(2, 199, 217, 0.16);
   border-radius: 8px;
   box-shadow: 0 18px 45px rgba(5, 18, 34, 0.22);
 }
@@ -1547,8 +1547,8 @@
 .command-card::before {
   inset: 0;
   background:
-    linear-gradient(90deg, transparent 0 48%, rgba(2, 199, 217, 0.16) 48% 49%, transparent 49%),
-    linear-gradient(0deg, transparent 0 58%, rgba(244, 95, 154, 0.13) 58% 59%, transparent 59%);
+    linear-gradient(90deg, transparent 0 62%, rgba(2, 199, 217, 0.05) 62%, transparent 92%),
+    linear-gradient(0deg, transparent 0 68%, rgba(244, 95, 154, 0.07) 68%, transparent 88%);
 }
 
 .command-card::after {
@@ -1566,10 +1566,10 @@
   width: 124px;
   height: 78px;
   background:
-    linear-gradient(90deg, rgba(2, 199, 217, 0.42) 1px, transparent 1px),
-    linear-gradient(180deg, rgba(34, 199, 169, 0.34) 1px, transparent 1px);
-  background-size: 16px 16px;
-  opacity: 0.38;
+    linear-gradient(120deg, transparent 0 42%, rgba(2, 199, 217, 0.18) 42% 45%, transparent 45% 100%),
+    linear-gradient(120deg, transparent 0 63%, rgba(34, 199, 169, 0.12) 63% 66%, transparent 66% 100%);
+  background-size: auto;
+  opacity: 0.32;
   transform: translateY(-50%) skew(-10deg);
 }
 
@@ -2071,9 +2071,9 @@
 .export-modal-header {
   color: #ffffff;
   background:
-    linear-gradient(90deg, rgba(2, 199, 217, 0.08) 1px, transparent 1px),
+    radial-gradient(circle at 92% 0%, rgba(2, 199, 217, 0.18), transparent 36%),
     linear-gradient(135deg, #07182f, #12365f);
-  background-size: 24px 24px, auto;
+  background-size: auto;
   border-bottom: 1px solid rgba(2, 199, 217, 0.22);
 }
 
@@ -2141,9 +2141,10 @@
   .main-content.estado-page {
     padding: 1rem;
     background:
-      linear-gradient(90deg, rgba(2, 199, 217, 0.08) 1px, transparent 1px),
+      radial-gradient(circle at 18% 96px, rgba(2, 199, 217, 0.1), transparent 30%),
+      linear-gradient(180deg, rgba(255, 255, 255, 0.04) 0, transparent 210px),
       linear-gradient(180deg, #06101f 0, #0b1f3d 250px, #edf4f9 250px, #f7fafc 100%);
-    background-size: 38px 38px, auto;
+    background-size: auto;
   }
 
   .command-card,
