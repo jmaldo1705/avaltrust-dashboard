@@ -55,6 +55,11 @@ export type RefreshResponse = {
   expiresIn: number;
 };
 
+export type AuthMessageResponse = {
+  message: string;
+  success: boolean;
+};
+
 @Injectable({ providedIn: 'root' })
 export class AuthService {
   // User activity and keep-alive handling
@@ -554,6 +559,41 @@ export class AuthService {
           this.writeToStorage(updatedUser);
         }
       }),
+      catchError((error: HttpErrorResponse) => {
+        throw new Error(this.getErrorMessage(error));
+      })
+    );
+  }
+
+  requestPasswordReset(email: string): Observable<AuthMessageResponse> {
+    const httpOptions = {
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json'
+      }
+    };
+
+    return this.http.post<AuthMessageResponse>(`${this.API_URL}/forgot-password`, {
+      email: email.trim()
+    }, httpOptions).pipe(
+      catchError((error: HttpErrorResponse) => {
+        throw new Error(this.getErrorMessage(error));
+      })
+    );
+  }
+
+  resetPassword(token: string, newPassword: string): Observable<AuthMessageResponse> {
+    const httpOptions = {
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json'
+      }
+    };
+
+    return this.http.post<AuthMessageResponse>(`${this.API_URL}/reset-password`, {
+      token,
+      newPassword
+    }, httpOptions).pipe(
       catchError((error: HttpErrorResponse) => {
         throw new Error(this.getErrorMessage(error));
       })

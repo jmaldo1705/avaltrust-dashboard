@@ -1,7 +1,7 @@
-import { Component, effect, inject, signal } from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Router, ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { AuthService } from '../auth/auth.service';
 
 @Component({
@@ -18,21 +18,44 @@ export class LoginComponent {
 
   username = '';
   password = '';
+  recoveryEmail = '';
   acceptTerms = false;
-  loading = signal(false);
-  error = signal('');
-  focused: 'user' | 'pass' | '' = '';
 
-  constructor(){
-    // If already logged in, go to dashboard
+  loading = signal(false);
+  recoveryLoading = signal(false);
+  error = signal('');
+  notice = signal('');
+  recoveryError = signal('');
+  recoveryMessage = signal('');
+  showRecovery = signal(false);
+
+  constructor() {
     if (this.auth.isAuthenticated()) {
       this.router.navigate(['/dashboard']);
+      return;
+    }
+
+    if (this.route.snapshot.queryParamMap.get('reset') === 'success') {
+      this.notice.set('Contraseña actualizada. Ya puedes iniciar sesión.');
     }
   }
 
-  onSubmit(){
+  onSubmit() {
     if (this.loading()) return;
+
     this.error.set('');
+    this.notice.set('');
+
+    if (!this.username.trim() || !this.password) {
+      this.error.set('Ingresa tu usuario y contraseña.');
+      return;
+    }
+
+    if (!this.acceptTerms) {
+      this.error.set('Debes aceptar los términos y la política de privacidad.');
+      return;
+    }
+
     this.loading.set(true);
 
     this.auth.login(this.username.trim(), this.password)
@@ -40,21 +63,17 @@ export class LoginComponent {
         next: () => {
           this.loading.set(false);
 
-          // Verificar si debe cambiar contraseña
           const user = this.auth.user();
           if (user && (user as any).mustChangePassword) {
-            // Redirigir al cambio de contraseña
             this.router.navigate(['/change-password']);
             return;
           }
 
-          // Si no necesita cambiar contraseña, redirigir normalmente
           const returnUrl = this.route.snapshot.queryParamMap.get('returnUrl');
 
           if (returnUrl && returnUrl !== '/admin' && returnUrl !== '/user') {
             this.router.navigateByUrl(returnUrl);
           } else {
-            // Siempre redirigir al dashboard después del login
             this.router.navigate(['/dashboard']);
           }
         },
@@ -63,5 +82,47 @@ export class LoginComponent {
           this.loading.set(false);
         }
       });
+  }
+
+  openRecovery() {
+    this.showRecovery.set(true);
+    this.recoveryError.set('');
+    this.recoveryMessage.set('');
+
+    if (!this.recoveryEmail && this.username.includes('@')) {
+      this.recoveryEmail = this.username.trim();
+    }
+  }
+
+  closeRecovery() {
+    this.showRecovery.set(false);
+    this.recoveryError.set('');
+    this.recoveryMessage.set('');
+  }
+
+  requestPasswordReset() {
+    if (this.recoveryLoading()) return;
+
+    const email = this.recoveryEmail.trim();
+    this.recoveryError.set('');
+    this.recoveryMessage.set('');
+
+    if (!email) {
+      this.recoveryError.set('Ingresa el correo registrado en AvalTrust.');
+      return;
+    }
+
+    this.recoveryLoading.set(true);
+
+    this.auth.requestPasswordReset(email).subscribe({
+      next: (response) => {
+        this.recoveryLoading.set(false);
+        this.recoveryMessage.set(response.message || 'Si el correo está registrado, enviaremos un enlace de recuperación.');
+      },
+      error: (err) => {
+        this.recoveryLoading.set(false);
+        this.recoveryError.set(err?.message || 'No pudimos enviar el correo de recuperación.');
+      }
+    });
   }
 }
