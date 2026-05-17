@@ -4,6 +4,18 @@ import { Router } from '@angular/router';
 import { FormBuilder, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { catchError, finalize } from 'rxjs/operators';
 import { of } from 'rxjs';
+import {
+  LucideDownload,
+  LucideEye,
+  LucideFileSpreadsheet,
+  LucideFileText,
+  LucideInfo,
+  LucideListFilter,
+  LucideLoaderCircle,
+  LucideRefreshCw,
+  LucideShieldCheck,
+  LucideX
+} from '@lucide/angular';
 
 import { AuthService } from '../auth/auth.service';
 import { UiStateService } from '../ui-state.service';
@@ -14,7 +26,22 @@ import { ReportsService } from './reports.service';
 @Component({
   selector: 'app-reports',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, HeaderComponent, SidebarComponent],
+  imports: [
+    CommonModule,
+    ReactiveFormsModule,
+    HeaderComponent,
+    SidebarComponent,
+    LucideDownload,
+    LucideEye,
+    LucideFileSpreadsheet,
+    LucideFileText,
+    LucideInfo,
+    LucideListFilter,
+    LucideLoaderCircle,
+    LucideRefreshCw,
+    LucideShieldCheck,
+    LucideX
+  ],
   templateUrl: './reports.component.html',
   styleUrls: ['./reports.component.css']
 })
@@ -80,6 +107,15 @@ export class ReportsComponent implements OnInit {
     { value: 'last_year', label: 'Último año' },
     { value: 'custom', label: 'Rango personalizado' }
   ];
+
+  get selectedReportLabel(): string {
+    return this.reportTypes.find(report => report.value === this.selectedReportType)?.label || 'Pendiente';
+  }
+
+  get selectedTimeRangeLabel(): string {
+    const selectedRange = this.reportsForm?.get('timeRange')?.value;
+    return this.timeRanges.find(range => range.value === selectedRange)?.label || 'Sin periodo';
+  }
 
   ngOnInit() {
     this.initializeForm();
