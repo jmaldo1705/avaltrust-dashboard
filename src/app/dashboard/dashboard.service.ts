@@ -130,10 +130,27 @@ export interface UserDetailDto {
   periodicidad: string;
 }
 
+export interface DashboardSummaryDto {
+  portfolioStats: PortfolioStatsDto;
+  totalValorAval: number;
+  moraDistribution: MoraCategoryDto[];
+  paymentStats: PaymentStatsDto;
+  recentPayments: RecentPaymentDto[];
+  alerts: AlertDto[];
+}
+
 @Injectable({ providedIn: 'root' })
 export class DashboardService {
   private http = inject(HttpClient);
   private baseUrl = `${environment.apiUrl}`;
+
+  getDashboardSummary(
+    period: 'month' | 'quarter' | 'year',
+    params: { aliadoIds?: number[] } = {}
+  ): Observable<DashboardSummaryDto> {
+    const queryParams = { period, ...this.buildAliadoParams(params.aliadoIds) };
+    return this.http.get<DashboardSummaryDto>(`${this.baseUrl}/api/dashboard/summary`, { params: queryParams });
+  }
 
   // Endpoints sugeridos (el backend puede ajustarlos)
   getPortfolioStats(params: { aliadoIds?: number[] } = {}): Observable<PortfolioStatsDto> {
@@ -202,8 +219,7 @@ export class DashboardService {
     if (!aliadoIds || aliadoIds.length === 0) {
       return {};
     }
-    // Enviar como array para que Spring lo parsee como List<Long>
-    return { aliadoIds: aliadoIds };
+    return { aliadoIds: aliadoIds.join(',') };
   }
 
   getPortfolioDetail(portfolioId: string): Observable<UserDetailDto> {

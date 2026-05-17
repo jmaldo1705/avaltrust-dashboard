@@ -1,16 +1,41 @@
-import { Component, inject, OnInit } from '@angular/core';
+import { Component, inject, OnDestroy, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
+import { Observable, Subject, Subscription, of } from 'rxjs';
+import { catchError, finalize, takeUntil } from 'rxjs/operators';
+import {
+  LucideAlertTriangle,
+  LucideBell,
+  LucideBuilding2,
+  LucideCalendarClock,
+  LucideChevronDown,
+  LucideChevronLeft,
+  LucideChevronRight,
+  LucideChevronUp,
+  LucideChevronsUpDown,
+  LucideDownload,
+  LucideEye,
+  LucideInfo,
+  LucideLoaderCircle,
+  LucideRefreshCw,
+  LucideSearch,
+  LucideShieldCheck,
+  LucideTrendingDown,
+  LucideTrendingUp,
+  LucideUsersRound,
+  LucideWalletCards,
+  LucideX
+} from '@lucide/angular';
 
 import { AuthService } from '../auth/auth.service';
 import { UiStateService } from '../ui-state.service';
 import { HeaderComponent } from '../header/header.component';
 import { SidebarComponent } from '../sidebar/sidebar.component';
-import { HasRoleDirective } from '../auth/has-role.directive';
 import { DashboardService } from './dashboard.service';
 import { PortfolioService } from '../portfolio/portfolio.service';
 import { FiltroAliadosComponent, FiltroAliadosEvent } from './filtro-aliados.component';
+import { ToastService } from '../services/toast.service';
 import * as XLSX from 'xlsx';
 
 // Interfaces para tipado
@@ -77,16 +102,44 @@ interface DelinquentUser {
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [CommonModule, FormsModule, HeaderComponent, SidebarComponent, FiltroAliadosComponent],
+  imports: [
+    CommonModule,
+    FormsModule,
+    HeaderComponent,
+    SidebarComponent,
+    FiltroAliadosComponent,
+    LucideAlertTriangle,
+    LucideBell,
+    LucideBuilding2,
+    LucideCalendarClock,
+    LucideChevronDown,
+    LucideChevronLeft,
+    LucideChevronRight,
+    LucideChevronUp,
+    LucideChevronsUpDown,
+    LucideDownload,
+    LucideEye,
+    LucideInfo,
+    LucideLoaderCircle,
+    LucideRefreshCw,
+    LucideSearch,
+    LucideShieldCheck,
+    LucideTrendingDown,
+    LucideTrendingUp,
+    LucideUsersRound,
+    LucideWalletCards,
+    LucideX
+  ],
   templateUrl: './dashboard.component.html',
   styleUrls: ['./dashboard.component.css']
 })
-export class DashboardComponent implements OnInit {
+export class DashboardComponent implements OnInit, OnDestroy {
   private router = inject(Router);
   private auth = inject(AuthService);
   private uiState = inject(UiStateService);
   private dashboardService = inject(DashboardService);
   private portfolioService = inject(PortfolioService);
+  private toastService = inject(ToastService);
 
   userProfile = this.auth.userProfile;
 
@@ -106,6 +159,15 @@ export class DashboardComponent implements OnInit {
   // Filtro de aliados estratégicos (solo para ADMIN)
   selectedAliadoIds: number[] | null = null;
   isAliadoFilterVisible = false;
+  isDashboardLoading = false;
+  dashboardError: string | null = null;
+  dashboardSectionErrors: string[] = [];
+  delinquentsError: string | null = null;
+  lastUpdatedAt: Date | null = null;
+  isExportingDelinquents = false;
+  private dashboardLoadSub?: Subscription;
+  private delinquentsLoadSub?: Subscription;
+  private readonly destroy$ = new Subject<void>();
 
   // Datos del dashboard
   portfolioStats: PortfolioStats = {
@@ -161,7 +223,12 @@ export class DashboardComponent implements OnInit {
   ngOnInit() {
     // Cargar datos del usuario si no están disponibles
     if (!this.userProfile()) {
-      this.auth.getUserProfile().subscribe();
+      this.auth.getUserProfile()
+        .pipe(takeUntil(this.destroy$))
+        .subscribe({
+          next: () => this.checkAdminRole(),
+          error: () => this.checkAdminRole()
+        });
     }
 
     // Verificar si es admin para mostrar filtro de aliados
@@ -171,17 +238,81 @@ export class DashboardComponent implements OnInit {
     this.loadDashboardData();
   }
 
+  ngOnDestroy() {
+    this.dashboardLoadSub?.unsubscribe();
+    this.delinquentsLoadSub?.unsubscribe();
+    if (this.delinquentsFilterTimeout) {
+      clearTimeout(this.delinquentsFilterTimeout);
+    }
+    this.destroy$.next();
+    this.destroy$.complete();
+  }
+
   private checkAdminRole() {
     const profile = this.userProfile();
-    this.isAliadoFilterVisible = profile?.roles?.includes('ROLE_ADMIN') ?? false;
+    const currentUser = this.auth.user();
+    this.isAliadoFilterVisible =
+      Boolean(profile?.roles?.includes('ROLE_ADMIN')) ||
+      Boolean(profile?.isAdmin) ||
+      Boolean(currentUser?.roles?.includes('ROLE_ADMIN')) ||
+      Boolean(currentUser?.isAdmin);
   }
 
   onAliadoFilterChange(event: FiltroAliadosEvent) {
     this.selectedAliadoIds = event.aliadoIds;
+    this.delinquentsCurrentPage = 1;
     this.loadDashboardData();
   }
 
   private loadDashboardData() {
+    const params = this.getDashboardParams();
+    const period = this.selectedPeriod as 'month' | 'quarter' | 'year';
+
+    this.dashboardLoadSub?.unsubscribe();
+    this.dashboardSectionErrors = [];
+    this.dashboardError = null;
+    this.isDashboardLoading = true;
+
+    this.dashboardLoadSub = this.safeRequest(
+      this.dashboardService.getDashboardSummary(period, params),
+      'No fue posible cargar el resumen del dashboard.',
+      {
+        portfolioStats: this.getEmptyPortfolioStats(),
+        totalValorAval: 0,
+        moraDistribution: [],
+        paymentStats: this.getEmptyPaymentStats(),
+        recentPayments: [],
+        alerts: []
+      }
+    )
+      .pipe(
+        takeUntil(this.destroy$),
+        finalize(() => this.isDashboardLoading = false)
+      )
+      .subscribe({
+        next: data => {
+          this.portfolioStats = this.normalizePortfolioStats(data.portfolioStats);
+          this.totalValorAval = this.toNumber(data.totalValorAval);
+          this.moraDistribution = this.normalizeMoraDistribution(data.moraDistribution);
+          this.alerts = this.normalizeAlerts(data.alerts);
+          this.paymentStats = this.normalizePaymentStats(data.paymentStats);
+          this.recentPayments = this.normalizeRecentPayments(data.recentPayments);
+          this.lastUpdatedAt = new Date();
+          this.dashboardError = this.dashboardSectionErrors.length
+            ? 'Algunos datos no se pudieron actualizar. Se muestran valores disponibles.'
+            : null;
+        },
+        error: err => {
+          console.error('Error inesperado cargando dashboard', err);
+          this.dashboardError = 'No fue posible actualizar el dashboard. Intenta nuevamente.';
+          this.toastService.error(this.dashboardError);
+        }
+      });
+
+    this.loadDelinquentUsers();
+  }
+
+  private loadDashboardDataLegacy() {
     const params = this.selectedAliadoIds ? { aliadoIds: this.selectedAliadoIds } : {};
 
     // Cargar estadísticas generales de la cartera
@@ -221,10 +352,203 @@ export class DashboardComponent implements OnInit {
     this.loadPaymentData();
   }
 
+  refreshDashboard() {
+    this.loadDashboardData();
+  }
+
+  private getDashboardParams(): { aliadoIds?: number[] } {
+    return this.selectedAliadoIds && this.selectedAliadoIds.length > 0
+      ? { aliadoIds: this.selectedAliadoIds }
+      : {};
+  }
+
+  private safeRequest<T>(request$: Observable<T>, message: string, fallback: T): Observable<T> {
+    return request$.pipe(
+      catchError(err => {
+        this.addDashboardSectionError(message, err);
+        return of(fallback);
+      })
+    );
+  }
+
+  private addDashboardSectionError(message: string, err: unknown) {
+    console.error(message, err);
+    if (!this.dashboardSectionErrors.includes(message)) {
+      this.dashboardSectionErrors.push(message);
+    }
+  }
+
+  private getEmptyPortfolioStats(): PortfolioStats {
+    return {
+      totalPortfolio: 0,
+      portfolioGrowth: 0,
+      activeUsers: 0,
+      averageDelayDays: 0,
+      delayDaysChange: 0,
+      guaranteeRate: 0
+    };
+  }
+
+  private getEmptyPaymentStats(): PaymentStats {
+    return {
+      totalPayments: 0,
+      totalInterest: 0,
+      totalPenalties: 0
+    };
+  }
+
+  private normalizePortfolioStats(data: any): PortfolioStats {
+    return {
+      totalPortfolio: this.toNumber(data?.totalPortfolio),
+      portfolioGrowth: this.toNumber(data?.portfolioGrowth),
+      activeUsers: this.toNumber(data?.activeUsers),
+      averageDelayDays: this.toNumber(data?.averageDelayDays),
+      delayDaysChange: this.toNumber(data?.delayDaysChange),
+      guaranteeRate: this.toNumber(data?.guaranteeRate)
+    };
+  }
+
+  private normalizePaymentStats(data: any): PaymentStats {
+    return {
+      totalPayments: this.toNumber(data?.totalPayments),
+      totalInterest: this.toNumber(data?.totalInterest),
+      totalPenalties: this.toNumber(data?.totalPenalties)
+    };
+  }
+
+  private normalizeMoraDistribution(data: any): MoraCategory[] {
+    if (!Array.isArray(data)) return [];
+
+    return data.map(category => ({
+      name: String(category?.name ?? 'Sin clasificar'),
+      count: this.toNumber(category?.count),
+      percentage: Math.max(0, Math.min(100, this.toNumber(category?.percentage))),
+      amount: this.toNumber(category?.amount),
+      severity: this.normalizeSeverity(category?.severity)
+    }));
+  }
+
+  private normalizeAlerts(data: any): Alert[] {
+    if (!Array.isArray(data)) return [];
+
+    return data.map(a => {
+      const userId = (a as any).userId ?? (a as any).user_id ?? (a as any).userID ?? (a as any).usuarioId ?? (a as any).usuario_id ?? (a as any).clienteId ?? (a as any).cliente_id;
+      return {
+        ...a,
+        id: String(a?.id ?? `${a?.title ?? 'alert'}-${a?.timestamp ?? Date.now()}`),
+        type: String(a?.type ?? 'system'),
+        severity: this.normalizeAlertSeverity(a?.severity),
+        title: String(a?.title ?? 'Alerta'),
+        description: String(a?.description ?? 'Sin descripcion disponible.'),
+        userId,
+        timestamp: this.toDate(a?.timestamp)
+      };
+    });
+  }
+
+  private normalizeRecentPayments(data: any): RecentPayment[] {
+    if (!Array.isArray(data)) return [];
+
+    return data.map(p => ({
+      ...p,
+      date: this.toDate(p?.date),
+      amount: this.toNumber(p?.amount),
+      type: p?.type ?? 'payment',
+      typeName: String(p?.typeName ?? 'Pago')
+    }));
+  }
+
+  private calculateCoverageValue(resp: any): number {
+    const value = this.toNumber(resp?.sumValorAval ?? resp?.sum_valor_aval ?? resp?.sum);
+    const porcentajeCapitalizacion = this.toNumber(resp?.porcentajeCapitalizacion ?? 100, 100);
+    const valorConIva = value / 1.19;
+    return Number.isFinite(valorConIva) ? valorConIva * (porcentajeCapitalizacion / 100) : 0;
+  }
+
+  private normalizeSeverity(value: unknown): MoraCategory['severity'] {
+    return value === 'low' || value === 'medium' || value === 'high' || value === 'critical'
+      ? value
+      : 'low';
+  }
+
+  private normalizeAlertSeverity(value: unknown): Alert['severity'] {
+    return value === 'info' || value === 'warning' || value === 'error'
+      ? value
+      : 'info';
+  }
+
+  private toNumber(value: unknown, fallback = 0): number {
+    const numeric = Number(value);
+    return Number.isFinite(numeric) ? numeric : fallback;
+  }
+
+  private toDate(value: unknown): Date {
+    const date = new Date(String(value ?? ''));
+    return Number.isNaN(date.getTime()) ? new Date() : date;
+  }
+
   /**
    * Carga usuarios con mora desde el backend con paginación.
    */
   private loadDelinquentUsers() {
+    this.delinquentsLoadSub?.unsubscribe();
+    this.delinquentsLoading = true;
+    this.delinquentsError = null;
+
+    const params: any = {
+      page: this.delinquentsCurrentPage,
+      size: this.delinquentsPageSize,
+      sortBy: this.delinquentsSortBy,
+      sortDir: this.delinquentsSortDir
+    };
+
+    if (this.delinquentsFilter?.trim()) {
+      params.filter = this.delinquentsFilter.trim();
+    }
+
+    if (this.selectedAliadoIds && this.selectedAliadoIds.length > 0) {
+      params.aliadoIds = this.selectedAliadoIds;
+    }
+
+    this.delinquentsLoadSub = this.dashboardService.getDelinquentUsers(params)
+      .pipe(
+        takeUntil(this.destroy$),
+        finalize(() => this.delinquentsLoading = false)
+      )
+      .subscribe({
+        next: (response: any) => {
+          const content = Array.isArray(response?.content) ? response.content : [];
+          this.topDelinquentUsers = content.map((u: any) => {
+            const uid = u.userId ?? u.user_id ?? u.uid ?? u.userUid ?? u.usuarioUid ?? u.clienteUid ?? u.cliente_id ?? u.id;
+            return {
+              ...u,
+              id: String(uid ?? u.identification ?? u.numeroDocumento ?? ''),
+              name: String(u.name ?? u.nombres ?? 'Sin nombre'),
+              identification: String(u.identification ?? u.numeroDocumento ?? ''),
+              debtAmount: this.toNumber(u.debtAmount ?? u.totalDeuda),
+              delayDays: this.toNumber(u.delayDays ?? u.diasMora),
+              guaranteeRate: String(u.guaranteeRate ?? u.obligacion ?? '')
+            } as DelinquentUser;
+          });
+          this.delinquentsTotalElements = this.toNumber(response?.totalElements, content.length);
+          this.delinquentsTotalPages = Math.max(1, this.toNumber(response?.totalPages, 1));
+          this.delinquentsCurrentPage = Math.min(
+            Math.max(1, this.toNumber(response?.page, this.delinquentsCurrentPage)),
+            this.delinquentsTotalPages
+          );
+        },
+        error: err => {
+          console.error('Error cargando usuarios con mora', err);
+          this.topDelinquentUsers = [];
+          this.delinquentsTotalElements = 0;
+          this.delinquentsTotalPages = 1;
+          this.delinquentsError = 'No fue posible cargar los usuarios con mora.';
+          this.toastService.error(this.delinquentsError);
+        }
+      });
+  }
+
+  private loadDelinquentUsersLegacy() {
     this.delinquentsLoading = true;
     
     const params: any = {
@@ -242,7 +566,12 @@ export class DashboardComponent implements OnInit {
       params.aliadoIds = this.selectedAliadoIds;
     }
     
-    this.dashboardService.getDelinquentUsers(params).subscribe({
+    this.dashboardService.getDelinquentUsers(params)
+      .pipe(
+        takeUntil(this.destroy$),
+        finalize(() => this.isExportingDelinquents = false)
+      )
+      .subscribe({
       next: (response: any) => {
         this.topDelinquentUsers = (response.content || []).map((u: any) => {
           const uid = u.userId ?? u.user_id ?? u.uid ?? u.userUid ?? u.usuarioUid ?? u.clienteUid ?? u.cliente_id ?? u.id;
@@ -289,33 +618,36 @@ export class DashboardComponent implements OnInit {
   }
 
   loadTimelineData() {
-    this.dashboardService.getMoraTimeline(this.timelinePeriod).subscribe({
+    this.dashboardService.getMoraTimeline(this.timelinePeriod, this.getDashboardParams()).subscribe({
       next: (data: any[]) => {
-        this.moraTimeline = data.map(item => ({
-          date: new Date(item.date),
-          categories: item.categories
-        }));
+        this.moraTimeline = Array.isArray(data)
+          ? data.map(item => ({
+              date: this.toDate(item.date),
+              categories: this.normalizeMoraDistribution(item.categories)
+            }))
+          : [];
       },
-      error: (err) => console.error('Error cargando moraTimeline', err)
+      error: (err) => {
+        console.error('Error cargando moraTimeline', err);
+        this.toastService.error('No fue posible cargar la linea de tiempo de mora.');
+      }
     });
   }
 
   loadPaymentData() {
     const period = this.selectedPeriod as 'month' | 'quarter' | 'year';
+    const params = this.getDashboardParams();
 
     // Resumen de pagos
-    this.dashboardService.getPaymentStats(period).subscribe({
-      next: (data: any) => this.paymentStats = data,
+    this.dashboardService.getPaymentStats(period, params).subscribe({
+      next: (data: any) => this.paymentStats = this.normalizePaymentStats(data),
       error: (err) => console.error('Error cargando paymentStats', err)
     });
 
     // Pagos recientes
-    this.dashboardService.getRecentPayments(period).subscribe({
+    this.dashboardService.getRecentPayments(period, params).subscribe({
       next: (data: any[]) => {
-        this.recentPayments = data.map(p => ({
-          ...p,
-          date: new Date(p.date)
-        }));
+        this.recentPayments = this.normalizeRecentPayments(data);
       },
       error: (err) => console.error('Error cargando recentPayments', err)
     });
@@ -360,6 +692,10 @@ export class DashboardComponent implements OnInit {
   // Los datos ya vienen procesados del backend, solo mostramos lo que tenemos
   get visibleDelinquentUsers(): DelinquentUser[] {
     return this.topDelinquentUsers || [];
+  }
+
+  get moraUsersCount(): number {
+    return this.moraDistribution.reduce((total, category) => total + category.count, 0);
   }
 
   get delinquentsRangeStart(): number {
@@ -565,6 +901,9 @@ export class DashboardComponent implements OnInit {
   }
 
   exportTopDelinquents() {
+    if (this.isExportingDelinquents) return;
+    this.isExportingDelinquents = true;
+
     // Exportar todos los usuarios con mora que cumplan con los filtros actuales
     const params: any = {
       page: 1,
@@ -585,9 +924,9 @@ export class DashboardComponent implements OnInit {
     this.dashboardService.getDelinquentUsers(params).subscribe({
       next: (response: any) => {
         try {
-          const data = response.content || [];
+          const data = Array.isArray(response?.content) ? response.content : [];
           if (!data.length) {
-            alert('No hay datos para exportar.');
+            this.toastService.warning('No hay datos para exportar.');
             return;
           }
 
@@ -682,14 +1021,15 @@ export class DashboardComponent implements OnInit {
           const fileName = `usuarios_con_mora_${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}_${pad(now.getHours())}-${pad(now.getMinutes())}.xlsx`;
 
           XLSX.writeFile(wb, fileName);
+          this.toastService.success('Excel exportado correctamente.');
         } catch (e) {
           console.error('Error exportando a Excel', e);
-          alert('Ocurrió un error al exportar el archivo.');
+          this.toastService.error('Ocurrió un error al exportar el archivo.');
         }
       },
       error: (err) => {
         console.error('Error obteniendo datos para exportar', err);
-        alert('Ocurrió un error al obtener los datos para exportar.');
+        this.toastService.error('Ocurrió un error al obtener los datos para exportar.');
       }
     });
   }
