@@ -124,7 +124,8 @@
 }
 
 .ghost-button,
-.primary-button {
+.primary-button,
+.secondary-button {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -150,13 +151,22 @@
   background: linear-gradient(135deg, var(--brand-cyan), var(--brand-green));
 }
 
+.secondary-button {
+  color: var(--brand-blue);
+  background: #edf6fb;
+  border-color: #cfe3f0;
+}
+
 .ghost-button:hover:not(:disabled),
-.primary-button:hover {
+.primary-button:hover:not(:disabled),
+.secondary-button:hover:not(:disabled) {
   transform: translateY(-1px);
   filter: brightness(1.03);
 }
 
-.ghost-button:disabled {
+.ghost-button:disabled,
+.primary-button:disabled,
+.secondary-button:disabled {
   opacity: 0.58;
   cursor: not-allowed;
 }
@@ -243,6 +253,102 @@
   color: var(--brand-blue);
 }
 
+.password-form {
+  display: grid;
+  gap: 0.75rem;
+  padding: 0.85rem;
+  background: #f7fafc;
+  border: 1px solid #dce9f3;
+  border-radius: 8px;
+}
+
+.password-field {
+  display: grid;
+  gap: 0.35rem;
+}
+
+.password-field span {
+  color: #667b92;
+  font-size: 0.76rem;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.password-field input {
+  width: 100%;
+  min-height: 42px;
+  padding: 0.65rem 0.75rem;
+  color: var(--ink);
+  background: #ffffff;
+  border: 1px solid #cfe0ec;
+  border-radius: 8px;
+  font: inherit;
+  font-weight: 700;
+}
+
+.password-field input:focus {
+  border-color: var(--brand-cyan);
+  box-shadow: 0 0 0 3px rgba(2, 199, 217, 0.12);
+  outline: none;
+}
+
+.password-field input:disabled {
+  background: #edf3f8;
+  cursor: not-allowed;
+}
+
+.password-rules {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+}
+
+.password-rules span {
+  min-height: 30px;
+  padding: 0.35rem 0.55rem;
+  color: #64748b;
+  background: #ffffff;
+  border: 1px solid #dce9f3;
+  border-radius: 8px;
+  font-size: 0.76rem;
+  font-weight: 800;
+}
+
+.password-rules span.valid {
+  color: #0f513f;
+  background: #eafaf5;
+  border-color: #bcebd9;
+}
+
+.password-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.55rem;
+  flex-wrap: wrap;
+}
+
+.inline-alert {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.55rem;
+  padding: 0.7rem 0.75rem;
+  border-radius: 8px;
+  font-size: 0.86rem;
+  font-weight: 800;
+}
+
+.inline-alert.error {
+  color: #7f1d1d;
+  background: #fff1f2;
+  border: 1px solid #fecdd3;
+}
+
+.inline-alert.success {
+  color: #0f513f;
+  background: #eafaf5;
+  border: 1px solid #bcebd9;
+}
+
 .info-row span,
 .security-status span,
 .permission-strip span {
@@ -321,8 +427,13 @@
   }
 
   .ghost-button,
-  .primary-button {
+  .primary-button,
+  .secondary-button {
     width: 100%;
+  }
+
+  .password-actions {
+    flex-direction: column-reverse;
   }
 
   .permission-strip {

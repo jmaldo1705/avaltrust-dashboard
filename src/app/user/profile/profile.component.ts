@@ -1,5 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnDestroy, OnInit, inject } from '@angular/core';
+import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { Subject, of } from 'rxjs';
 import { catchError, finalize, takeUntil } from 'rxjs/operators';
@@ -23,6 +24,7 @@ import { UiStateService } from '../../ui-state.service';
   standalone: true,
   imports: [
     CommonModule,
+    FormsModule,
     HeaderComponent,
     SidebarComponent,
     LucideBadgeCheck,
@@ -47,6 +49,13 @@ export class ProfileComponent implements OnInit, OnDestroy {
   userPermissions = this.auth.userPermissions;
   isLoading = false;
   profileError: string | null = null;
+  isPasswordFormOpen = false;
+  isPasswordSaving = false;
+  passwordError: string | null = null;
+  passwordSuccess: string | null = null;
+  currentPassword = '';
+  newPassword = '';
+  confirmPassword = '';
 
   get isSidebarOpen() {
     return this.uiState.isSidebarOpen();
@@ -73,6 +82,26 @@ export class ProfileComponent implements OnInit, OnDestroy {
 
   get primaryRole(): string {
     return this.roleLabels[0] || 'Usuario';
+  }
+
+  get passwordMismatch(): boolean {
+    return Boolean(this.confirmPassword) && this.newPassword !== this.confirmPassword;
+  }
+
+  get passwordTooShort(): boolean {
+    return Boolean(this.newPassword) && this.newPassword.length < 6;
+  }
+
+  get passwordSameAsCurrent(): boolean {
+    return Boolean(this.currentPassword && this.newPassword) && this.currentPassword === this.newPassword;
+  }
+
+  get canSubmitPasswordChange(): boolean {
+    return Boolean(this.currentPassword && this.newPassword && this.confirmPassword)
+      && !this.passwordMismatch
+      && !this.passwordTooShort
+      && !this.passwordSameAsCurrent
+      && !this.isPasswordSaving;
   }
 
   ngOnInit() {
@@ -136,8 +165,58 @@ export class ProfileComponent implements OnInit, OnDestroy {
     this.router.navigate([route]);
   }
 
-  goToChangePassword() {
-    this.navigateTo('/change-password');
+  togglePasswordForm() {
+    this.isPasswordFormOpen = !this.isPasswordFormOpen;
+    this.passwordError = null;
+    this.passwordSuccess = null;
+
+    if (!this.isPasswordFormOpen) {
+      this.resetPasswordForm();
+    }
+  }
+
+  submitPasswordChange() {
+    this.passwordError = null;
+    this.passwordSuccess = null;
+
+    if (!this.currentPassword || !this.newPassword || !this.confirmPassword) {
+      this.passwordError = 'Completa todos los campos para actualizar la contrasena.';
+      return;
+    }
+
+    if (this.passwordTooShort) {
+      this.passwordError = 'La nueva contrasena debe tener al menos 6 caracteres.';
+      return;
+    }
+
+    if (this.passwordSameAsCurrent) {
+      this.passwordError = 'La nueva contrasena debe ser diferente a la actual.';
+      return;
+    }
+
+    if (this.passwordMismatch) {
+      this.passwordError = 'Las contrasenas no coinciden.';
+      return;
+    }
+
+    this.isPasswordSaving = true;
+
+    this.auth.changePassword(this.currentPassword, this.newPassword)
+      .pipe(
+        finalize(() => this.isPasswordSaving = false),
+        takeUntil(this.destroy$)
+      )
+      .subscribe({
+        next: () => {
+          this.passwordSuccess = 'Contrasena actualizada correctamente.';
+          this.resetPasswordForm();
+          this.isPasswordFormOpen = false;
+          this.refreshProfile();
+        },
+        error: (error) => {
+          this.passwordError = error?.message || 'No fue posible actualizar la contrasena.';
+        }
+      });
   }
 
   logout() {
@@ -166,5 +245,11 @@ export class ProfileComponent implements OnInit, OnDestroy {
       default:
         return cleanRole.charAt(0).toUpperCase() + cleanRole.slice(1).toLowerCase().replace(/_/g, ' ');
     }
+  }
+
+  private resetPasswordForm() {
+    this.currentPassword = '';
+    this.newPassword = '';
+    this.confirmPassword = '';
   }
 }
