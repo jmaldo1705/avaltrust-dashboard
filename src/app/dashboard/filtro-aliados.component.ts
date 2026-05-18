@@ -113,6 +113,8 @@ export interface FiltroAliadosEvent {
   `,
   styles: [`
     .filtro-aliados-container {
+      position: relative;
+      z-index: 30;
       margin-bottom: 0;
       width: 100%;
     }
@@ -156,6 +158,7 @@ export interface FiltroAliadosEvent {
 
     .filtro-dropdown {
       position: relative;
+      z-index: 31;
       width: 100%;
       max-width: none;
     }
@@ -183,6 +186,7 @@ export interface FiltroAliadosEvent {
       border-color: rgba(2, 199, 217, 0.58);
       border-bottom-left-radius: 0;
       border-bottom-right-radius: 0;
+      background: rgba(255, 255, 255, 0.16);
     }
 
     .toggle-text {
@@ -216,8 +220,8 @@ export interface FiltroAliadosEvent {
       border: 1px solid rgba(2, 199, 217, 0.58);
       border-top: none;
       border-radius: 0 0 8px 8px;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-      z-index: 1000;
+      box-shadow: 0 22px 45px rgba(5, 18, 34, 0.28);
+      z-index: 9999;
       max-height: 350px;
       display: flex;
       flex-direction: column;
