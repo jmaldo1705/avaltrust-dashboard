@@ -12,8 +12,10 @@ import { AuthService } from './auth.service';
     <div class="change-password-container">
       <div class="change-password-card">
         <div class="card-header">
-          <h2>Cambio de Contraseña Requerido</h2>
-          <p class="subtitle">Por seguridad, debes cambiar tu contraseña antes de continuar</p>
+          <h2>{{ isRequiredChange() ? 'Cambio de contrasena requerido' : 'Cambiar contrasena' }}</h2>
+          <p class="subtitle">
+            {{ isRequiredChange() ? 'Por seguridad, debes cambiar tu contrasena antes de continuar' : 'Actualiza tu contrasena de acceso a AvalTrust' }}
+          </p>
         </div>
 
         <div class="card-body">
@@ -40,10 +42,10 @@ import { AuthService } from './auth.service';
                 name="currentPassword"
                 required
                 [disabled]="loading()"
-                placeholder="Tu contraseña actual (número de documento)"
+                [placeholder]="isRequiredChange() ? 'Tu contrasena actual (numero de documento)' : 'Ingresa tu contrasena actual'"
               />
-              <small class="form-text text-muted">
-                Tu contraseña actual es tu número de documento
+              <small class="form-text text-muted" *ngIf="isRequiredChange()">
+                Tu contrasena actual es tu numero de documento
               </small>
             </div>
 
@@ -116,7 +118,7 @@ import { AuthService } from './auth.service';
         <div class="card-footer">
           <p class="info-text">
             <i class="fas fa-info-circle"></i>
-            Esta contraseña la usarás para futuros inicios de sesión
+            Esta contrasena la usaras para futuros inicios de sesion
           </p>
         </div>
       </div>
@@ -349,16 +351,18 @@ export class ChangePasswordComponent {
   loading = signal(false);
   error = signal('');
   success = signal('');
+  isRequiredChange = signal(false);
 
   passwordMismatch = signal(false);
 
   constructor() {
-    // Verificar que el usuario debe cambiar contraseña
     const user = this.auth.user();
-    if (!user || !(user as any).mustChangePassword) {
-      // Si no necesita cambiar contraseña, redirigir al dashboard
-      this.auth.redirectToAppropriateRoute();
+    if (!user) {
+      this.router.navigate(['/login']);
+      return;
     }
+
+    this.isRequiredChange.set(Boolean((user as any).mustChangePassword));
   }
 
   onSubmit() {
@@ -391,11 +395,15 @@ export class ChangePasswordComponent {
     this.auth.changePassword(this.currentPassword, this.newPassword).subscribe({
       next: (response) => {
         this.loading.set(false);
-        this.success.set('Contraseña actualizada exitosamente');
+        this.success.set('Contrasena actualizada exitosamente');
         
-        // Esperar 1.5 segundos para que el usuario vea el mensaje de éxito
+        // Esperar 1.5 segundos para que el usuario vea el mensaje de exito
         setTimeout(() => {
-          this.auth.redirectToAppropriateRoute();
+          if (this.isRequiredChange()) {
+            this.auth.redirectToAppropriateRoute();
+          } else {
+            this.router.navigate(['/user/profile']);
+          }
         }, 1500);
       },
       error: (err) => {
