@@ -278,13 +278,19 @@ export class AuditoriaComponent implements OnInit {
 
   formatDate(value: string | null | undefined): string {
     if (!value) return 'Sin registro';
-    const date = new Date(value);
+    const date = this.parseColombiaDate(value);
     if (Number.isNaN(date.getTime())) return 'Sin registro';
 
     return new Intl.DateTimeFormat('es-CO', {
       dateStyle: 'medium',
-      timeStyle: 'short'
+      timeStyle: 'short',
+      timeZone: 'America/Bogota'
     }).format(date);
+  }
+
+  private parseColombiaDate(value: string): Date {
+    const hasTimezone = /(?:Z|[+-]\d{2}:?\d{2})$/i.test(value);
+    return new Date(hasTimezone ? value : `${value}-05:00`);
   }
 
   formatPercent(value: number | null | undefined): string {

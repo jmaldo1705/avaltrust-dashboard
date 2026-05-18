@@ -613,7 +613,11 @@ export class DashboardComponent implements OnInit, OnDestroy {
   }
 
   getLastUpdateTime(): string {
-    return new Date().toLocaleString('es-CO');
+    return new Date().toLocaleString('es-CO', {
+      dateStyle: 'short',
+      timeStyle: 'short',
+      timeZone: 'America/Bogota'
+    });
   }
 
   setMoraView(view: 'distribution' | 'timeline') {
