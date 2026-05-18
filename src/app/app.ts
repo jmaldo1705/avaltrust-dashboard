@@ -1,9 +1,10 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
-import { RouterOutlet } from '@angular/router';
+import { NavigationEnd, Router, RouterOutlet } from '@angular/router';
 import { SessionWarningComponent } from './auth/session-warning.component';
 import { ToastContainerComponent } from './services/toast-container.component';
 import { AuthService } from './auth/auth.service';
-import { Subscription } from 'rxjs';
+import { Subscription, filter } from 'rxjs';
+import { AuditoriaService } from './admin/auditoria/auditoria.service';
 
 @Component({
   selector: 'app-root',
@@ -23,8 +24,13 @@ export class App implements OnInit, OnDestroy {
   showSessionWarning = false;
   timeRemaining = 60;
   private warningSubscription?: Subscription;
+  private navigationAuditSubscription?: Subscription;
 
-  constructor(private authService: AuthService) {}
+  constructor(
+    private authService: AuthService,
+    private auditoriaService: AuditoriaService,
+    private router: Router
+  ) {}
 
   ngOnInit() {
     // Suscribirse a las advertencias de sesión
@@ -34,10 +40,18 @@ export class App implements OnInit, OnDestroy {
         this.timeRemaining = secondsRemaining;
       }
     );
+
+    this.navigationAuditSubscription = this.router.events
+      .pipe(filter((event): event is NavigationEnd => event instanceof NavigationEnd))
+      .subscribe(event => {
+        if (!this.authService.isAuthenticated()) return;
+        this.auditoriaService.trackRoute(event.urlAfterRedirects).subscribe();
+      });
   }
 
   ngOnDestroy() {
     this.warningSubscription?.unsubscribe();
+    this.navigationAuditSubscription?.unsubscribe();
   }
 
   onContinueSession() {

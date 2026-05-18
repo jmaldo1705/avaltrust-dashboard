@@ -2,6 +2,7 @@ import { Component, inject, Input, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import {
+  LucideActivity,
   LucideBadgeCheck,
   LucideBookOpen,
   LucideBuilding2,
@@ -23,6 +24,7 @@ import { HasRoleDirective } from '../auth/has-role.directive';
   imports: [
     CommonModule,
     HasRoleDirective,
+    LucideActivity,
     LucideBadgeCheck,
     LucideBookOpen,
     LucideBuilding2,

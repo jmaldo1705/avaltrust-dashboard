@@ -155,6 +155,18 @@
             <span class="nav-description">Gestion de contenido</span>
           </span>
         </a>
+
+        <a
+          class="nav-link admin-only"
+          *appHasRole="'ROLE_ADMIN'"
+          [class.active]="isActive('/admin/auditoria')"
+          (click)="navigateTo('/admin/auditoria')">
+          <span class="nav-icon admin-exclusive"><svg lucideActivity></svg></span>
+          <span class="nav-content">
+            <span class="nav-title">Auditoria</span>
+            <span class="nav-description">Accesos y cursos</span>
+          </span>
+        </a>
       </div>
     </nav>
   </div>

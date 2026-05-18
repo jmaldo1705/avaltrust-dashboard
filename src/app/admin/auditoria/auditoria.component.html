@@ -1,0 +1,397 @@
+<div class="dashboard-layout">
+  <app-header
+    [isSidebarOpen]="isSidebarOpen"
+    [isUserMenuOpen]="isUserMenuOpen"
+    (toggleSidebar)="toggleSidebar()"
+    (toggleUserMenu)="toggleUserMenu()"
+    (closeUserMenu)="handleUserMenuClose()"
+    (navigate)="onHeaderNavigate($event)"
+    (logout)="onLogout()">
+  </app-header>
+
+  <div
+    class="overlay"
+    [class.active]="isSidebarOpen || isUserMenuOpen"
+    (click)="handleSidebarClose(); handleUserMenuClose()">
+  </div>
+
+  <app-sidebar
+    [isSidebarOpen]="isSidebarOpen"
+    [isOpen]="isSidebarOpen"
+    (close)="handleSidebarClose()"
+    (sidebarClose)="handleSidebarClose()"
+    (navigate)="onSidebarNavigate($event)">
+  </app-sidebar>
+
+  <main class="main-content portfolio-page audit-page">
+    <section class="portfolio-command audit-command">
+      <aside class="command-card audit-command-card">
+        <div class="panel-pattern"></div>
+        <span class="control-chip">
+          <svg lucideShieldCheck></svg>
+          Auditoria
+        </span>
+        <h1>Control de accesos</h1>
+        <div class="command-stats">
+          <div>
+            <span>Eventos</span>
+            <strong>{{ summary.totalEvents }}</strong>
+          </div>
+          <div>
+            <span>Usuarios con login</span>
+            <strong>{{ summary.usersWithLogin }}</strong>
+          </div>
+        </div>
+        <div class="command-note">
+          <svg lucideCalendarClock></svg>
+          Trazabilidad por usuario, opcion y curso
+        </div>
+      </aside>
+
+      <section class="command-main">
+        <div class="command-header">
+          <div>
+            <span class="section-kicker">Administracion</span>
+            <h2>Auditoria</h2>
+          </div>
+
+          <button type="button" class="secondary-btn" (click)="refreshCurrentTab()" [disabled]="loadingSummary">
+            <svg lucideRefreshCw [class.spinning]="loadingSummary"></svg>
+            Actualizar
+          </button>
+        </div>
+
+        <section class="workflow-grid audit-flow">
+          <article class="workflow-card">
+            <div class="workflow-icon"><svg lucideRoute></svg></div>
+            <div>
+              <span>Navegaciones</span>
+              <strong>{{ summary.navigationEvents }}</strong>
+            </div>
+          </article>
+          <article class="workflow-card">
+            <div class="workflow-icon"><svg lucideUserRound></svg></div>
+            <div>
+              <span>Inicios de sesion</span>
+              <strong>{{ summary.loginEvents }}</strong>
+            </div>
+          </article>
+          <article class="workflow-card">
+            <div class="workflow-icon"><svg lucideGraduationCap></svg></div>
+            <div>
+              <span>Avance cursos</span>
+              <strong>{{ courseProgress.length }}</strong>
+            </div>
+          </article>
+        </section>
+      </section>
+    </section>
+
+    <div class="alert-panel" *ngIf="errorMessage">
+      {{ errorMessage }}
+    </div>
+
+    <section class="audit-shell">
+      <nav class="audit-tabs" aria-label="Secciones de auditoria">
+        <button type="button" [class.active]="activeTab === 'activity'" (click)="setTab('activity')">
+          <svg lucideActivity></svg>
+          Actividad
+        </button>
+        <button type="button" [class.active]="activeTab === 'connections'" (click)="setTab('connections')">
+          <svg lucideClock3></svg>
+          Ultimas conexiones
+        </button>
+        <button type="button" [class.active]="activeTab === 'courses'" (click)="setTab('courses')">
+          <svg lucideBookOpen></svg>
+          Cursos
+        </button>
+      </nav>
+
+      <section class="tab-surface" *ngIf="activeTab === 'activity'">
+        <div class="panel-toolbar">
+          <div>
+            <span class="section-kicker">Actividad por opcion</span>
+            <h3>Accesos recientes</h3>
+            <p>{{ rangeStart }} - {{ rangeEnd }} de {{ totalEvents }} registros</p>
+          </div>
+        </div>
+
+        <div class="filters-grid">
+          <label class="filter-control">
+            <span>Tipo</span>
+            <select [(ngModel)]="eventFilters.type" (change)="applyActivityFilters()">
+              <option value="all">Todos</option>
+              <option value="NAVIGATION">Navegacion</option>
+              <option value="LOGIN">Inicio de sesion</option>
+            </select>
+          </label>
+
+          <label class="filter-control">
+            <span>Opcion</span>
+            <select [(ngModel)]="eventFilters.optionKey" (change)="applyActivityFilters()">
+              <option value="all">Todas las opciones</option>
+              <option *ngFor="let option of trackedOptions" [value]="option.key">{{ option.label }}</option>
+            </select>
+          </label>
+
+          <label class="filter-control search-control">
+            <span>Usuario o correo</span>
+            <div class="input-with-icon">
+              <svg lucideSearch></svg>
+              <input type="search" [(ngModel)]="eventFilters.search" (keyup.enter)="applyActivityFilters()" placeholder="Buscar usuario">
+            </div>
+          </label>
+
+          <label class="filter-control compact">
+            <span>Desde</span>
+            <input type="date" [(ngModel)]="eventFilters.from" (change)="applyActivityFilters()">
+          </label>
+
+          <label class="filter-control compact">
+            <span>Hasta</span>
+            <input type="date" [(ngModel)]="eventFilters.to" (change)="applyActivityFilters()">
+          </label>
+
+          <div class="filter-actions">
+            <button type="button" class="primary-btn" (click)="applyActivityFilters()">
+              <svg lucideListFilter></svg>
+              Filtrar
+            </button>
+            <button type="button" class="secondary-btn" (click)="clearActivityFilters()">Limpiar</button>
+          </div>
+        </div>
+
+        <section class="option-summary-grid" *ngIf="optionSummary.length">
+          <article class="option-card" *ngFor="let item of optionSummary.slice(0, 4)">
+            <span>{{ item.optionLabel }}</span>
+            <strong>{{ item.totalAccesses }}</strong>
+            <small>{{ item.uniqueUsers }} usuarios · {{ formatDate(item.lastAccessAt) }}</small>
+          </article>
+        </section>
+
+        <div *ngIf="loadingActivity" class="loading-container">
+          <svg lucideLoaderCircle class="spinning"></svg>
+          <p>Cargando actividad...</p>
+        </div>
+
+        <ng-container *ngIf="!loadingActivity">
+          <div class="table-card" *ngIf="events.length; else emptyActivity">
+            <div class="table-scroll">
+              <table class="audit-table">
+                <thead>
+                  <tr>
+                    <th>Usuario</th>
+                    <th>Tipo</th>
+                    <th>Opcion</th>
+                    <th>Ruta</th>
+                    <th>Fecha y hora</th>
+                    <th>IP</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr *ngFor="let event of events; trackBy: trackByEventId">
+                    <td>
+                      <div class="user-cell">
+                        <span class="avatar">{{ (event.username || 'U').charAt(0).toUpperCase() }}</span>
+                        <div>
+                          <strong>{{ event.username || 'Usuario' }}</strong>
+                          <small>{{ event.email || 'Sin correo' }}</small>
+                        </div>
+                      </div>
+                    </td>
+                    <td><span class="type-pill" [class.login]="event.type === 'LOGIN'">{{ eventTypeLabel(event.type) }}</span></td>
+                    <td>{{ event.optionLabel || optionLabel(event.optionKey) }}</td>
+                    <td><span class="route-chip">{{ event.route || '-' }}</span></td>
+                    <td>{{ formatDate(event.eventTime) }}</td>
+                    <td>{{ event.ipAddress || '-' }}</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <div class="pagination-bar" *ngIf="totalPages > 1">
+              <button type="button" class="pagination-btn" (click)="previousPage()" [disabled]="currentPage === 0 || loadingActivity">
+                <svg lucideChevronLeft></svg>
+                Anterior
+              </button>
+
+              <div class="pagination-pages">
+                <button
+                  *ngFor="let page of pageNumbers"
+                  type="button"
+                  class="page-number"
+                  [class.active]="page === currentPage"
+                  (click)="goToPage(page)">
+                  {{ page + 1 }}
+                </button>
+              </div>
+
+              <button type="button" class="pagination-btn" (click)="nextPage()" [disabled]="currentPage >= totalPages - 1 || loadingActivity">
+                Siguiente
+                <svg lucideChevronRight></svg>
+              </button>
+            </div>
+          </div>
+        </ng-container>
+      </section>
+
+      <section class="tab-surface" *ngIf="activeTab === 'connections'">
+        <div class="panel-toolbar">
+          <div>
+            <span class="section-kicker">Usuarios</span>
+            <h3>Ultima conexion</h3>
+            <p>Ordenado por el acceso mas reciente</p>
+          </div>
+          <div class="inline-search">
+            <svg lucideSearch></svg>
+            <input type="search" [(ngModel)]="connectionSearch" (keyup.enter)="loadConnections()" placeholder="Buscar usuario">
+            <button type="button" class="secondary-btn" (click)="loadConnections()">Buscar</button>
+          </div>
+        </div>
+
+        <div *ngIf="loadingConnections" class="loading-container">
+          <svg lucideLoaderCircle class="spinning"></svg>
+          <p>Cargando conexiones...</p>
+        </div>
+
+        <div class="table-card" *ngIf="!loadingConnections && lastConnections.length; else emptyConnections">
+          <div class="table-scroll">
+            <table class="audit-table">
+              <thead>
+                <tr>
+                  <th>Usuario</th>
+                  <th>Correo</th>
+                  <th>Ultima conexion</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let user of lastConnections; trackBy: trackByUserId">
+                  <td>
+                    <div class="user-cell">
+                      <span class="avatar">{{ user.username.charAt(0).toUpperCase() }}</span>
+                      <strong>{{ user.username }}</strong>
+                    </div>
+                  </td>
+                  <td>{{ user.email || 'Sin correo' }}</td>
+                  <td>
+                    <span class="date-strong" [class.muted]="!user.lastConnectionAt">
+                      {{ formatDate(user.lastConnectionAt) }}
+                    </span>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <section class="tab-surface" *ngIf="activeTab === 'courses'">
+        <div class="panel-toolbar">
+          <div>
+            <span class="section-kicker">Escuela financiera</span>
+            <h3>Avance de cursos</h3>
+            <p>Intentos, mejor puntaje y ultima evaluacion registrada</p>
+          </div>
+        </div>
+
+        <div class="filters-grid courses-filter">
+          <label class="filter-control">
+            <span>Curso</span>
+            <select [(ngModel)]="selectedCourse" (change)="loadCourseProgress()">
+              <option value="all">Todos los cursos</option>
+              <option *ngFor="let course of courseOptions" [ngValue]="course.cursoId">{{ course.titulo }}</option>
+            </select>
+          </label>
+          <label class="filter-control search-control">
+            <span>Usuario o correo</span>
+            <div class="input-with-icon">
+              <svg lucideSearch></svg>
+              <input type="search" [(ngModel)]="courseSearch" (keyup.enter)="loadCourseProgress()" placeholder="Buscar usuario">
+            </div>
+          </label>
+          <div class="filter-actions">
+            <button type="button" class="primary-btn" (click)="loadCourseProgress()">
+              <svg lucideListFilter></svg>
+              Filtrar
+            </button>
+          </div>
+        </div>
+
+        <div *ngIf="loadingCourses" class="loading-container">
+          <svg lucideLoaderCircle class="spinning"></svg>
+          <p>Cargando avances...</p>
+        </div>
+
+        <div class="table-card" *ngIf="!loadingCourses && courseProgress.length; else emptyCourses">
+          <div class="table-scroll">
+            <table class="audit-table course-table">
+              <thead>
+                <tr>
+                  <th>Usuario</th>
+                  <th>Curso</th>
+                  <th>Avance</th>
+                  <th>Intentos</th>
+                  <th>Estado</th>
+                  <th>Ultima evaluacion</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let item of courseProgress; trackBy: trackByCourseProgress">
+                  <td>
+                    <div class="user-cell">
+                      <span class="avatar">{{ item.username.charAt(0).toUpperCase() }}</span>
+                      <div>
+                        <strong>{{ item.username }}</strong>
+                        <small>{{ item.email || 'Sin correo' }}</small>
+                      </div>
+                    </div>
+                  </td>
+                  <td>{{ item.cursoTitulo }}</td>
+                  <td>
+                    <div class="progress-cell">
+                      <span>{{ formatPercent(item.bestPercentage) }}</span>
+                      <div class="progress-track">
+                        <i [style.width.%]="item.bestPercentage || 0"></i>
+                      </div>
+                    </div>
+                  </td>
+                  <td>{{ item.attempts }}</td>
+                  <td>
+                    <span class="status-pill" [class.pending]="!item.aprobado">
+                      {{ item.aprobado ? 'Aprobado' : 'En avance' }}
+                    </span>
+                  </td>
+                  <td>{{ formatDate(item.lastEvaluationAt) }}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+    </section>
+  </main>
+</div>
+
+<ng-template #emptyActivity>
+  <div class="empty-state">
+    <div class="empty-icon"><svg lucideActivity></svg></div>
+    <h3>No hay actividad para mostrar</h3>
+    <p>Ajusta los filtros o espera a que los usuarios naveguen por la plataforma.</p>
+  </div>
+</ng-template>
+
+<ng-template #emptyConnections>
+  <div class="empty-state" *ngIf="!loadingConnections">
+    <div class="empty-icon"><svg lucideClock3></svg></div>
+    <h3>Sin conexiones registradas</h3>
+    <p>Las conexiones nuevas apareceran despues del proximo inicio de sesion.</p>
+  </div>
+</ng-template>
+
+<ng-template #emptyCourses>
+  <div class="empty-state" *ngIf="!loadingCourses">
+    <div class="empty-icon"><svg lucideGraduationCap></svg></div>
+    <h3>Sin avances de cursos</h3>
+    <p>No se encontraron evaluaciones con los filtros actuales.</p>
+  </div>
+</ng-template>
