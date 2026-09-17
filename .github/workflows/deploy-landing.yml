@@ -70,13 +70,13 @@ jobs:
           aws s3 sync dist/landing/browser/image/ "s3://$S3_BUCKET/image/" \
             --delete \
             --cache-control "public,max-age=86400,must-revalidate"
-          aws s3 sync dist/landing/browser/favicon.png "s3://$S3_BUCKET/favicon.png" \
+          aws s3 cp dist/landing/browser/favicon.png "s3://$S3_BUCKET/favicon.png" \
             --cache-control "public,max-age=86400,must-revalidate" \
             --content-type "image/png"
-          aws s3 sync dist/landing/browser/robots.txt "s3://$S3_BUCKET/robots.txt" \
+          aws s3 cp dist/landing/browser/robots.txt "s3://$S3_BUCKET/robots.txt" \
             --cache-control "public,max-age=3600,must-revalidate" \
             --content-type "text/plain; charset=utf-8"
-          aws s3 sync dist/landing/browser/sitemap.xml "s3://$S3_BUCKET/sitemap.xml" \
+          aws s3 cp dist/landing/browser/sitemap.xml "s3://$S3_BUCKET/sitemap.xml" \
             --cache-control "public,max-age=3600,must-revalidate" \
             --content-type "application/xml; charset=utf-8"
 
