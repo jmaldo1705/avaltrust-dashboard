@@ -1,5 +1,6 @@
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { RouterLink } from '@angular/router';
 import { Meta, Title } from '@angular/platform-browser';
 import { CoberturaService } from '../cobertura/cobertura.service';
 
@@ -36,7 +37,7 @@ const PORCENTAJE = new Intl.NumberFormat('es-CO', {
 
 @Component({
   selector: 'at-home',
-  imports: [FormsModule],
+  imports: [FormsModule, RouterLink],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './home.component.html',
   styleUrl: './home.component.css',
@@ -108,25 +109,25 @@ export class HomeComponent {
       titulo: 'Para Personas',
       texto:
         'Crédito más accesible y seguro. Garantía digital ante imprevistos que te permite acceder al financiamiento que necesitas.',
-      destino: '#contacto',
+      destino: '/afianzados',
     },
     {
       titulo: 'Para Empresas',
       texto:
         'Garantía para licitaciones y financiamiento empresarial. Impulsa el crecimiento de tu negocio con nuestro respaldo.',
-      destino: '#contacto',
+      destino: '/servicio',
     },
     {
       titulo: 'Para Fintechs',
       texto:
         'Infraestructura de fianza digital. Fácil de integrar, lista para escalar y optimizar tu plataforma crediticia.',
-      destino: '#contacto',
+      destino: '/servicio',
     },
     {
       titulo: 'Para Cooperativas',
       texto:
         'Fondos financieramente estables contra exposición al riesgo operativo. Mejoran la cartera crediticia y reducen significativamente las pérdidas.',
-      destino: '#contacto',
+      destino: '/servicio',
     },
   ];
 

@@ -1,12 +1,14 @@
 import { ChangeDetectionStrategy, Component, HostListener, signal } from '@angular/core';
+import { RouterLink, RouterLinkActive } from '@angular/router';
 
 interface EnlaceNav {
   etiqueta: string;
-  destino: string;
+  ruta: string;
 }
 
 @Component({
   selector: 'at-site-header',
+  imports: [RouterLink, RouterLinkActive],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './site-header.component.html',
   styleUrl: './site-header.component.css',
@@ -15,12 +17,12 @@ export class SiteHeaderComponent {
   protected readonly menuAbierto = signal(false);
   protected readonly compacto = signal(false);
 
-  /** Mientras la landing vive en una sola pagina, el menu apunta a sus secciones. */
   protected readonly enlaces: readonly EnlaceNav[] = [
-    { etiqueta: 'Qué es AvalTrust', destino: '#que-es' },
-    { etiqueta: 'Servicios', destino: '#servicios' },
-    { etiqueta: 'Para fintechs', destino: '#fintech' },
-    { etiqueta: 'Preguntas', destino: '#preguntas' },
+    { etiqueta: 'Quiénes Somos', ruta: '/quienes-somos' },
+    { etiqueta: 'Nuestro Servicio', ruta: '/servicio' },
+    { etiqueta: 'Afianzados', ruta: '/afianzados' },
+    { etiqueta: 'Calculadora', ruta: '/calculadora' },
+    { etiqueta: 'Blog', ruta: '/blog' },
   ];
 
   protected readonly accesoPortal = 'https://app.avaltrust.co/login';

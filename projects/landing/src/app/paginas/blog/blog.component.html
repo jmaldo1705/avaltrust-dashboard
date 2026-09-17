@@ -1,0 +1,84 @@
+<at-page-hero
+  titulo="AvalTrust Insights"
+  entrada="Descubre las últimas tendencias en fintech, consejos financieros y análisis del mercado crediticio colombiano"
+/>
+
+<section class="at-section">
+  <div class="at-container blog">
+    <article class="articulo at-card">
+      <picture>
+        <source
+          type="image/avif"
+          srcset="img/noticia-480.avif 480w, img/noticia-800.avif 800w"
+          sizes="(max-width: 700px) 100vw, 640px"
+        />
+        <img
+          src="img/noticia-800.webp"
+          srcset="img/noticia-480.webp 480w, img/noticia-800.webp 800w"
+          sizes="(max-width: 700px) 100vw, 640px"
+          width="800"
+          height="457"
+          alt="Fianzas en la ley"
+          loading="lazy"
+        />
+      </picture>
+
+      <p class="articulo__meta">6 Junio 2025 · Ingrid Alcazar</p>
+
+      <ul class="articulo__etiquetas">
+        @for (etiqueta of etiquetas; track etiqueta) {
+          <li>{{ etiqueta }}</li>
+        }
+      </ul>
+
+      <h2>Fianzas en la ley</h2>
+      <p>
+        En AvalTrust aplicamos el principio legal de la fianza para respaldar obligaciones
+        crediticias con avales digitales. Actuamos como fiadores profesionales bajo normas claras,
+        cubriendo pagos incumplidos y activando un fondo de cobertura para su recuperación legal.
+      </p>
+
+      <p class="articulo__leer">
+        <a routerLink="/blog/fianzas-en-la-ley">Leer más →</a>
+      </p>
+    </article>
+
+    <aside class="lateral">
+      <section class="at-card">
+        <h2>Blog AvalTrust</h2>
+        <p>
+          Compartimos insights sobre el sector fintech, educación financiera y las últimas tendencias
+          en avales digitales para mantenerte informado.
+        </p>
+      </section>
+
+      <section class="at-card">
+        <h2>Información</h2>
+        <p class="lateral__intro">Publicamos contenido sobre:</p>
+        <ul class="lateral__lista">
+          @for (tema of temas; track tema) {
+            <li>{{ tema }}</li>
+          }
+        </ul>
+      </section>
+
+      <section class="at-card">
+        <h2>Enlaces Útiles</h2>
+        <ul class="lateral__enlaces">
+          <li><a routerLink="/servicio">Nuestros Servicios</a></li>
+          <li><a routerLink="/quienes-somos">Quiénes Somos</a></li>
+          <li><a routerLink="/afianzados">Afianzados</a></li>
+          <li><a routerLink="/calculadora">Calculadora de Cobertura</a></li>
+        </ul>
+      </section>
+    </aside>
+  </div>
+</section>
+
+<section class="at-section cierre-pagina">
+  <div class="at-container">
+    <h2>¿Tienes Preguntas?</h2>
+    <p>Nuestro equipo está listo para ayudarte con información sobre nuestros servicios de aval.</p>
+    <a class="at-btn at-btn--primary" routerLink="/contacto">Contáctanos</a>
+  </div>
+</section>

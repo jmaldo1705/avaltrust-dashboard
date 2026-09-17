@@ -107,9 +107,10 @@
           </div>
         </div>
 
-        <a class="at-btn at-btn--primary calculadora__accion" href="#contacto">
-          Solicita tu garantía
-        </a>
+        <div class="calculadora__acciones">
+          <a class="at-btn at-btn--primary" routerLink="/calculadora">Calcula tu Cobertura</a>
+          <a class="at-btn at-btn--dark" routerLink="/contacto">Únete a la Revolución</a>
+        </div>
       </form>
     </div>
   </div>
@@ -207,7 +208,7 @@
         <article class="at-card servicio">
           <h3>{{ servicio.titulo }}</h3>
           <p>{{ servicio.texto }}</p>
-          <a [href]="servicio.destino">Conoce más</a>
+          <a [routerLink]="servicio.destino">Conoce más</a>
         </article>
       }
     </div>
@@ -239,6 +240,6 @@
       Habla con un asesor y empieza hoy mismo. Transformamos tu acceso al financiamiento con
       garantías innovadoras y seguras.
     </p>
-    <a class="at-btn at-btn--primary" href="mailto:comercial@avaltrust.co">Solicita tu garantía</a>
+    <a class="at-btn at-btn--primary" routerLink="/contacto">Solicita tu garantía</a>
   </div>
 </section>

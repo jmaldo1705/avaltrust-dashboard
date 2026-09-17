@@ -183,7 +183,12 @@
   color: var(--at-accent);
 }
 
-.calculadora__accion {
+.calculadora__acciones {
+  display: grid;
+  gap: var(--at-space-3);
+}
+
+.calculadora__acciones .at-btn {
   width: 100%;
 }
 

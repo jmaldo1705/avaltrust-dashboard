@@ -1,0 +1,325 @@
+<at-page-hero
+  insignia="Respuesta en menos de 30 minutos"
+  titulo="Calculadora de Cobertura Inteligente"
+  entrada="Obtén una estimación personalizada de cobertura para tu negocio. Solo necesitamos algunos datos empresariales para generar tu propuesta."
+/>
+
+<section class="at-section">
+  <div class="at-container calculadora">
+    <ul class="cifras">
+      <li><strong>30min</strong> Tiempo de respuesta</li>
+      <li><strong>95%</strong> Precisión estimada</li>
+      <li><strong>24/7</strong> Disponible siempre</li>
+    </ul>
+
+    <ol class="progreso">
+      @for (nombre of pasos; track nombre; let i = $index) {
+        <li
+          class="progreso__paso"
+          [class.progreso__paso--activo]="paso() === i + 1"
+          [class.progreso__paso--hecho]="paso() > i + 1"
+          [attr.aria-current]="paso() === i + 1 ? 'step' : null"
+        >
+          <span class="progreso__numero">{{ i + 1 }}</span>
+          <span class="progreso__nombre">{{ nombre }}</span>
+        </li>
+      }
+    </ol>
+
+    @if (estado() === 'enviado') {
+      <div class="at-card resumen-final">
+        <h2>Recibimos tu solicitud</h2>
+        <p>
+          Nuestro equipo revisará los datos de tu operación y te contactará con una propuesta de
+          cobertura.
+        </p>
+        <dl class="resultado">
+          <div>
+            <dt>Cobertura Mensual Estimada</dt>
+            <dd>{{ coberturaFormateada() }}</dd>
+          </div>
+          <div>
+            <dt>Prima Aproximada</dt>
+            <dd class="resultado__acento">{{ primaFormateada() }}</dd>
+          </div>
+        </dl>
+        <button type="button" class="at-btn at-btn--dark" (click)="nuevaEstimacion()">
+          Hacer otra estimación
+        </button>
+      </div>
+    } @else {
+      <div class="paso-contenido">
+        @if (paso() === 1) {
+          <form class="at-card" [formGroup]="operacion" (ngSubmit)="siguiente()" novalidate>
+            <h2>Parámetros Financieros</h2>
+            <p class="paso-entrada">Con estos datos calculamos tu cobertura al instante.</p>
+
+            <div class="fila">
+              <div class="campo">
+                <label for="valorPromedio">Valor promedio por crédito</label>
+                <span class="campo__ayuda">Monto típico que otorgas</span>
+                <input
+                  id="valorPromedio"
+                  type="number"
+                  min="0"
+                  step="100000"
+                  inputmode="numeric"
+                  formControlName="valorPromedio"
+                />
+                @if (invalidoOperacion('valorPromedio')) {
+                  <span class="campo__error">Indica el monto promedio por crédito.</span>
+                }
+              </div>
+
+              <div class="campo">
+                <label for="numeroCuotas">Plazo promedio</label>
+                <span class="campo__ayuda">Número de cuotas típico</span>
+                <select id="numeroCuotas" formControlName="numeroCuotas">
+                  @for (plazo of plazos; track plazo.valor) {
+                    <option [value]="plazo.valor">{{ plazo.etiqueta }}</option>
+                  }
+                </select>
+              </div>
+            </div>
+
+            <div class="fila">
+              <div class="campo">
+                <label for="porcentajeDefault">Tasa de impagos (90+ días)</label>
+                <span class="campo__ayuda">Porcentaje histórico de incumplimiento</span>
+                <input
+                  id="porcentajeDefault"
+                  type="number"
+                  min="0"
+                  max="100"
+                  step="0.5"
+                  inputmode="decimal"
+                  formControlName="porcentajeDefault"
+                />
+                @if (invalidoOperacion('porcentajeDefault')) {
+                  <span class="campo__error">Indica un porcentaje entre 0 y 100.</span>
+                }
+              </div>
+
+              <div class="campo">
+                <label for="creditosPorMes">Volumen mensual</label>
+                <span class="campo__ayuda">Créditos otorgados por mes</span>
+                <input
+                  id="creditosPorMes"
+                  type="number"
+                  min="0"
+                  step="10"
+                  inputmode="numeric"
+                  formControlName="creditosPorMes"
+                />
+                @if (invalidoOperacion('creditosPorMes')) {
+                  <span class="campo__error">Indica cuántos créditos otorgas al mes.</span>
+                }
+              </div>
+            </div>
+
+            <dl class="resultado">
+              <div>
+                <dt>Cobertura Mensual Estimada</dt>
+                <dd>{{ coberturaFormateada() }}</dd>
+              </div>
+              <div>
+                <dt>Prima Aproximada</dt>
+                <dd class="resultado__acento">{{ primaFormateada() }}</dd>
+              </div>
+            </dl>
+
+            <div class="acciones">
+              <button type="submit" class="at-btn at-btn--primary">Continuar</button>
+            </div>
+          </form>
+        }
+
+        @if (paso() === 2) {
+          <form class="at-card" [formGroup]="aliado" (ngSubmit)="siguiente()" novalidate>
+            <h2>Datos del Aliado</h2>
+            <p class="paso-entrada">Para enviarte la propuesta con tu estimación.</p>
+
+            <div class="fila">
+              <div class="campo">
+                <label for="nombreCompleto">Nombre completo</label>
+                <span class="campo__ayuda">Persona con rol decisorio</span>
+                <input
+                  id="nombreCompleto"
+                  type="text"
+                  autocomplete="name"
+                  placeholder="Ej: Laura Patricia Sánchez"
+                  formControlName="nombreCompleto"
+                />
+                @if (invalidoAliado('nombreCompleto')) {
+                  <span class="campo__error">Escribe el nombre completo.</span>
+                }
+              </div>
+
+              <div class="campo">
+                <label for="cargoDesempena">Cargo actual</label>
+                <span class="campo__ayuda">Posición en la empresa</span>
+                <select id="cargoDesempena" formControlName="cargoDesempena">
+                  <option value="">Selecciona tu cargo</option>
+                  @for (cargo of cargos; track cargo.valor) {
+                    <option [value]="cargo.valor">{{ cargo.etiqueta }}</option>
+                  }
+                </select>
+                @if (invalidoAliado('cargoDesempena')) {
+                  <span class="campo__error">Selecciona tu cargo.</span>
+                }
+              </div>
+            </div>
+
+            <div class="campo">
+              <label for="nombreEmpresa">Nombre de la empresa</label>
+              <span class="campo__ayuda">Razón social completa</span>
+              <input
+                id="nombreEmpresa"
+                type="text"
+                autocomplete="organization"
+                placeholder="Ej: Distribuidora Nacional S.A.S."
+                formControlName="nombreEmpresa"
+              />
+              @if (invalidoAliado('nombreEmpresa')) {
+                <span class="campo__error">Escribe la razón social.</span>
+              }
+            </div>
+
+            <div class="fila">
+              <div class="campo">
+                <label for="correoEmpresarial">Correo empresarial</label>
+                <span class="campo__ayuda">No se acepta correo personal</span>
+                <input
+                  id="correoEmpresarial"
+                  type="email"
+                  autocomplete="email"
+                  formControlName="correoEmpresarial"
+                />
+                @if (invalidoAliado('correoEmpresarial')) {
+                  <span class="campo__error">Escribe un correo válido.</span>
+                }
+              </div>
+
+              <div class="campo">
+                <label for="celularCorporativo">Teléfono corporativo</label>
+                <span class="campo__ayuda">Incluye código de país</span>
+                <input
+                  id="celularCorporativo"
+                  type="tel"
+                  autocomplete="tel"
+                  placeholder="+57 300 123 4567"
+                  formControlName="celularCorporativo"
+                />
+                @if (invalidoAliado('celularCorporativo')) {
+                  <span class="campo__error">Escribe un teléfono de contacto.</span>
+                }
+              </div>
+            </div>
+
+            <label class="consentimiento">
+              <input type="checkbox" formControlName="acepta" />
+              <span>
+                Declaro que he leído y acepto los
+                <a routerLink="/terminos-condiciones">Términos y Condiciones de Uso</a> y la
+                <a routerLink="/politica-privacidad"
+                  >Política de Privacidad y Tratamiento de Datos Personales</a
+                >
+                de AvalTrust S.A.S., y que conozco y acepto expresamente la diferencia entre el
+                servicio de aval o fianza digital y los servicios tecnológicos y en la nube, los
+                cuales son servicios independientes, con naturaleza jurídica y alcance distinto.
+              </span>
+            </label>
+            @if (invalidoAliado('acepta')) {
+              <span class="campo__error">Necesitamos tu aceptación para continuar.</span>
+            }
+
+            <div class="acciones">
+              <button type="button" class="at-btn at-btn--ghost" (click)="anterior()">Volver</button>
+              <button type="submit" class="at-btn at-btn--primary">Revisar datos</button>
+            </div>
+          </form>
+        }
+
+        @if (paso() === 3) {
+          <div class="at-card">
+            <h2>Confirmación</h2>
+            <p class="paso-entrada">Revisa que todo esté correcto antes de enviar.</p>
+
+            @if (estado() === 'error') {
+              <p class="aviso aviso--error" role="alert">
+                No pudimos enviar tu solicitud. Verifica el captcha e inténtalo de nuevo, o
+                escríbenos a <a href="mailto:comercial&#64;avaltrust.co">comercial&#64;avaltrust.co</a>.
+              </p>
+            }
+
+            <dl class="revision">
+              <div><dt>Nombre completo</dt><dd>{{ aliado.controls.nombreCompleto.value }}</dd></div>
+              <div>
+                <dt>Cargo actual</dt>
+                <dd>{{ etiquetaCargo(aliado.controls.cargoDesempena.value) }}</dd>
+              </div>
+              <div><dt>Empresa</dt><dd>{{ aliado.controls.nombreEmpresa.value }}</dd></div>
+              <div><dt>Correo empresarial</dt><dd>{{ aliado.controls.correoEmpresarial.value }}</dd></div>
+              <div><dt>Teléfono corporativo</dt><dd>{{ aliado.controls.celularCorporativo.value }}</dd></div>
+              <div>
+                <dt>Valor promedio por crédito</dt>
+                <dd>{{ valorPromedioFormateado() }}</dd>
+              </div>
+              <div>
+                <dt>Plazo promedio</dt>
+                <dd>{{ etiquetaPlazo(operacion.controls.numeroCuotas.value) }}</dd>
+              </div>
+              <div><dt>Tasa de impagos (90+ días)</dt><dd>{{ tasaFormateada() }}</dd></div>
+              <div>
+                <dt>Volumen mensual</dt>
+                <dd>{{ operacion.controls.creditosPorMes.value }} créditos</dd>
+              </div>
+            </dl>
+
+            <dl class="resultado">
+              <div>
+                <dt>Cobertura Mensual Estimada</dt>
+                <dd>{{ coberturaFormateada() }}</dd>
+              </div>
+              <div>
+                <dt>Prima Aproximada</dt>
+                <dd class="resultado__acento">{{ primaFormateada() }}</dd>
+              </div>
+            </dl>
+
+            <at-turnstile (resuelto)="token.set($event)" />
+
+            <div class="acciones">
+              <button type="button" class="at-btn at-btn--ghost" (click)="anterior()">Volver</button>
+              <button
+                type="button"
+                class="at-btn at-btn--primary"
+                [disabled]="estado() === 'enviando' || !token()"
+                (click)="enviar()"
+              >
+                {{ estado() === 'enviando' ? 'Enviando…' : 'Enviar solicitud' }}
+              </button>
+            </div>
+            @if (!token()) {
+              <span class="campo__ayuda"
+                >Completa la verificación de seguridad para poder enviar.</span
+              >
+            }
+          </div>
+        }
+      </div>
+    }
+
+    <aside class="nota">
+      <h2>Cómo leer el resultado</h2>
+      <p>
+        La cobertura corresponde al monto mensual respaldado, y la prima es el valor aproximado del
+        servicio con IVA incluido. Es una estimación: la propuesta final depende del perfil de riesgo
+        de tu operación.
+      </p>
+      <p>
+        ¿Prefieres hablar con alguien? <a routerLink="/contacto">Escríbenos</a> y te acompañamos.
+      </p>
+    </aside>
+  </div>
+</section>

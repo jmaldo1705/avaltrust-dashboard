@@ -1,0 +1,154 @@
+<at-page-hero
+  titulo="Estamos Aquí Para Ayudarte"
+  entrada="En AvalTrust estamos listos para construir soluciones de aval y garantía que impulsen tu crecimiento financiero. ¡Hablemos y transformemos juntos el acceso al crédito!"
+/>
+
+<section class="at-section">
+  <div class="at-container contacto">
+    <div class="at-card formulario-tarjeta">
+      <h2>Envíanos un Mensaje</h2>
+      <p class="formulario-entrada">
+        ¿Necesitas más información sobre nuestros servicios? Completa el formulario y nuestro equipo
+        se pondrá en contacto contigo a la brevedad.
+      </p>
+
+      @if (estado() === 'enviado') {
+        <p class="aviso aviso--exito" role="status">
+          <strong>¡Mensaje enviado exitosamente!</strong><br />
+          Hemos recibido tu mensaje. Nuestro equipo se pondrá en contacto contigo a la brevedad.
+        </p>
+      }
+      @if (estado() === 'error') {
+        <p class="aviso aviso--error" role="alert">
+          No pudimos enviar tu mensaje. Verifica el captcha e inténtalo de nuevo, o escríbenos a
+          <a href="mailto:comercial&#64;avaltrust.co">comercial&#64;avaltrust.co</a>.
+        </p>
+      }
+
+      <form [formGroup]="formulario" (ngSubmit)="enviar()" novalidate>
+        <div class="fila">
+          <div class="campo">
+            <label for="nombre">Nombre Completo *</label>
+            <input id="nombre" type="text" formControlName="nombre" autocomplete="name" />
+            @if (invalido('nombre')) {
+              <span class="campo__error">Escribe tu nombre completo.</span>
+            }
+          </div>
+
+          <div class="campo">
+            <label for="empresa">Empresa / Organización</label>
+            <input id="empresa" type="text" formControlName="empresa" autocomplete="organization" />
+          </div>
+        </div>
+
+        <div class="fila">
+          <div class="campo">
+            <label for="correo">Correo Electrónico *</label>
+            <input id="correo" type="email" formControlName="correo" autocomplete="email" />
+            @if (invalido('correo')) {
+              <span class="campo__error">Escribe un correo electrónico válido.</span>
+            }
+          </div>
+
+          <div class="campo">
+            <label for="telefono">Teléfono *</label>
+            <input id="telefono" type="tel" formControlName="telefono" autocomplete="tel" />
+            @if (invalido('telefono')) {
+              <span class="campo__error">Escribe un teléfono de contacto.</span>
+            }
+          </div>
+        </div>
+
+        <div class="campo">
+          <label for="mensaje">Cuéntanos cómo podemos ayudarte *</label>
+          <textarea id="mensaje" rows="5" formControlName="mensaje"></textarea>
+          @if (invalido('mensaje')) {
+            <span class="campo__error">Cuéntanos un poco más para poder ayudarte.</span>
+          }
+        </div>
+
+        <label class="consentimiento">
+          <input type="checkbox" formControlName="acepta" />
+          <span>
+            Declaro que he leído y acepto los
+            <a routerLink="/terminos-condiciones">Términos y Condiciones de Uso</a> y la
+            <a routerLink="/politica-privacidad"
+              >Política de Privacidad y Tratamiento de Datos Personales</a
+            >
+            de AvalTrust S.A.S., y que conozco y acepto expresamente la diferencia entre el servicio
+            de aval o fianza digital y los servicios tecnológicos y en la nube, los cuales son
+            servicios independientes, con naturaleza jurídica y alcance distinto.
+          </span>
+        </label>
+        @if (invalido('acepta')) {
+          <span class="campo__error">Necesitamos tu aceptación para continuar.</span>
+        }
+
+        <at-turnstile (resuelto)="token.set($event)" />
+
+        <button
+          type="submit"
+          class="at-btn at-btn--primary"
+          [disabled]="estado() === 'enviando' || !token()"
+        >
+          {{ estado() === 'enviando' ? 'Enviando mensaje...' : 'Enviar Mensaje' }}
+        </button>
+        @if (!token()) {
+          <span class="campo__ayuda">Completa la verificación de seguridad para poder enviar.</span>
+        }
+      </form>
+    </div>
+
+    <aside class="informacion">
+      <h2>Información de Contacto</h2>
+
+      <div class="dato">
+        <h3>Nuestra Oficina</h3>
+        <address>
+          CR 46 B 74 SUR 03<br />
+          Edificio Cantoluna<br />
+          Sabaneta, Antioquia
+        </address>
+      </div>
+
+      <div class="dato">
+        <h3>Teléfono</h3>
+        <p><a href="tel:+573027657434">302 765 7434</a></p>
+      </div>
+
+      <div class="dato">
+        <h3>Correo Electrónico</h3>
+        <p><a href="mailto:comercial&#64;avaltrust.co">comercial&#64;avaltrust.co</a></p>
+      </div>
+
+      <div class="dato">
+        <h3>Horario de Atención</h3>
+        <p>Lunes - Viernes<br />8:00 AM - 6:00 PM</p>
+      </div>
+    </aside>
+  </div>
+</section>
+
+<section class="at-section at-section--dark">
+  <div class="at-container puentes">
+    <h2 class="at-section-title">Construyendo Puentes de Confianza</h2>
+    <p class="at-section-lead">
+      En AvalTrust transformamos el acceso al crédito con soluciones innovadoras que conectan a
+      personas, empresas y plataformas Fintech de manera segura y confiable.
+    </p>
+  </div>
+</section>
+
+<section class="at-section cierre-pagina">
+  <div class="at-container">
+    <h2>¿Listo para Transformar tu Acceso al Crédito?</h2>
+    <p>
+      Únete a AvalTrust y descubre cómo nuestras soluciones de aval pueden impulsar tu crecimiento
+      financiero de manera segura y confiable.
+    </p>
+    <div class="cierre-pagina__acciones">
+      <a class="at-btn at-btn--primary" routerLink="/quienes-somos">Conoce Más Sobre Nosotros</a>
+      <a class="at-btn at-btn--dark" routerLink="/servicio">Explora Nuestros Servicios</a>
+    </div>
+  </div>
+</section>

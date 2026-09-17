@@ -1,6 +1,6 @@
 <header class="cabecera" [class.cabecera--compacta]="compacto()">
   <div class="at-container cabecera__interior">
-    <a class="cabecera__marca" href="#inicio" (click)="cerrarMenu()">
+    <a class="cabecera__marca" routerLink="/" (click)="cerrarMenu()">
       <img
         src="img/logo-200.webp"
         srcset="img/logo-200.webp 200w, img/logo-400.webp 400w"
@@ -26,15 +26,22 @@
 
     <nav id="menu-principal" class="cabecera__nav" [class.cabecera__nav--abierto]="menuAbierto()">
       <ul class="cabecera__lista">
-        @for (enlace of enlaces; track enlace.destino) {
+        @for (enlace of enlaces; track enlace.ruta) {
           <li>
-            <a [href]="enlace.destino" (click)="cerrarMenu()">{{ enlace.etiqueta }}</a>
+            <a
+              [routerLink]="enlace.ruta"
+              routerLinkActive="activo"
+              (click)="cerrarMenu()"
+              >{{ enlace.etiqueta }}</a
+            >
           </li>
         }
       </ul>
       <div class="cabecera__acciones">
         <a class="cabecera__acceso" [href]="accesoPortal">Iniciar sesión</a>
-        <a class="at-btn at-btn--primary" href="#contacto" (click)="cerrarMenu()">Contáctanos</a>
+        <a class="at-btn at-btn--primary" routerLink="/contacto" (click)="cerrarMenu()"
+          >Contáctanos</a
+        >
       </div>
     </nav>
   </div>

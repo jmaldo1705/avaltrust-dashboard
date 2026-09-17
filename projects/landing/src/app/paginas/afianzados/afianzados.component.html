@@ -1,0 +1,105 @@
+<at-page-hero
+  titulo="Tu Respaldo Financiero de Confianza"
+  entrada="Hacemos que acceder al crédito sea más fácil, seguro y humano. En cada paso del camino, estamos contigo."
+/>
+
+<section class="promesas-seccion">
+  <div class="at-container promesas">
+    @for (promesa of promesas; track promesa.titulo) {
+      <div class="promesa">
+        <strong>{{ promesa.titulo }}</strong>
+        <span>{{ promesa.texto }}</span>
+      </div>
+    }
+  </div>
+</section>
+
+<section class="at-section">
+  <div class="at-container">
+    <h2 class="at-section-title">¿Qué Pasa Si No Puedo Pagar Mi Crédito?</h2>
+    <p class="at-section-lead">
+      No te preocupes. En AvalTrust entendemos que la vida a veces trae desafíos. Por eso hemos
+      diseñado un proceso transparente y humano para acompañarte.
+    </p>
+
+    <ol class="acompanamiento">
+      <li class="at-card">
+        <h3>Nosotros Te Cubrimos</h3>
+        <p>
+          Cuando tu crédito entra en mora, <strong>AvalTrust se hace cargo inmediatamente</strong>.
+          Pagamos tu deuda al acreedor para que tu historial crediticio no se vea más afectado. Es
+          como tener un hermano mayor que te respalda.
+        </p>
+      </li>
+      <li class="at-card">
+        <h3>Nos Convertimos en Tu Aliado</h3>
+        <p>
+          Ahora que pagamos tu deuda, <strong>nos convertimos en tu nuevo interlocutor</strong>. Pero
+          no somos como los cobradores tradicionales. Somos tu socio para encontrar la mejor solución
+          juntos.
+        </p>
+      </li>
+      <li class="at-card">
+        <h3>Conversamos de Corazón</h3>
+        <p>
+          Te contactamos para <strong>dialogar de manera abierta y constructiva</strong>. No hay
+          prisa, no hay presión. Queremos entender tu situación y construir juntos un plan que
+          funcione para ti.
+        </p>
+      </li>
+      <li class="at-card">
+        <h3>Todo Claro y Justo</h3>
+        <p>
+          Te explicamos exactamente qué debes pagar:
+          <strong>el monto que cubrimos + gastos de gestión proporcionales</strong>. Sin sorpresas,
+          sin letra pequeña. Transparencia total.
+        </p>
+      </li>
+    </ol>
+  </div>
+</section>
+
+<section class="at-section at-section--dark">
+  <div class="at-container">
+    <h2 class="at-section-title">Nuestro Compromiso Contigo</h2>
+    <p class="at-section-lead">
+      En momentos difíciles, lo que más necesitas es comprensión y apoyo. Eso es exactamente lo que
+      encontrarás en AvalTrust.
+    </p>
+
+    <div class="compromisos">
+      @for (compromiso of compromisos; track compromiso.titulo) {
+        <article class="compromiso">
+          <h3>{{ compromiso.titulo }}</h3>
+          <p>{{ compromiso.texto }}</p>
+        </article>
+      }
+    </div>
+  </div>
+</section>
+
+<section class="at-section creditos-seccion">
+  <div class="at-container">
+    <h2 class="at-section-title">Tipos de Créditos que Respaldamos</h2>
+    <p class="at-section-lead">
+      Nuestro respaldo crediticio te abre las puertas a diferentes oportunidades de financiamiento
+    </p>
+
+    <div class="creditos">
+      @for (credito of creditos; track credito.titulo) {
+        <article class="at-card">
+          <h3>{{ credito.titulo }}</h3>
+          <p>{{ credito.texto }}</p>
+        </article>
+      }
+    </div>
+  </div>
+</section>
+
+<section class="at-section cierre-pagina">
+  <div class="at-container">
+    <h2>¿Tienes Preguntas? Estamos Aquí Para Ti</h2>
+    <p>Nuestro equipo está listo para atenderte con la calidez y profesionalismo que mereces.</p>
+    <a class="at-btn at-btn--primary" routerLink="/contacto">Solicita tu fianza</a>
+  </div>
+</section>

@@ -1,0 +1,124 @@
+.promesas-seccion {
+  padding-block: var(--at-space-8);
+  background: var(--at-white);
+}
+
+.promesas {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: var(--at-space-6);
+}
+
+.promesa {
+  display: grid;
+  gap: var(--at-space-1);
+}
+
+.promesa strong {
+  font-size: var(--at-text-lg);
+}
+
+.promesa span {
+  color: var(--at-text-muted);
+  font-size: var(--at-text-sm);
+}
+
+.acompanamiento {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: var(--at-space-6);
+  margin: var(--at-space-8) 0 0;
+  padding: 0;
+  list-style: none;
+  counter-reset: paso;
+}
+
+.acompanamiento li {
+  counter-increment: paso;
+}
+
+.acompanamiento h3 {
+  display: flex;
+  align-items: center;
+  gap: var(--at-space-3);
+  margin-bottom: var(--at-space-3);
+  font-size: var(--at-text-lg);
+}
+
+.acompanamiento h3::before {
+  content: counter(paso);
+  display: grid;
+  flex-shrink: 0;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border-radius: var(--at-radius-pill);
+  background: var(--at-accent);
+  color: var(--at-white);
+  font-size: var(--at-text-sm);
+}
+
+.acompanamiento p {
+  color: var(--at-text-muted);
+}
+
+.compromisos {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: var(--at-space-6);
+  margin-top: var(--at-space-8);
+}
+
+.compromiso {
+  padding: var(--at-space-6);
+  border: 1px solid rgb(255 255 255 / 0.16);
+  border-radius: var(--at-radius-lg);
+  background: rgb(255 255 255 / 0.05);
+}
+
+.compromiso h3 {
+  margin-bottom: var(--at-space-2);
+  color: var(--at-white);
+  font-size: var(--at-text-base);
+}
+
+.compromiso p {
+  color: rgb(255 255 255 / 0.76);
+  font-size: var(--at-text-sm);
+}
+
+.creditos-seccion {
+  background: var(--at-white);
+}
+
+.creditos {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: var(--at-space-6);
+  margin-top: var(--at-space-8);
+}
+
+.creditos h3 {
+  margin-bottom: var(--at-space-2);
+  font-size: var(--at-text-lg);
+}
+
+.creditos p {
+  color: var(--at-text-muted);
+  font-size: var(--at-text-sm);
+}
+
+.cierre-pagina {
+  background: var(--at-slate-100);
+  text-align: center;
+}
+
+.cierre-pagina h2 {
+  font-size: var(--at-text-2xl);
+}
+
+.cierre-pagina p {
+  max-width: 60ch;
+  margin: var(--at-space-4) auto var(--at-space-6);
+  color: var(--at-text-muted);
+}

@@ -1,0 +1,139 @@
+<at-page-hero
+  titulo="Nuestras Soluciones de Respaldo Crediticio Digital"
+  entrada="Transformamos el acceso al crédito con soluciones innovadoras de respaldo crediticio digital y garantía, diseñadas para brindar seguridad tanto a acreedores como a deudores."
+/>
+
+<section class="at-section destacado">
+  <div class="at-container">
+    <p class="destacado__texto">
+      Con AvalTrust, los acreedores obtienen una protección robusta y los deudores un acceso más
+      sencillo y seguro al financiamiento impulsando juntos la inclusión financiera
+    </p>
+
+    <ul class="destacado__cifras">
+      <li><strong>100%</strong> Satisfacción</li>
+      <li><strong>24/7</strong> Disponibilidad</li>
+      <li><strong>100%</strong> Digital</li>
+    </ul>
+  </div>
+</section>
+
+<section class="at-section propuesta">
+  <div class="at-container">
+    <p class="at-eyebrow">Propuesta de Valor</p>
+    <h2 class="at-section-title">
+      Impulsamos la confianza en el ecosistema Fintech a través de protección estructural e
+      innovación sostenible.
+    </h2>
+
+    <div class="propuesta__texto">
+      <p>
+        En Avaltrust, construimos soluciones de respaldo digital que fortalecen la infraestructura de
+        riesgo de plataformas financieras. Nuestra propuesta se basa en un fondo de estabilización
+        autogestionable, diseñado para mitigar exposiciones operativas ante eventos de riesgo
+        recurrentes.
+      </p>
+      <p>
+        No somos una fuente de financiación ni intermediación de crédito. Somos una capa técnica de
+        protección inteligente para actores que desean operar con mayor seguridad, previsibilidad y
+        transparencia.
+      </p>
+      <p>
+        Nuestra tecnología es propia, modular y desarrollada desde cero, con un enfoque centrado en
+        la interoperabilidad, la gobernanza de datos y la sostenibilidad financiera. Nos
+        diferenciamos por trabajar de la mano con Fintechs, aseguradoras, y plataformas de pagos que
+        buscan mitigar riesgo sin sacrificar escalabilidad.
+      </p>
+      <p class="propuesta__lema">En Avaltrust creemos que proteger es avanzar.</p>
+
+      <ul class="propuesta__atributos">
+        <li>Protección Inmediata</li>
+        <li>Autogestionado</li>
+        <li>Transparente</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<section class="at-section at-section--dark">
+  <div class="at-container">
+    <p class="at-eyebrow">Flexibilidad</p>
+    <h2 class="at-section-title">Tu Fianza Digital en Evolución</h2>
+    <p class="at-section-lead">
+      Nuestra fianza digital se distingue por su diseño inherentemente flexible. Nos adaptamos a las
+      características específicas de tu producto crediticio, evolucionando continuamente para
+      satisfacer las necesidades cambiantes del mercado.
+    </p>
+
+    <div class="flexibilidad">
+      @for (bloque of flexibilidad; track bloque.titulo) {
+        <article class="flexibilidad__item">
+          <h3>{{ bloque.titulo }}</h3>
+          <p>{{ bloque.texto }}</p>
+        </article>
+      }
+    </div>
+
+    <p class="flexibilidad__cierre">
+      Garantizamos total transparencia en la gestión de los recursos, porque tú serás parte activa de
+      este proceso.
+    </p>
+  </div>
+</section>
+
+<section class="at-section beneficios-seccion">
+  <div class="at-container">
+    <h2 class="at-section-title">Beneficios Clave de Nuestras Fianzas Digitales</h2>
+    <p class="at-section-lead">
+      Nuestras fianzas digitales están diseñadas para optimizar y simplificar el proceso crediticio,
+      ofreciendo ventajas significativas
+    </p>
+
+    <div class="beneficios">
+      @for (beneficio of beneficios; track beneficio.titulo) {
+        <article class="at-card">
+          <h3>{{ beneficio.titulo }}</h3>
+          <p>{{ beneficio.texto }}</p>
+        </article>
+      }
+    </div>
+
+    <a class="at-btn at-btn--dark beneficios__cta" routerLink="/contacto">Conoce más detalles</a>
+  </div>
+</section>
+
+<section class="at-section">
+  <div class="at-container">
+    <h2 class="at-section-title">
+      ¿Cómo opera AvalTrust bajo el Modelo de Cobertura Crediticia?
+    </h2>
+    <p class="at-section-lead">
+      Nuestro modelo está diseñado para respaldar a las entidades financieras y empresas, brindando
+      seguridad en sus operaciones sin intervenir en la evaluación de los clientes finales. Así
+      funciona:
+    </p>
+
+    <ol class="operacion">
+      @for (paso of operacion; track paso.titulo; let i = $index) {
+        <li class="operacion__paso">
+          <span class="operacion__numero" aria-hidden="true">{{ i + 1 }}</span>
+          <div>
+            <h3>{{ paso.titulo }}</h3>
+            <p>{{ paso.texto }}</p>
+          </div>
+        </li>
+      }
+    </ol>
+  </div>
+</section>
+
+<section class="at-section cierre-pagina">
+  <div class="at-container">
+    <h2>¿Listo para transformar tu proceso crediticio?</h2>
+    <p>Descubre cómo nuestras soluciones pueden impulsar tu negocio</p>
+    <div class="cierre-pagina__acciones">
+      <a class="at-btn at-btn--primary" routerLink="/contacto">Contáctanos ahora</a>
+      <a class="at-btn at-btn--dark" routerLink="/quienes-somos">Conoce más</a>
+    </div>
+  </div>
+</section>
