@@ -1,11 +1,10 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
-import { RouterLink } from '@angular/router';
 import { PageHeroComponent } from '../../ui/page-hero.component';
 import { definirSeo } from '../../ui/seo';
 
 @Component({
   selector: 'at-terminos-condiciones',
-  imports: [PageHeroComponent, RouterLink],
+  imports: [PageHeroComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './terminos-condiciones.component.html',
   styleUrl: './legal.css',

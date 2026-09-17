@@ -159,6 +159,12 @@ form {
   color: var(--at-accent);
 }
 
+.nota-banda {
+  margin: calc(var(--at-space-2) * -1) 0 0;
+  color: var(--at-text-muted);
+  font-size: var(--at-text-xs);
+}
+
 .revision {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));

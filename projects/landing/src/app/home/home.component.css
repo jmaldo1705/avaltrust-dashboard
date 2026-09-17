@@ -183,6 +183,12 @@
   color: var(--at-accent);
 }
 
+.calculadora__nota {
+  margin-top: calc(var(--at-space-2) * -1);
+  color: var(--at-text-muted);
+  font-size: var(--at-text-xs);
+}
+
 .calculadora__acciones {
   display: grid;
   gap: var(--at-space-3);

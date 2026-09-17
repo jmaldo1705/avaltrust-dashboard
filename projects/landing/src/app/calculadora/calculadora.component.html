@@ -128,6 +128,10 @@
               </div>
             </dl>
 
+            @if (notaPrima(); as nota) {
+              <p class="nota-banda">{{ nota }}</p>
+            }
+
             <div class="acciones">
               <button type="submit" class="at-btn at-btn--primary">Continuar</button>
             </div>
@@ -287,6 +291,10 @@
               </div>
             </dl>
 
+            @if (notaPrima(); as nota) {
+              <p class="nota-banda">{{ nota }}</p>
+            }
+
             <at-turnstile (resuelto)="token.set($event)" />
 
             <div class="acciones">
@@ -314,8 +322,12 @@
       <h2>Cómo leer el resultado</h2>
       <p>
         La cobertura corresponde al monto mensual respaldado, y la prima es el valor aproximado del
-        servicio con IVA incluido. Es una estimación: la propuesta final depende del perfil de riesgo
-        de tu operación.
+        servicio con IVA incluido.
+      </p>
+      <p>
+        La prima se mueve entre el 2% y el 8% del valor cubierto según tu tasa de impagos. Si tu
+        tasa queda fuera de esa banda, la estimación usa el límite más cercano. Es una estimación:
+        la propuesta final depende del perfil de riesgo de tu operación.
       </p>
       <p>
         ¿Prefieres hablar con alguien? <a routerLink="/contacto">Escríbenos</a> y te acompañamos.

@@ -5,43 +5,90 @@
 
 <section class="at-section">
   <div class="at-container blog">
-    <article class="articulo at-card">
-      <picture>
-        <source
-          type="image/avif"
-          srcset="img/noticia-480.avif 480w, img/noticia-800.avif 800w"
-          sizes="(max-width: 700px) 100vw, 640px"
-        />
-        <img
-          src="img/noticia-800.webp"
-          srcset="img/noticia-480.webp 480w, img/noticia-800.webp 800w"
-          sizes="(max-width: 700px) 100vw, 640px"
-          width="800"
-          height="457"
-          alt="Fianzas en la ley"
-          loading="lazy"
-        />
-      </picture>
+    <div class="listado">
+      <article class="at-card destacado">
+        <a class="destacado__enlace" [routerLink]="['/blog', destacado.slug]">
+          <picture>
+            <source
+              type="image/avif"
+              [srcset]="
+                'img/' + destacado.imagen + '-480.avif 480w, img/' + destacado.imagen + '-800.avif 800w'
+              "
+              sizes="(max-width: 700px) 100vw, 640px"
+            />
+            <img
+              [src]="'img/' + destacado.imagen + '-800.webp'"
+              [srcset]="
+                'img/' + destacado.imagen + '-480.webp 480w, img/' + destacado.imagen + '-800.webp 800w'
+              "
+              sizes="(max-width: 700px) 100vw, 640px"
+              width="800"
+              height="450"
+              [alt]="destacado.alt"
+            />
+          </picture>
+        </a>
 
-      <p class="articulo__meta">6 Junio 2025 · Ingrid Alcazar</p>
+        <p class="meta">
+          <time [attr.datetime]="destacado.fecha">{{ destacado.fechaTexto }}</time>
+          · {{ destacado.autor }}
+        </p>
 
-      <ul class="articulo__etiquetas">
-        @for (etiqueta of etiquetas; track etiqueta) {
-          <li>{{ etiqueta }}</li>
+        <h2>
+          <a [routerLink]="['/blog', destacado.slug]">{{ destacado.titulo }}</a>
+        </h2>
+        <p class="resumen">{{ destacado.resumen }}</p>
+
+        <ul class="etiquetas">
+          @for (etiqueta of destacado.etiquetas; track etiqueta) {
+            <li>{{ etiqueta }}</li>
+          }
+        </ul>
+
+        <p class="leer">
+          <a [routerLink]="['/blog', destacado.slug]">Leer más →</a>
+        </p>
+      </article>
+
+      <div class="rejilla">
+        @for (post of resto; track post.slug) {
+          <article class="at-card tarjeta">
+            <a [routerLink]="['/blog', post.slug]">
+              <picture>
+                <source
+                  type="image/avif"
+                  [srcset]="'img/' + post.imagen + '-480.avif 480w, img/' + post.imagen + '-800.avif 800w'"
+                  sizes="(max-width: 700px) 100vw, 360px"
+                />
+                <img
+                  [src]="'img/' + post.imagen + '-480.webp'"
+                  [srcset]="'img/' + post.imagen + '-480.webp 480w, img/' + post.imagen + '-800.webp 800w'"
+                  sizes="(max-width: 700px) 100vw, 360px"
+                  width="480"
+                  height="270"
+                  [alt]="post.alt"
+                  loading="lazy"
+                />
+              </picture>
+            </a>
+
+            <p class="meta">
+              <time [attr.datetime]="post.fecha">{{ post.fechaTexto }}</time>
+            </p>
+            <h3>
+              <a [routerLink]="['/blog', post.slug]">{{ post.titulo }}</a>
+            </h3>
+            <p class="resumen">{{ post.resumen }}</p>
+
+            <ul class="etiquetas">
+              @for (etiqueta of post.etiquetas; track etiqueta) {
+                <li>{{ etiqueta }}</li>
+              }
+            </ul>
+          </article>
         }
-      </ul>
-
-      <h2>Fianzas en la ley</h2>
-      <p>
-        En AvalTrust aplicamos el principio legal de la fianza para respaldar obligaciones
-        crediticias con avales digitales. Actuamos como fiadores profesionales bajo normas claras,
-        cubriendo pagos incumplidos y activando un fondo de cobertura para su recuperación legal.
-      </p>
-
-      <p class="articulo__leer">
-        <a routerLink="/blog/fianzas-en-la-ley">Leer más →</a>
-      </p>
-    </article>
+      </div>
+    </div>
 
     <aside class="lateral">
       <section class="at-card">

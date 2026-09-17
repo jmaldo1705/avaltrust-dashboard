@@ -1,11 +1,10 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
-import { RouterLink } from '@angular/router';
 import { PageHeroComponent } from '../../ui/page-hero.component';
 import { definirSeo } from '../../ui/seo';
 
 @Component({
   selector: 'at-politica-privacidad',
-  imports: [PageHeroComponent, RouterLink],
+  imports: [PageHeroComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './politica-privacidad.component.html',
   styleUrl: './legal.css',

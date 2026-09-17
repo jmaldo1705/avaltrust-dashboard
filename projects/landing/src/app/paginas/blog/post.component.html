@@ -1,0 +1,46 @@
+@if (post(); as articulo) {
+  <at-page-hero
+    [insignia]="articulo.fechaTexto + ' · ' + articulo.autor"
+    [titulo]="articulo.titulo"
+  />
+
+  <article class="articulo">
+    <div class="at-container">
+      <picture>
+        <source
+          type="image/avif"
+          [srcset]="'img/' + articulo.imagen + '-480.avif 480w, img/' + articulo.imagen + '-800.avif 800w'"
+          sizes="(max-width: 800px) 100vw, 760px"
+        />
+        <img
+          [src]="'img/' + articulo.imagen + '-800.webp'"
+          [srcset]="'img/' + articulo.imagen + '-480.webp 480w, img/' + articulo.imagen + '-800.webp 800w'"
+          sizes="(max-width: 800px) 100vw, 760px"
+          width="800"
+          height="450"
+          [alt]="articulo.alt"
+        />
+      </picture>
+
+      <ul class="etiquetas">
+        @for (etiqueta of articulo.etiquetas; track etiqueta) {
+          <li>{{ etiqueta }}</li>
+        }
+      </ul>
+
+      <div class="at-prose" [innerHTML]="articulo.contenido"></div>
+
+      <nav class="siguientes" aria-label="Otras publicaciones">
+        <h2>Sigue leyendo</h2>
+        <ul>
+          @for (otro of relacionados(); track otro.slug) {
+            <li>
+              <a [routerLink]="['/blog', otro.slug]">{{ otro.titulo }}</a>
+            </li>
+          }
+        </ul>
+        <p><a routerLink="/blog">Volver al blog</a></p>
+      </nav>
+    </div>
+  </article>
+}

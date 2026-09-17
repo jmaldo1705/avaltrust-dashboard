@@ -70,23 +70,26 @@ jobs:
           aws s3 sync dist/landing/browser/image/ "s3://$S3_BUCKET/image/" \
             --delete \
             --cache-control "public,max-age=86400,must-revalidate"
-          aws s3 cp dist/landing/browser/favicon.png "s3://$S3_BUCKET/favicon.png" \
+          aws s3 sync dist/landing/browser/favicon.png "s3://$S3_BUCKET/favicon.png" \
             --cache-control "public,max-age=86400,must-revalidate" \
             --content-type "image/png"
-          aws s3 cp dist/landing/browser/robots.txt "s3://$S3_BUCKET/robots.txt" \
+          aws s3 sync dist/landing/browser/robots.txt "s3://$S3_BUCKET/robots.txt" \
             --cache-control "public,max-age=3600,must-revalidate" \
             --content-type "text/plain; charset=utf-8"
-          aws s3 cp dist/landing/browser/sitemap.xml "s3://$S3_BUCKET/sitemap.xml" \
+          aws s3 sync dist/landing/browser/sitemap.xml "s3://$S3_BUCKET/sitemap.xml" \
             --cache-control "public,max-age=3600,must-revalidate" \
             --content-type "application/xml; charset=utf-8"
 
       # El HTML prerenderizado no se cachea en el navegador para que un
-      # despliegue se vea de inmediato. index.csr.html no se publica: es el
+      # despliegue se vea de inmediato. Va con sync --delete y no con cp:
+      # asi desaparecen del bucket las paginas que dejan de existir, como
+      # paso con los .html del sitio estatico anterior.
+      # index.csr.html no se publica: es el
       # esqueleto sin prerenderizar y ninguna ruta lo referencia.
       - name: Upload prerendered HTML without browser cache
         run: |
-          aws s3 cp dist/landing/browser/ "s3://$S3_BUCKET/" \
-            --recursive \
+          aws s3 sync dist/landing/browser/ "s3://$S3_BUCKET/" \
+            --delete \
             --exclude "*" --include "*.html" --exclude "index.csr.html" \
             --cache-control "no-cache, no-store, must-revalidate" \
             --content-type "text/html; charset=utf-8"

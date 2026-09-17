@@ -1,5 +1,5 @@
 import { ApplicationConfig, provideBrowserGlobalErrorListeners, provideZoneChangeDetection } from '@angular/core';
-import { provideRouter, withInMemoryScrolling } from '@angular/router';
+import { provideRouter, withComponentInputBinding, withInMemoryScrolling } from '@angular/router';
 import { provideHttpClient, withFetch } from '@angular/common/http';
 
 import { routes } from './app.routes';
@@ -14,6 +14,8 @@ export const appConfig: ApplicationConfig = {
       // Al cambiar de pagina se vuelve arriba, y los enlaces con #ancla
       // llevan a su seccion.
       withInMemoryScrolling({ scrollPositionRestoration: 'enabled', anchorScrolling: 'enabled' }),
+      // Los parametros de ruta llegan como inputs del componente.
+      withComponentInputBinding(),
     ),
     provideHttpClient(withFetch()),
     provideClientHydration(withEventReplay(), withNoIncrementalHydration()),

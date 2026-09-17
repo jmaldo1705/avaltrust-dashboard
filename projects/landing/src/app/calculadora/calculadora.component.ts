@@ -1,7 +1,11 @@
 import { ChangeDetectionStrategy, Component, computed, inject, signal, viewChild } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { RouterLink } from '@angular/router';
-import { CoberturaService } from '../cobertura/cobertura.service';
+import {
+  CoberturaService,
+  TASA_PRIMA_MAXIMA,
+  TASA_PRIMA_MINIMA,
+} from '../cobertura/cobertura.service';
 import { MailService, plantillaCorreo } from '../contacto/mail.service';
 import { TurnstileComponent } from '../contacto/turnstile.component';
 import { PageHeroComponent } from '../ui/page-hero.component';
@@ -95,6 +99,18 @@ export class CalculadoraComponent {
   protected readonly valorPromedioFormateado = computed(() =>
     PESOS.format(this.valores().valorPromedio || 0),
   );
+  protected readonly tasaPrimaFormateada = computed(() =>
+    PORCENTAJE.format(this.estimacion().tasaPrima / 100),
+  );
+
+  /** Aviso cuando la tasa de impago cae fuera de la banda 2-8 % de la prima. */
+  protected readonly notaPrima = computed(() => {
+    const { ajuste } = this.estimacion();
+    if (!ajuste) return null;
+    const limite = ajuste === 'piso' ? 'mínimo' : 'tope';
+    const banda = `${PORCENTAJE.format(TASA_PRIMA_MINIMA / 100)} a ${PORCENTAJE.format(TASA_PRIMA_MAXIMA / 100)}`;
+    return `Prima calculada al ${this.tasaPrimaFormateada()}, el ${limite} de la banda (${banda}).`;
+  });
 
   constructor() {
     this.operacion.valueChanges.subscribe(() => this.valores.set(this.operacion.getRawValue()));
@@ -171,6 +187,7 @@ export class CalculadoraComponent {
             ['Valor promedio por crédito', PESOS.format(negocio.valorPromedio)],
             ['Plazo promedio', this.etiquetaPlazo(negocio.numeroCuotas)],
             ['Tasa de impagos (90+ días)', this.tasaFormateada()],
+            ['Tasa de prima aplicada', this.tasaPrimaFormateada()],
             ['Volumen mensual', `${negocio.creditosPorMes} créditos`],
             ['Cobertura Mensual Estimada', this.coberturaFormateada()],
             ['Prima Aproximada', this.primaFormateada()],

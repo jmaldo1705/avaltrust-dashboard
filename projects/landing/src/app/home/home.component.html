@@ -107,6 +107,10 @@
           </div>
         </div>
 
+        @if (notaPrima(); as nota) {
+          <p class="calculadora__nota">{{ nota }}</p>
+        }
+
         <div class="calculadora__acciones">
           <a class="at-btn at-btn--primary" routerLink="/calculadora">Calcula tu Cobertura</a>
           <a class="at-btn at-btn--dark" routerLink="/contacto">Únete a la Revolución</a>

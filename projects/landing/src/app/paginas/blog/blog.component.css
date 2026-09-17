@@ -5,33 +5,67 @@
   align-items: start;
 }
 
-.articulo img {
-  width: 100%;
-  border-radius: var(--at-radius-md);
-  margin-bottom: var(--at-space-6);
+.listado {
+  display: grid;
+  gap: var(--at-space-6);
 }
 
-.articulo__meta {
-  margin-bottom: var(--at-space-3);
+.destacado picture img,
+.tarjeta picture img {
+  width: 100%;
+  border-radius: var(--at-radius-md);
+  margin-bottom: var(--at-space-4);
+}
+
+.meta {
+  margin-bottom: var(--at-space-2);
   color: var(--at-text-muted);
   font-size: var(--at-text-sm);
 }
 
-.articulo__leer {
-  margin-top: var(--at-space-4);
-  font-weight: var(--at-weight-semibold);
+.destacado h2 {
+  margin-bottom: var(--at-space-3);
+  font-size: var(--at-text-2xl);
 }
 
-.articulo__etiquetas {
+.tarjeta h3 {
+  margin-bottom: var(--at-space-2);
+  font-size: var(--at-text-lg);
+}
+
+.destacado h2 a,
+.tarjeta h3 a {
+  color: inherit;
+}
+
+.destacado h2 a:hover,
+.tarjeta h3 a:hover {
+  color: var(--at-accent);
+  text-decoration: none;
+}
+
+.resumen {
+  color: var(--at-text-muted);
+}
+
+.destacado .resumen {
+  font-size: var(--at-text-lg);
+}
+
+.tarjeta .resumen {
+  font-size: var(--at-text-sm);
+}
+
+.etiquetas {
   display: flex;
   flex-wrap: wrap;
   gap: var(--at-space-2);
-  margin: 0 0 var(--at-space-4);
+  margin: var(--at-space-4) 0 0;
   padding: 0;
   list-style: none;
 }
 
-.articulo__etiquetas li {
+.etiquetas li {
   padding: var(--at-space-1) var(--at-space-3);
   border-radius: var(--at-radius-pill);
   background: var(--at-slate-100);
@@ -40,14 +74,26 @@
   font-weight: var(--at-weight-semibold);
 }
 
-.articulo h2 {
-  margin-bottom: var(--at-space-4);
-  font-size: var(--at-text-2xl);
+.leer {
+  margin-top: var(--at-space-4);
+  font-weight: var(--at-weight-semibold);
 }
 
-.articulo p {
-  color: var(--at-text-muted);
-  font-size: var(--at-text-lg);
+.rejilla {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: var(--at-space-6);
+}
+
+.tarjeta {
+  display: flex;
+  flex-direction: column;
+  transition: border-color 0.2s ease, transform 0.2s ease;
+}
+
+.tarjeta:hover {
+  border-color: var(--at-accent);
+  transform: translateY(-2px);
 }
 
 .lateral {
@@ -67,8 +113,8 @@
 
 .lateral__intro {
   margin-bottom: var(--at-space-2);
-  font-weight: var(--at-weight-semibold);
   color: var(--at-text);
+  font-weight: var(--at-weight-semibold);
 }
 
 .lateral__lista,

@@ -2,7 +2,11 @@ import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@a
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { Meta, Title } from '@angular/platform-browser';
-import { CoberturaService } from '../cobertura/cobertura.service';
+import {
+  CoberturaService,
+  TASA_PRIMA_MAXIMA,
+  TASA_PRIMA_MINIMA,
+} from '../cobertura/cobertura.service';
 
 interface Bloque {
   titulo: string;
@@ -62,6 +66,15 @@ export class HomeComponent {
   protected readonly coberturaFormateada = computed(() => PESOS.format(this.estimacion().cobertura));
   protected readonly primaFormateada = computed(() => PESOS.format(this.estimacion().prima));
   protected readonly tasaFormateada = computed(() => PORCENTAJE.format(this.tasaImpago() / 100));
+
+  /** Aviso cuando la tasa de impago cae fuera de la banda 2-8 % de la prima. */
+  protected readonly notaPrima = computed(() => {
+    const { ajuste, tasaPrima } = this.estimacion();
+    if (!ajuste) return null;
+    const limite = ajuste === 'piso' ? 'mínimo' : 'tope';
+    const banda = `${PORCENTAJE.format(TASA_PRIMA_MINIMA / 100)} a ${PORCENTAJE.format(TASA_PRIMA_MAXIMA / 100)}`;
+    return `Prima calculada al ${PORCENTAJE.format(tasaPrima / 100)}, el ${limite} de la banda (${banda}).`;
+  });
 
   protected readonly queEsAvalTrust: readonly Bloque[] = [
     {

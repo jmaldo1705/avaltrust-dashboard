@@ -38,10 +38,8 @@ export const routes: Routes = [
     title: 'Blog | AvalTrust - Insights Financieros y Tendencias Fintech',
   },
   {
-    path: 'blog/fianzas-en-la-ley',
-    loadComponent: () =>
-      import('./paginas/blog/articulo-fianzas.component').then((m) => m.ArticuloFianzasComponent),
-    title: 'Fianzas en la ley | Blog AvalTrust',
+    path: 'blog/:slug',
+    loadComponent: () => import('./paginas/blog/post.component').then((m) => m.PostComponent),
   },
   {
     path: 'calculadora',
