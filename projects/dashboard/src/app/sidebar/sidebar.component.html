@@ -1,0 +1,179 @@
+<aside class="sidebar" [class.open]="isMenuOpen">
+  <div class="sidebar-background">
+    <div class="gradient-overlay"></div>
+    <div class="grid-pattern"></div>
+    <div class="edge-line"></div>
+  </div>
+
+  <div class="sidebar-content">
+    <div class="sidebar-header">
+      <div class="brand">
+        <div class="brand-icon">
+          <svg lucideShieldCheck></svg>
+        </div>
+        <div class="brand-text">
+          <span class="brand-name">{{ getUserRoleDisplay() }}</span>
+          <span class="brand-subtitle">{{ userProfile()?.username || 'Usuario' }}</span>
+        </div>
+      </div>
+    </div>
+
+    <nav class="sidebar-nav" aria-label="Navegacion principal">
+      <div class="nav-section">Principal</div>
+      <div class="nav-container">
+        <a
+          class="nav-link"
+          *appHasRole="'ROLE_AFIANZADO'"
+          [class.active]="isActive('/dashboard-afianzado')"
+          (click)="navigateTo('/dashboard-afianzado')">
+          <span class="nav-icon"><svg lucideLayoutDashboard></svg></span>
+          <span class="nav-content">
+            <span class="nav-title">Mi Dashboard</span>
+            <span class="nav-description">Informacion personal</span>
+          </span>
+        </a>
+
+        <a
+          class="nav-link"
+          *appHasRole="'ROLE_AFIANZADO'"
+          [class.active]="isActive('/escuela-financiera')"
+          (click)="navigateTo('/escuela-financiera')">
+          <span class="nav-icon"><svg lucideBookOpen></svg></span>
+          <span class="nav-content">
+            <span class="nav-title">Escuela Financiera</span>
+            <span class="nav-description">Educacion y cursos</span>
+          </span>
+        </a>
+
+        @if (!auth.hasRole('ROLE_AFIANZADO')) {
+          <a
+            class="nav-link"
+            [class.active]="isActive('/dashboard')"
+            (click)="navigateTo('/dashboard')">
+            <span class="nav-icon"><svg lucideLayoutDashboard></svg></span>
+            <span class="nav-content">
+              <span class="nav-title">Dashboard</span>
+              <span class="nav-description">Panel principal</span>
+            </span>
+          </a>
+        }
+
+        @if (!auth.hasRole('ROLE_AFIANZADO') && !auth.hasRole('ROLE_CONSULTA')) {
+          <a
+            class="nav-link"
+            [class.active]="isActive('/portfolio')"
+            (click)="navigateTo('/portfolio')">
+            <span class="nav-icon"><svg lucideFileSpreadsheet></svg></span>
+            <span class="nav-content">
+              <span class="nav-title">Cargue Cartera</span>
+              <span class="nav-description">Gestion de archivos</span>
+            </span>
+          </a>
+        }
+
+        @if (!auth.hasRole('ROLE_AFIANZADO')) {
+          <a
+            class="nav-link"
+            [class.active]="isActive('/estado-cartera')"
+            (click)="navigateTo('/estado-cartera')">
+            <span class="nav-icon"><svg lucideHouse></svg></span>
+            <span class="nav-content">
+              <span class="nav-title">Estado Cartera</span>
+              <span class="nav-description">Listado de cartera</span>
+            </span>
+          </a>
+        }
+
+        @if (!auth.hasRole('ROLE_AFIANZADO') && !auth.hasRole('ROLE_CONSULTA')) {
+          <a
+            class="nav-link"
+            [class.active]="isActive('/claims')"
+            (click)="navigateTo('/claims')">
+            <span class="nav-icon"><svg lucideClipboardCheck></svg></span>
+            <span class="nav-content">
+              <span class="nav-title">Cargue Siniestros</span>
+              <span class="nav-description">Gestion siniestros</span>
+            </span>
+          </a>
+        }
+
+        @if (!auth.hasRole('ROLE_AFIANZADO')) {
+          <a
+            class="nav-link"
+            [class.active]="isActive('/documentos')"
+            (click)="navigateTo('/documentos')">
+            <span class="nav-icon"><svg lucideFileText></svg></span>
+            <span class="nav-content">
+              <span class="nav-title">Documentos</span>
+              <span class="nav-description">Informes personalizados</span>
+            </span>
+          </a>
+        }
+
+        @if (!auth.hasRole('ROLE_AFIANZADO')) {
+          <a
+            class="nav-link"
+            [class.active]="isActive('/certificados')"
+            (click)="navigateTo('/certificados')">
+            <span class="nav-icon"><svg lucideBadgeCheck></svg></span>
+            <span class="nav-content">
+              <span class="nav-title">Certificados</span>
+              <span class="nav-description">Certificados oficiales</span>
+            </span>
+          </a>
+        }
+      </div>
+
+      <div class="nav-section admin-section" *appHasRole="'ROLE_ADMIN'">Administracion</div>
+      <div class="nav-container">
+        <a
+          class="nav-link admin-only"
+          *appHasRole="'ROLE_ADMIN'"
+          [class.active]="isActive('/admin/users')"
+          (click)="navigateTo('/admin/users')">
+          <span class="nav-icon admin-exclusive"><svg lucideUsersRound></svg></span>
+          <span class="nav-content">
+            <span class="nav-title">Gestion Usuarios</span>
+            <span class="nav-description">Solo administradores</span>
+          </span>
+        </a>
+
+        <a
+          class="nav-link admin-only"
+          *appHasRole="'ROLE_ADMIN'"
+          [class.active]="isActive('/aliados')"
+          (click)="navigateTo('/aliados')">
+          <span class="nav-icon admin-exclusive"><svg lucideBuilding2></svg></span>
+          <span class="nav-content">
+            <span class="nav-title">Aliados Estrategicos</span>
+            <span class="nav-description">Gestion de aliados</span>
+          </span>
+        </a>
+
+        <a
+          class="nav-link admin-only"
+          *appHasRole="'ROLE_ADMIN'"
+          [class.active]="isActive('/admin/cursos')"
+          (click)="navigateTo('/admin/cursos')">
+          <span class="nav-icon admin-exclusive"><svg lucideGraduationCap></svg></span>
+          <span class="nav-content">
+            <span class="nav-title">Cursos</span>
+            <span class="nav-description">Gestion de contenido</span>
+          </span>
+        </a>
+
+        <a
+          class="nav-link admin-only"
+          *appHasRole="'ROLE_ADMIN'"
+          [class.active]="isActive('/admin/auditoria')"
+          (click)="navigateTo('/admin/auditoria')">
+          <span class="nav-icon admin-exclusive"><svg lucideActivity></svg></span>
+          <span class="nav-content">
+            <span class="nav-title">Auditoria</span>
+            <span class="nav-description">Accesos y cursos</span>
+          </span>
+        </a>
+      </div>
+    </nav>
+  </div>
+</aside>

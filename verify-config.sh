@@ -18,14 +18,14 @@ warnings=0
 # 1. Verificar archivos de entorno
 echo "📁 Verificando archivos de entorno..."
 
-if [ -f "src/app/environments/environment.ts" ]; then
+if [ -f "projects/dashboard/src/app/environments/environment.ts" ]; then
     echo -e "${GREEN}✓${NC} environment.ts existe"
 else
     echo -e "${RED}✗${NC} environment.ts NO encontrado"
     ((errors++))
 fi
 
-if [ -f "src/app/environments/environment.prod.ts" ]; then
+if [ -f "projects/dashboard/src/app/environments/environment.prod.ts" ]; then
     echo -e "${GREEN}✓${NC} environment.prod.ts existe"
 else
     echo -e "${RED}✗${NC} environment.prod.ts NO encontrado"
@@ -36,7 +36,7 @@ fi
 echo ""
 echo "🔗 Verificando URLs de producción..."
 
-if grep -q "https://avaltrustback-production.up.railway.app" "src/app/environments/environment.prod.ts"; then
+if grep -q "https://avaltrustback-production.up.railway.app" "projects/dashboard/src/app/environments/environment.prod.ts"; then
     echo -e "${GREEN}✓${NC} URL de Railway configurada correctamente"
 else
     echo -e "${RED}✗${NC} URL de Railway NO encontrada en environment.prod.ts"
@@ -69,14 +69,14 @@ fi
 echo ""
 echo "🔐 Verificando auth.service.ts..."
 
-if grep -q "import.*environment.*from.*environments/environment" "src/app/auth/auth.service.ts"; then
+if grep -q "import.*environment.*from.*environments/environment" "projects/dashboard/src/app/auth/auth.service.ts"; then
     echo -e "${GREEN}✓${NC} auth.service.ts importa environment"
 else
     echo -e "${RED}✗${NC} auth.service.ts NO importa environment"
     ((errors++))
 fi
 
-if grep -q "environment.apiUrl" "src/app/auth/auth.service.ts"; then
+if grep -q "environment.apiUrl" "projects/dashboard/src/app/auth/auth.service.ts"; then
     echo -e "${GREEN}✓${NC} auth.service.ts usa environment.apiUrl"
 else
     echo -e "${RED}✗${NC} auth.service.ts NO usa environment.apiUrl"
@@ -87,14 +87,14 @@ fi
 echo ""
 echo "🔎 Buscando URLs hardcodeadas..."
 
-hardcoded=$(grep -r "http://localhost:8080" src/app/**/*.ts 2>/dev/null | grep -v "environment.ts" | wc -l)
+hardcoded=$(grep -r "http://localhost:8080" projects/dashboard/src/app/**/*.ts 2>/dev/null | grep -v "environment.ts" | wc -l)
 
 if [ "$hardcoded" -eq 0 ]; then
     echo -e "${GREEN}✓${NC} No se encontraron URLs hardcodeadas"
 else
     echo -e "${YELLOW}⚠${NC} Se encontraron $hardcoded URLs hardcodeadas (localhost:8080)"
     echo "   Archivos:"
-    grep -r "http://localhost:8080" src/app/**/*.ts 2>/dev/null | grep -v "environment.ts" | cut -d: -f1 | sort -u
+    grep -r "http://localhost:8080" projects/dashboard/src/app/**/*.ts 2>/dev/null | grep -v "environment.ts" | cut -d: -f1 | sort -u
     ((warnings++))
 fi
 

@@ -1,0 +1,611 @@
+<div class="dashboard-layout">
+  <app-header
+    [isSidebarOpen]="isSidebarOpen"
+    [isUserMenuOpen]="isUserMenuOpen"
+    (toggleSidebar)="toggleSidebar()"
+    (toggleUserMenu)="toggleUserMenu()"
+    (closeUserMenu)="closeUserMenu()"
+    (navigate)="onHeaderNavigate($event)"
+    (logout)="logout()">
+  </app-header>
+
+  <div
+    class="overlay"
+    [class.active]="isSidebarOpen || isUserMenuOpen"
+    (click)="closeSidebar(); closeUserMenu()">
+  </div>
+
+  <app-sidebar
+    [isSidebarOpen]="isSidebarOpen"
+    (sidebarClose)="onSidebarClose()"
+    (navigate)="onSidebarNavigate($event)">
+  </app-sidebar>
+
+  <main class="main-content dashboard-page">
+    <section class="dashboard-command">
+      <aside class="command-panel">
+        <div class="panel-pattern"></div>
+
+        <div class="command-topline">
+          <span class="control-chip">
+            <svg lucideLayoutDashboard></svg>
+            Resumen operativo
+          </span>
+          <button
+            class="icon-button"
+            type="button"
+            aria-label="Actualizar dashboard"
+            (click)="refreshDashboard()"
+            [disabled]="isDashboardLoading">
+            <svg lucideRefreshCw [class.spinning]="isDashboardLoading"></svg>
+          </button>
+          @if (isAliadoFilterVisible) {
+            <div class="filter-shell command-filter">
+              <svg lucideListFilter></svg>
+              <app-filtro-aliados (selectionChange)="onAliadoFilterChange($event)"></app-filtro-aliados>
+            </div>
+          }
+        </div>
+
+        <div class="command-primary">
+          <span>Cartera total</span>
+          @if (!isDashboardLoading) {
+            <strong>
+              {{ portfolioStats.totalPortfolio | currency:'COP':'symbol':'1.0-0' }}
+            </strong>
+          } @else {
+            <span class="skeleton skeleton-value"></span>
+          }
+          <small [class.positive]="portfolioStats.portfolioGrowth >= 0" [class.negative]="portfolioStats.portfolioGrowth < 0">
+            @if (portfolioStats.portfolioGrowth >= 0) {
+              <svg lucideTrendingUp></svg>
+            }
+            @if (portfolioStats.portfolioGrowth < 0) {
+              <svg lucideTrendingDown></svg>
+            }
+            {{ portfolioStats.portfolioGrowth >= 0 ? '+' : '' }}{{ portfolioStats.portfolioGrowth }}% vs mes anterior
+          </small>
+        </div>
+
+        <div class="command-facts">
+          <div>
+            <span>Fianza capitalizada</span>
+            <strong>{{ totalValorAval | currency:'COP':'symbol':'1.0-0' }}</strong>
+          </div>
+          <div>
+            <span>Usuarios activos</span>
+            <strong>{{ portfolioStats.activeUsers | number }}</strong>
+          </div>
+        </div>
+
+        <div class="sync-status">
+          <svg lucideCalendarClock></svg>
+          <span>{{ lastUpdatedAt ? (lastUpdatedAt | date:'short') : 'Sin actualizar' }}</span>
+        </div>
+      </aside>
+
+      <section class="command-main">
+        <div class="command-header">
+          <div class="command-title">
+            <span class="section-kicker">AvalTrust Financial and Fintech</span>
+            <h1>Gestion de cartera</h1>
+          </div>
+
+          <div class="command-actions">
+            <button class="refresh-button" type="button" (click)="refreshDashboard()" [disabled]="isDashboardLoading">
+              <svg lucideRefreshCw [class.spinning]="isDashboardLoading"></svg>
+              Actualizar
+            </button>
+          </div>
+        </div>
+
+        @if (dashboardError) {
+          <div class="dashboard-alert">
+            <svg lucideAlertTriangle></svg>
+            <div>
+              <strong>{{ dashboardError }}</strong>
+              @if (dashboardSectionErrors.length) {
+                <p>{{ dashboardSectionErrors.join(' ') }}</p>
+              }
+            </div>
+          </div>
+        }
+
+        <section class="metric-strip" [class.is-loading]="isDashboardLoading">
+          <article class="metric-tile tile-money">
+            <div class="tile-icon">
+              <svg lucideBadgeDollarSign></svg>
+            </div>
+            <div>
+              <span>Cartera</span>
+              @if (!isDashboardLoading) {
+                <strong>
+                  {{ portfolioStats.totalPortfolio | currency:'COP':'symbol':'1.0-0' }}
+                </strong>
+              } @else {
+                <span class="skeleton skeleton-value"></span>
+              }
+            </div>
+          </article>
+
+          <article class="metric-tile tile-users">
+            <div class="tile-icon">
+              <svg lucideUsersRound></svg>
+            </div>
+            <div>
+              <span>Usuarios</span>
+              @if (!isDashboardLoading) {
+                <strong>
+                  {{ portfolioStats.activeUsers | number }}
+                </strong>
+              } @else {
+                <span class="skeleton skeleton-value"></span>
+              }
+            </div>
+          </article>
+
+          <article class="metric-tile tile-delay">
+            <div class="tile-icon">
+              <svg lucideGauge></svg>
+            </div>
+            <div>
+              <span>Mora promedio</span>
+              @if (!isDashboardLoading) {
+                <strong>
+                  {{ portfolioStats.averageDelayDays }} dias
+                </strong>
+              } @else {
+                <span class="skeleton skeleton-value"></span>
+              }
+            </div>
+          </article>
+
+          <article class="metric-tile tile-coverage">
+            <div class="tile-icon">
+              <svg lucideShieldCheck></svg>
+            </div>
+            <div>
+              <span>Cobertura</span>
+              @if (!isDashboardLoading) {
+                <strong>
+                  {{ coverageRatio | number:'1.0-1' }}%
+                </strong>
+              } @else {
+                <span class="skeleton skeleton-value"></span>
+              }
+            </div>
+          </article>
+        </section>
+      </section>
+    </section>
+
+    <section class="insight-grid">
+      <article class="risk-panel">
+        <div class="panel-header">
+          <div>
+            <span class="section-kicker">Riesgo</span>
+            <h2>Distribucion por mora</h2>
+          </div>
+          <span class="panel-count">{{ moraUsersCount }} usuarios</span>
+        </div>
+
+        <div class="risk-overview">
+          <div class="risk-meter" [style.background]="riskMeterBackground">
+            <div class="risk-meter-core">
+              <strong>{{ highRiskPercentage | number:'1.0-0' }}%</strong>
+              <span>alto riesgo</span>
+            </div>
+          </div>
+
+          <div class="risk-facts">
+            <div>
+              <span>Usuarios criticos</span>
+              <strong>{{ riskUsersCount | number }}</strong>
+            </div>
+            <div>
+              <span>Valor en riesgo</span>
+              <strong>{{ riskAmount | currency:'COP':'symbol':'1.0-0' }}</strong>
+            </div>
+            <div>
+              <span>Mora media</span>
+              <strong>{{ portfolioStats.averageDelayDays }} dias</strong>
+            </div>
+          </div>
+        </div>
+
+        @if (isDashboardLoading) {
+          <div class="skeleton-list">
+            <span></span>
+            <span></span>
+            <span></span>
+          </div>
+        } @else {
+          @if (moraDistribution.length === 0) {
+            <div class="empty-state panel-empty">
+              <svg lucideInfo></svg>
+              <span>No hay distribucion de mora disponible.</span>
+            </div>
+          }
+          @if (moraDistribution.length > 0) {
+            <div class="risk-segments">
+              @for (category of moraDistribution; track category) {
+                <div class="risk-row" [class]="category.severity">
+                  <div class="risk-label">
+                    <span>{{ category.name }}</span>
+                    <small>{{ category.count }} usuarios</small>
+                  </div>
+                  <div class="risk-bar">
+                    <span [style.width.%]="category.percentage"></span>
+                  </div>
+                  <div class="risk-value">
+                    <strong>{{ category.percentage | number:'1.0-1' }}%</strong>
+                    <small>{{ category.amount | currency:'COP':'symbol':'1.0-0' }}</small>
+                  </div>
+                </div>
+              }
+            </div>
+          }
+        }
+
+      </article>
+
+      <article class="alerts-panel">
+        <div class="panel-header">
+          <div>
+            <span class="section-kicker">Seguimiento</span>
+            <h2>Alertas</h2>
+          </div>
+          <span class="panel-count warning">{{ alerts.length }}</span>
+        </div>
+
+        <div class="alerts-list">
+          @if (isDashboardLoading) {
+            <div class="skeleton-list">
+              <span></span>
+              <span></span>
+              <span></span>
+            </div>
+          } @else {
+            @if (alerts.length === 0) {
+              <div class="empty-state panel-empty">
+                <svg lucideBell></svg>
+                <span>No hay alertas activas.</span>
+              </div>
+            }
+            @for (alert of alerts; track alert) {
+              <button class="alert-item" [class]="alert.severity" type="button" (click)="handleAlert(alert)">
+                <span class="alert-icon">
+                  @switch (alert.severity) {
+                    @case ('error') {
+                      <svg lucideAlertTriangle></svg>
+                    }
+                    @case ('warning') {
+                      <svg lucideBell></svg>
+                    }
+                    @default {
+                      <svg lucideInfo></svg>
+                    }
+                  }
+                </span>
+                <span class="alert-content">
+                  <span class="alert-title">{{ alert.title }}</span>
+                  <span class="alert-description">{{ alert.description }}</span>
+                  <span class="alert-meta">
+                    <span>{{ alert.timestamp | date:'short' }}</span>
+                    @if (isAliadoFilterVisible && alert.aliadoEstrategicoNombre) {
+                      <span class="alert-aliado-badge">
+                        <svg lucideBuilding2></svg>
+                        {{ alert.aliadoEstrategicoNombre }}
+                      </span>
+                    }
+                  </span>
+                </span>
+                <span class="alert-action">
+                  <svg lucideEye></svg>
+                </span>
+              </button>
+            }
+          }
+
+        </div>
+      </article>
+    </section>
+
+    <section class="workbench-card">
+      <div class="workbench-header">
+        <div>
+          <span class="section-kicker">Cartera vencida</span>
+          <h2>Usuarios con mora</h2>
+        </div>
+        <button class="export-btn" type="button" (click)="exportTopDelinquents()" [disabled]="isExportingDelinquents || delinquentsLoading">
+          @if (!isExportingDelinquents) {
+            <svg lucideDownload></svg>
+          }
+          @if (isExportingDelinquents) {
+            <svg lucideLoaderCircle class="spinning"></svg>
+          }
+          {{ isExportingDelinquents ? 'Exportando' : 'Exportar' }}
+        </button>
+      </div>
+
+      <div class="table-toolbar">
+        <label class="search-box">
+          <svg lucideSearch></svg>
+          <input
+            type="text"
+            [(ngModel)]="delinquentsFilter"
+            (ngModelChange)="onDelinquentsFilterChange()"
+            placeholder="Buscar por nombre, documento u obligacion">
+        </label>
+        <div class="table-controls">
+          <span class="result-count">{{ delinquentsTotalElements }} resultados</span>
+          <label>
+            <span>Por pagina</span>
+            <select class="page-size-select" [(ngModel)]="delinquentsPageSize" (change)="onDelinquentsPageSizeChange($event)">
+              <option [ngValue]="5">5</option>
+              <option [ngValue]="10">10</option>
+              <option [ngValue]="20">20</option>
+              <option [ngValue]="50">50</option>
+            </select>
+          </label>
+        </div>
+      </div>
+
+      @if (delinquentsError) {
+        <div class="table-error">
+          <svg lucideAlertTriangle></svg>
+          <span>{{ delinquentsError }}</span>
+        </div>
+      }
+
+      <div class="delinquents-table" [class.loading]="delinquentsLoading" [class.with-aliado]="isAliadoFilterVisible">
+        <div class="table-header">
+          <button class="col-name sortable" type="button" [class.active]="delinquentsSortBy === 'name'" (click)="changeDelinquentsSort('name')">
+            Usuario
+            @if (delinquentsSortBy !== 'name') {
+              <svg lucideChevronsUpDown></svg>
+            }
+            @if (delinquentsSortBy === 'name' && delinquentsSortDir === 'asc') {
+              <svg lucideChevronUp></svg>
+            }
+            @if (delinquentsSortBy === 'name' && delinquentsSortDir === 'desc') {
+              <svg lucideChevronDown></svg>
+            }
+          </button>
+          <button class="col-amount sortable" type="button" [class.active]="delinquentsSortBy === 'debtAmount'" (click)="changeDelinquentsSort('debtAmount')">
+            Deuda
+            @if (delinquentsSortBy !== 'debtAmount') {
+              <svg lucideChevronsUpDown></svg>
+            }
+            @if (delinquentsSortBy === 'debtAmount' && delinquentsSortDir === 'asc') {
+              <svg lucideChevronUp></svg>
+            }
+            @if (delinquentsSortBy === 'debtAmount' && delinquentsSortDir === 'desc') {
+              <svg lucideChevronDown></svg>
+            }
+          </button>
+          <button class="col-days sortable" type="button" [class.active]="delinquentsSortBy === 'delayDays'" (click)="changeDelinquentsSort('delayDays')">
+            Mora
+            @if (delinquentsSortBy !== 'delayDays') {
+              <svg lucideChevronsUpDown></svg>
+            }
+            @if (delinquentsSortBy === 'delayDays' && delinquentsSortDir === 'asc') {
+              <svg lucideChevronUp></svg>
+            }
+            @if (delinquentsSortBy === 'delayDays' && delinquentsSortDir === 'desc') {
+              <svg lucideChevronDown></svg>
+            }
+          </button>
+          <button class="col-rate sortable" type="button" [class.active]="delinquentsSortBy === 'guaranteeRate'" (click)="changeDelinquentsSort('guaranteeRate')">
+            Obligacion
+            @if (delinquentsSortBy !== 'guaranteeRate') {
+              <svg lucideChevronsUpDown></svg>
+            }
+            @if (delinquentsSortBy === 'guaranteeRate' && delinquentsSortDir === 'asc') {
+              <svg lucideChevronUp></svg>
+            }
+            @if (delinquentsSortBy === 'guaranteeRate' && delinquentsSortDir === 'desc') {
+              <svg lucideChevronDown></svg>
+            }
+          </button>
+          @if (isAliadoFilterVisible) {
+            <div class="col-aliado">Aliado</div>
+          }
+          <div class="col-actions">Detalle</div>
+        </div>
+
+        @for (user of visibleDelinquentUsers; track trackByUserId($index, user)) {
+          <div class="table-row">
+            <div class="col-name" data-label="Usuario">
+              <div class="user-info">
+                <div class="user-name">{{ user.name }}</div>
+                <div class="user-id">{{ user.identification }}</div>
+              </div>
+            </div>
+            <div class="col-amount" data-label="Deuda">
+              <span class="amount-value">{{ user.debtAmount | currency:'COP':'symbol':'1.0-0' }}</span>
+            </div>
+            <div class="col-days" data-label="Mora">
+              <span class="days-badge" [class]="getDaysSeverity(user.delayDays)">
+                {{ user.delayDays }} dias
+              </span>
+            </div>
+            <div class="col-rate" data-label="Obligacion">{{ user.guaranteeRate }}</div>
+            @if (isAliadoFilterVisible) {
+              <div class="col-aliado" data-label="Aliado">
+                <span class="aliado-badge" [class.has-aliado]="user.aliadoEstrategicoNombre">
+                  {{ user.aliadoEstrategicoNombre || 'Sin aliado' }}
+                </span>
+              </div>
+            }
+            <div class="col-actions" data-label="Detalle">
+              <button class="action-btn-small" type="button" (click)="viewUserDetail(user.id)">
+                <svg lucideEye></svg>
+                Ver
+              </button>
+            </div>
+          </div>
+        }
+
+        @if (delinquentsLoading) {
+          <div class="loading-state">
+            <svg lucideLoaderCircle class="spinning"></svg>
+            <span>Cargando datos</span>
+          </div>
+        }
+
+        @if (!delinquentsLoading && !delinquentsError && visibleDelinquentUsers.length === 0) {
+          <div class="empty-state table-empty">
+            <svg lucideInfo></svg>
+            <span>No hay usuarios con mora para mostrar.</span>
+          </div>
+        }
+      </div>
+
+      @if (delinquentsTotalElements > 0) {
+        <div class="pagination">
+          <div class="result-count">
+            Mostrando {{ delinquentsRangeStart + 1 }}-{{ delinquentsRangeEnd }} de {{ delinquentsTotalElements }}
+          </div>
+          <div class="page-controls">
+            <button class="page-btn" type="button" (click)="prevDelinquentsPage()" [disabled]="delinquentsCurrentPage === 1 || delinquentsLoading">
+              <svg lucideChevronLeft></svg>
+            </button>
+            @for (p of delinquentsPagesArray; track p) {
+              <button class="page-btn" type="button" [class.active]="p === delinquentsCurrentPage" (click)="goToDelinquentsPage(p)" [disabled]="delinquentsLoading">
+                {{ p }}
+              </button>
+            }
+            <button class="page-btn" type="button" (click)="nextDelinquentsPage()" [disabled]="delinquentsCurrentPage === delinquentsTotalPages || delinquentsLoading">
+              <svg lucideChevronRight></svg>
+            </button>
+          </div>
+        </div>
+      }
+    </section>
+
+    @if (isUserModalOpen) {
+      <div class="modal-backdrop" (click)="closeUserModal()">
+        <div class="modal" (click)="$event.stopPropagation()">
+          <div class="modal-header">
+            <div>
+              <span class="section-kicker">Detalle</span>
+              <h3>Usuario y obligacion</h3>
+            </div>
+            <button class="modal-close" type="button" (click)="closeUserModal()" aria-label="Cerrar">
+              <svg lucideX></svg>
+            </button>
+          </div>
+          <div class="modal-body">
+            @if (userModalLoading) {
+              <div class="modal-loading">
+                <svg lucideLoaderCircle class="spinning"></svg>
+                <span>Cargando detalle</span>
+              </div>
+            }
+            @if (userModalError && !userModalLoading) {
+              <div class="modal-error">
+                <svg lucideAlertTriangle></svg>
+                <span>{{ userModalError }}</span>
+              </div>
+            }
+            @if (!userModalLoading && !userModalError && selectedUserDetail) {
+              <div class="detail-grid">
+                <div class="detail-row">
+                  <div class="detail-label">Obligacion</div>
+                  <div class="detail-value">{{ selectedUserDetail.obligacion }}</div>
+                </div>
+                <div class="detail-row">
+                  <div class="detail-label">Documento</div>
+                  <div class="detail-value">{{ selectedUserDetail.tipoDocumento }} {{ selectedUserDetail.numeroDocumento }}</div>
+                </div>
+                <div class="detail-row">
+                  <div class="detail-label">Nombres</div>
+                  <div class="detail-value">{{ selectedUserDetail.nombres }} {{ selectedUserDetail.apellidos }}</div>
+                </div>
+                <div class="detail-row">
+                  <div class="detail-label">Tipo cliente</div>
+                  <div class="detail-value">{{ selectedUserDetail.tipoCliente }}</div>
+                </div>
+                <div class="detail-row">
+                  <div class="detail-label">Fecha desembolso</div>
+                  <div class="detail-value">{{ selectedUserDetail.fechaDesembolso | date:'shortDate' }}</div>
+                </div>
+                <div class="detail-row">
+                  <div class="detail-label">Plazo inicial</div>
+                  <div class="detail-value">{{ selectedUserDetail.plazoInicial }} meses</div>
+                </div>
+                <div class="detail-row">
+                  <div class="detail-label">Valor desembolso</div>
+                  <div class="detail-value">{{ selectedUserDetail.valorDesembolso | currency:'COP':'symbol':'1.0-0' }}</div>
+                </div>
+                <div class="detail-row">
+                  <div class="detail-label">Valor fianza</div>
+                  <div class="detail-value">{{ selectedUserDetail.valorAval | currency:'COP':'symbol':'1.0-0' }}</div>
+                </div>
+                <div class="detail-row">
+                  <div class="detail-label">Interes</div>
+                  <div class="detail-value">{{ selectedUserDetail.interes | currency:'COP':'symbol':'1.0-0' }}</div>
+                </div>
+                <div class="detail-row">
+                  <div class="detail-label">Tasa fianza</div>
+                  <div class="detail-value">{{ selectedUserDetail.tasaAval }}%</div>
+                </div>
+                @if (selectedUserDetail.otrosConceptos != null) {
+                  <div class="detail-row">
+                    <div class="detail-label">Otros conceptos</div>
+                    <div class="detail-value">{{ selectedUserDetail.otrosConceptos | currency:'COP':'symbol':'1.0-0' }}</div>
+                  </div>
+                }
+                @if (selectedUserDetail.abonoAval != null) {
+                  <div class="detail-row">
+                    <div class="detail-label">Abono fianza</div>
+                    <div class="detail-value">{{ selectedUserDetail.abonoAval | currency:'COP':'symbol':'1.0-0' }}</div>
+                  </div>
+                }
+                @if (selectedUserDetail.abonoCapital != null) {
+                  <div class="detail-row">
+                    <div class="detail-label">Abono capital</div>
+                    <div class="detail-value">{{ selectedUserDetail.abonoCapital | currency:'COP':'symbol':'1.0-0' }}</div>
+                  </div>
+                }
+                <div class="detail-row highlight">
+                  <div class="detail-label">Total deuda</div>
+                  <div class="detail-value">{{ selectedUserDetail.totalDeuda | currency:'COP':'symbol':'1.0-0' }}</div>
+                </div>
+                <div class="detail-row">
+                  <div class="detail-label">Fecha vencimiento</div>
+                  <div class="detail-value">{{ selectedUserDetail.fechaVencimiento | date:'shortDate' }}</div>
+                </div>
+                @if (selectedUserDetail.diasMora != null) {
+                  <div class="detail-row">
+                    <div class="detail-label">Dias de mora</div>
+                    <div class="detail-value">{{ selectedUserDetail.diasMora }}</div>
+                  </div>
+                }
+                @if (selectedUserDetail.fechaPago) {
+                  <div class="detail-row">
+                    <div class="detail-label">Fecha ultimo pago</div>
+                    <div class="detail-value">{{ selectedUserDetail.fechaPago | date:'shortDate' }}</div>
+                  </div>
+                }
+                <div class="detail-row">
+                  <div class="detail-label">Estado del credito</div>
+                  <div class="detail-value">{{ selectedUserDetail.estadoCredito }}</div>
+                </div>
+                <div class="detail-row">
+                  <div class="detail-label">Periodicidad</div>
+                  <div class="detail-value">{{ selectedUserDetail.periodicidad }}</div>
+                </div>
+              </div>
+            }
+          </div>
+          <div class="modal-footer">
+            <button class="primary-btn" type="button" (click)="closeUserModal()">Cerrar</button>
+          </div>
+        </div>
+      </div>
+    }
+
+  </main>
+</div>

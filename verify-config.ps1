@@ -10,14 +10,14 @@ $warnings = 0
 # 1. Verificar archivos de entorno
 Write-Host "📁 Verificando archivos de entorno..." -ForegroundColor Yellow
 
-if (Test-Path "src/app/environments/environment.ts") {
+if (Test-Path "projects/dashboard/src/app/environments/environment.ts") {
     Write-Host "✓ environment.ts existe" -ForegroundColor Green
 } else {
     Write-Host "✗ environment.ts NO encontrado" -ForegroundColor Red
     $errors++
 }
 
-if (Test-Path "src/app/environments/environment.prod.ts") {
+if (Test-Path "projects/dashboard/src/app/environments/environment.prod.ts") {
     Write-Host "✓ environment.prod.ts existe" -ForegroundColor Green
 } else {
     Write-Host "✗ environment.prod.ts NO encontrado" -ForegroundColor Red
@@ -28,7 +28,7 @@ if (Test-Path "src/app/environments/environment.prod.ts") {
 Write-Host ""
 Write-Host "🔗 Verificando URLs de producción..." -ForegroundColor Yellow
 
-$prodContent = Get-Content "src/app/environments/environment.prod.ts" -Raw -ErrorAction SilentlyContinue
+$prodContent = Get-Content "projects/dashboard/src/app/environments/environment.prod.ts" -Raw -ErrorAction SilentlyContinue
 if ($prodContent -match "https://avaltrustback-production.up.railway.app") {
     Write-Host "✓ URL de Railway configurada correctamente" -ForegroundColor Green
 } else {
@@ -64,7 +64,7 @@ if ($packageJson -match '"build":\s*"ng build --configuration production"') {
 Write-Host ""
 Write-Host "🔐 Verificando auth.service.ts..." -ForegroundColor Yellow
 
-$authService = Get-Content "src/app/auth/auth.service.ts" -Raw -ErrorAction SilentlyContinue
+$authService = Get-Content "projects/dashboard/src/app/auth/auth.service.ts" -Raw -ErrorAction SilentlyContinue
 
 if ($authService -match "import.*environment.*from.*environments/environment") {
     Write-Host "✓ auth.service.ts importa environment" -ForegroundColor Green
@@ -84,7 +84,7 @@ if ($authService -match "environment\.apiUrl") {
 Write-Host ""
 Write-Host "🔎 Buscando URLs hardcodeadas..." -ForegroundColor Yellow
 
-$hardcodedFiles = Get-ChildItem -Path "src/app" -Filter "*.ts" -Recurse | 
+$hardcodedFiles = Get-ChildItem -Path "projects/dashboard/src/app" -Filter "*.ts" -Recurse | 
     Where-Object { $_.Name -ne "environment.ts" } |
     Where-Object { (Get-Content $_.FullName -Raw) -match "http://localhost:8080" }
 

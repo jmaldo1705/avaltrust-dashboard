@@ -1,0 +1,457 @@
+<div class="users-layout">
+  <!-- Header -->
+  <app-header
+    [isSidebarOpen]="isSidebarOpen"
+    [isUserMenuOpen]="isUserMenuOpen"
+    (toggleSidebar)="toggleSidebar()"
+    (toggleUserMenu)="toggleUserMenu()"
+    (closeUserMenu)="closeUserMenu()"
+    (navigate)="onSidebarNavigate($event)"
+    (logout)="logout()"
+  ></app-header>
+
+  <!-- Overlay -->
+  <div class="overlay" [class.active]="isSidebarOpen || isUserMenuOpen" (click)="closeSidebar(); closeUserMenu()"></div>
+
+  <!-- Sidebar -->
+  <app-sidebar
+    [isSidebarOpen]="isSidebarOpen"
+    (sidebarClose)="onSidebarClose()"
+  (navigate)="onSidebarNavigate($event)"></app-sidebar>
+
+  <!-- Main content -->
+  <main class="main-content">
+    <div class="content-header">
+      <div class="title-wrap">
+        <h2>Gestión de Usuarios</h2>
+        <p class="subtitle">Administre los usuarios y roles del sistema</p>
+      </div>
+      <button class="btn-create-user" (click)="openCreateModal()">
+        <span class="icon">➕</span>
+        Nuevo Usuario
+      </button>
+    </div>
+
+    <!-- Messages -->
+    @if (errorMessage) {
+      <div class="alert error">{{ errorMessage }}</div>
+    }
+    @if (successMessage) {
+      <div class="alert success">{{ successMessage }}</div>
+    }
+
+    <!-- Filtros y resumen -->
+    <div class="toolbar">
+      <div class="filters-container">
+        <div class="search-box">
+          <span class="search-icon">🔍</span>
+          <input
+            type="text"
+            class="search-input"
+            [(ngModel)]="filterTextValue"
+            placeholder="Buscar por usuario o correo..."
+            />
+          </div>
+
+          <div class="filter-group">
+            <label class="filter-label">Rol</label>
+            <select class="filter-select" [(ngModel)]="roleFilterValue">
+              <option value="all">Todos los roles</option>
+              <option value="ROLE_ADMIN">Administrador</option>
+              <option value="ROLE_USER">Usuario</option>
+              <option value="ROLE_AFIANZADO">Afianzado</option>
+            </select>
+          </div>
+
+          <div class="filter-group">
+            <label class="filter-label">Estado</label>
+            <select class="filter-select" [(ngModel)]="statusFilterValue">
+              <option value="all">Todos</option>
+              <option value="enabled">Activos</option>
+              <option value="disabled">Inactivos</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="summary-info">
+          <div class="summary-item">
+            <span class="summary-label">Total:</span>
+            <span class="summary-value">{{ filteredUsers().length }}</span>
+          </div>
+          <div class="summary-divider"></div>
+          <div class="summary-item">
+            <span class="summary-label">Página:</span>
+            <span class="summary-value">{{ page() }} / {{ totalPages() }}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Loading -->
+      @if (isLoading) {
+        <div class="loading-overlay">
+          <div class="spinner"></div>
+          <p>Cargando usuarios...</p>
+        </div>
+      }
+
+      <!-- Tabla de usuarios -->
+      <div class="users-card">
+        @if (pagedUsers().length > 0 && !isLoading) {
+          <div class="table-container">
+            <table class="users-table">
+              <thead>
+                <tr>
+                  <th class="sortable" (click)="setSort('id')">
+                    <div class="th-content">
+                      ID
+                      <span class="sort-icon" [class.active]="sortBy()==='id'">
+                        {{ sortBy()==='id' ? (sortDir()==='asc'?'↑':'↓') : '↕' }}
+                      </span>
+                    </div>
+                  </th>
+                  <th class="sortable" (click)="setSort('username')">
+                    <div class="th-content">
+                      Usuario
+                      <span class="sort-icon" [class.active]="sortBy()==='username'">
+                        {{ sortBy()==='username' ? (sortDir()==='asc'?'↑':'↓') : '↕' }}
+                      </span>
+                    </div>
+                  </th>
+                  <th class="sortable" (click)="setSort('email')">
+                    <div class="th-content">
+                      Correo Electrónico
+                      <span class="sort-icon" [class.active]="sortBy()==='email'">
+                        {{ sortBy()==='email' ? (sortDir()==='asc'?'↑':'↓') : '↕' }}
+                      </span>
+                    </div>
+                  </th>
+                  <th>Roles</th>
+                  <th>Aliado Estratégico</th>
+                  <th class="sortable" (click)="setSort('enabled')">
+                    <div class="th-content">
+                      Estado
+                      <span class="sort-icon" [class.active]="sortBy()==='enabled'">
+                        {{ sortBy()==='enabled' ? (sortDir()==='asc'?'↑':'↓') : '↕' }}
+                      </span>
+                    </div>
+                  </th>
+                  <th class="actions-col">Acciones</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (u of pagedUsers(); track u) {
+                  <tr class="user-row">
+                    <td class="id-col">#{{ u.id }}</td>
+                    <td class="username-col">
+                      <div class="user-info">
+                        <span class="user-avatar">{{ u.username.charAt(0).toUpperCase() }}</span>
+                        <span class="user-name">{{ u.username }}</span>
+                      </div>
+                    </td>
+                    <td class="email-col">{{ u.email }}</td>
+                    <td class="roles-col">
+                      <div class="roles-list">
+                        @if (u.roles && u.roles.length) {
+                          @for (r of u.roles; track r) {
+                            <span class="role-badge"
+                              [class.admin]="r==='ROLE_ADMIN'"
+                              [class.user]="r==='ROLE_USER'"
+                              [class.afianzado]="r==='ROLE_AFIANZADO'">
+                              {{ formatRole(r) }}
+                            </span>
+                          }
+                        } @else {
+                          <span class="no-roles">Sin roles</span>
+                        }
+                      </div>
+                    </td>
+                    <td class="aliado-col">
+                      @if (u.aliadoEstrategicoNombre) {
+                        <span class="aliado-badge">
+                          {{ u.aliadoEstrategicoNombre }}
+                        </span>
+                      }
+                      @if (!u.aliadoEstrategicoNombre) {
+                        <span class="no-aliado">
+                          Sin aliado
+                        </span>
+                      }
+                    </td>
+                    <td class="status-col">
+                      <span class="status-indicator" [class.active]="u.enabled" [class.inactive]="!u.enabled">
+                        <span class="status-dot"></span>
+                        {{ u.enabled ? 'Activo' : 'Inactivo' }}
+                      </span>
+                    </td>
+                    <td class="actions-col">
+                      <div class="action-buttons">
+                        <button class="action-btn edit-btn" (click)="openEditModal(u)" title="Editar usuario">
+                          <span class="btn-icon">✏️</span>
+                          <span class="btn-text">Editar</span>
+                        </button>
+                        @if (u.enabled) {
+                          <button
+                            class="action-btn disable-btn"
+                            (click)="openDeleteModal(u, 'disable')"
+                            title="Desactivar usuario">
+                            <span class="btn-icon">⏸️</span>
+                            <span class="btn-text">Desactivar</span>
+                          </button>
+                        }
+                        @if (!u.enabled) {
+                          <button
+                            class="action-btn enable-btn"
+                            (click)="openDeleteModal(u, 'disable')"
+                            title="Activar usuario">
+                            <span class="btn-icon">▶️</span>
+                            <span class="btn-text">Activar</span>
+                          </button>
+                        }
+                      </div>
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+            <!-- Paginación -->
+            @if (totalPages() > 1) {
+              <div class="pagination-controls">
+                <button class="page-btn" (click)="prevPage()" [disabled]="page()===1">
+                  ← Anterior
+                </button>
+                <div class="page-info">
+                  Página <strong>{{ page() }}</strong> de <strong>{{ totalPages() }}</strong>
+                </div>
+                <button class="page-btn" (click)="nextPage()" [disabled]="page()===totalPages()">
+                  Siguiente →
+                </button>
+              </div>
+            }
+          </div>
+        } @else {
+          @if (!isLoading) {
+            <div class="empty-state">
+              <div class="empty-icon">📭</div>
+              <h3>No hay usuarios para mostrar</h3>
+              <p>No se encontraron usuarios que coincidan con los filtros aplicados.</p>
+            </div>
+          }
+        }
+
+      </div>
+
+      <!-- Modal para crear/editar usuario -->
+      @if (showEditModal) {
+        <div class="modal-overlay" (click)="closeEditModal()">
+          <div class="modal-content modal-large" (click)="$event.stopPropagation()">
+            <div class="modal-header">
+              <h3>{{ editMode === 'create' ? '➕ Crear Nuevo Usuario' : '✏️ Editar Usuario' }}</h3>
+              <button class="close-btn" (click)="closeEditModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+              <p class="modal-description">
+                {{ editMode === 'create' ? 'Complete los datos del nuevo usuario:' : 'Modifique los datos del usuario:' }}
+              </p>
+              <div class="form-grid">
+                <div class="form-field">
+                  <label class="field-label">
+                    Nombre de Usuario <span class="required">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    class="form-input"
+                    [(ngModel)]="editUserForm.username"
+                    placeholder="usuario123"
+                    autocomplete="off"
+                    [disabled]="editMode === 'edit'"
+                    />
+                    @if (editMode === 'create') {
+                      <span class="field-hint">Mínimo 3 caracteres</span>
+                    }
+                    @if (editMode === 'edit') {
+                      <span class="field-hint">El nombre de usuario no se puede modificar</span>
+                    }
+                  </div>
+                  <div class="form-field">
+                    <label class="field-label">
+                      Correo Electrónico <span class="required">*</span>
+                    </label>
+                    <input
+                      type="email"
+                      class="form-input"
+                      [(ngModel)]="editUserForm.email"
+                      placeholder="usuario@ejemplo.com"
+                      autocomplete="email"
+                      [disabled]="editMode === 'edit'"
+                      />
+                      @if (editMode === 'create') {
+                        <span class="field-hint">Debe ser un email válido</span>
+                      }
+                      @if (editMode === 'edit') {
+                        <span class="field-hint">El email no se puede modificar</span>
+                      }
+                    </div>
+                    <div class="form-field">
+                      <label class="field-label">
+                        Contraseña @if (editMode === 'create') {
+                        <span class="required">*</span>
+                      }
+                    </label>
+                    <input
+                      type="password"
+                      class="form-input"
+                      [(ngModel)]="editUserForm.password"
+                      [placeholder]="editMode === 'create' ? '••••••••' : 'Dejar vacío para mantener la actual'"
+                      autocomplete="new-password"
+                      />
+                      <span class="field-hint">
+                        {{ editMode === 'create' ? 'Mínimo 6 caracteres' : 'Opcional: Solo si desea cambiar la contraseña' }}
+                      </span>
+                    </div>
+                    <div class="form-field">
+                      <label class="field-label">
+                        Confirmar Contraseña @if (editMode === 'create') {
+                        <span class="required">*</span>
+                      }
+                    </label>
+                    <input
+                      type="password"
+                      class="form-input"
+                      [(ngModel)]="editUserForm.confirmPassword"
+                      placeholder="••••••••"
+                      autocomplete="new-password"
+                      />
+                      <span class="field-hint">Debe coincidir con la contraseña</span>
+                    </div>
+                    <div class="form-field">
+                      <label class="field-label">
+                        Aliado Estratégico
+                      </label>
+                      <select
+                        class="form-input"
+                        [(ngModel)]="editUserForm.aliadoEstrategicoId"
+                        >
+                        <option [ngValue]="null">Sin aliado (acceso completo)</option>
+                        @for (aliado of aliados; track aliado) {
+                          <option [ngValue]="aliado.id">
+                            {{ aliado.nombre }}
+                          </option>
+                        }
+                      </select>
+                      <span class="field-hint">Opcional: Asociar usuario a un aliado estratégico para filtrar datos</span>
+                    </div>
+                    <div class="form-field full-width">
+                      <label class="field-label">
+                        Roles <span class="required">*</span>
+                      </label>
+                      <div class="roles-selection">
+                        @for (role of availableRoles; track role) {
+                          <label class="role-checkbox">
+                            <input
+                              type="checkbox"
+                              [checked]="isRoleSelected(role.value)"
+                              (change)="toggleRole(role.value)"
+                              />
+                              <span class="role-label">{{ role.label }}</span>
+                            </label>
+                          }
+                        </div>
+                        <span class="field-hint">Debe seleccionar al menos un rol</span>
+                      </div>
+                    </div>
+                    @if (errorMessage) {
+                      <div class="alert error">{{ errorMessage }}</div>
+                    }
+                  </div>
+                  <div class="modal-footer">
+                    <button class="btn btn-secondary" (click)="closeEditModal()" [disabled]="isLoading">
+                      Cancelar
+                    </button>
+                    <button class="btn btn-primary" (click)="saveUser()" [disabled]="isLoading">
+                      @if (!isLoading) {
+                        <span>
+                          {{ editMode === 'create' ? '✓ Crear Usuario' : '✓ Guardar Cambios' }}
+                        </span>
+                      }
+                      @if (isLoading) {
+                        <span>{{ editMode === 'create' ? 'Creando...' : 'Guardando...' }}</span>
+                      }
+                    </button>
+                  </div>
+                </div>
+              </div>
+            }
+
+            <!-- Modal de confirmación de desactivación/activación -->
+            @if (showDeleteModal) {
+              <div class="modal-overlay" (click)="closeDeleteModal()">
+                <div class="modal-content modal-confirm" (click)="$event.stopPropagation()">
+                  <div class="modal-header">
+                    <h3>
+                      @if (userToDelete?.enabled) {
+                        <span>⏸️ Desactivar Usuario</span>
+                      }
+                      @if (!userToDelete?.enabled) {
+                        <span>▶️ Activar Usuario</span>
+                      }
+                    </h3>
+                    <button class="close-btn" (click)="closeDeleteModal()">&times;</button>
+                  </div>
+                  <div class="modal-body">
+                    <!-- Desactivar usuario -->
+                    @if (userToDelete?.enabled) {
+                      <div class="confirm-content">
+                        <div class="confirm-icon warning">⏸️</div>
+                        <h4>¿Desactivar a "{{ userToDelete?.username }}"?</h4>
+                        <p class="confirm-description">
+                          El usuario no podrá iniciar sesión, pero sus datos se conservarán en el sistema.
+                          Puedes reactivarlo en cualquier momento.
+                        </p>
+                        <div class="info-box warning">
+                          <span class="info-icon">💡</span>
+                          <div class="info-text">
+                            <strong>Recomendado:</strong> Esta es la opción más segura ya que conserva todos los datos relacionados.
+                          </div>
+                        </div>
+                      </div>
+                    }
+                    <!-- Activar usuario -->
+                    @if (!userToDelete?.enabled) {
+                      <div class="confirm-content">
+                        <div class="confirm-icon success">▶️</div>
+                        <h4>¿Activar a "{{ userToDelete?.username }}"?</h4>
+                        <p class="confirm-description">
+                          El usuario podrá volver a iniciar sesión en el sistema.
+                        </p>
+                      </div>
+                    }
+                    @if (errorMessage) {
+                      <div class="alert error">{{ errorMessage }}</div>
+                    }
+                  </div>
+                  <div class="modal-footer">
+                    <button class="btn btn-secondary" (click)="closeDeleteModal()" [disabled]="isLoading">
+                      Cancelar
+                    </button>
+                    <button
+                      class="btn"
+                      [class.btn-danger]="userToDelete?.enabled"
+                      [class.btn-success]="!userToDelete?.enabled"
+                      (click)="confirmDelete()"
+                      [disabled]="isLoading">
+                      @if (!isLoading && userToDelete?.enabled) {
+                        <span>Desactivar</span>
+                      }
+                      @if (!isLoading && !userToDelete?.enabled) {
+                        <span>Activar</span>
+                      }
+                      @if (isLoading) {
+                        <span>Procesando...</span>
+                      }
+                    </button>
+                  </div>
+                </div>
+              </div>
+            }
+          </main>
+        </div>

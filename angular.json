@@ -3,42 +3,44 @@
   "version": 1,
   "newProjectRoot": "projects",
   "projects": {
-    "avaltrust-dashboard": {
+    "dashboard": {
       "projectType": "application",
       "schematics": {},
-      "root": "",
-      "sourceRoot": "src",
+      "root": "projects/dashboard",
+      "sourceRoot": "projects/dashboard/src",
       "prefix": "app",
       "architect": {
         "build": {
           "builder": "@angular/build:application",
           "options": {
-            "browser": "src/main.ts",
+            "browser": "projects/dashboard/src/main.ts",
             "polyfills": [
               "zone.js"
             ],
-            "tsConfig": "tsconfig.app.json",
+            "tsConfig": "projects/dashboard/tsconfig.app.json",
             "assets": [
               {
                 "glob": "**/*",
-                "input": "public"
+                "input": "projects/dashboard/public"
               },
               {
                 "glob": "**/*",
-                "input": "src/assets",
+                "input": "projects/dashboard/src/assets",
                 "output": "/assets"
               }
             ],
             "styles": [
-              "src/styles.css"
-            ]
+              "projects/shared-ui/styles/tokens.css",
+              "projects/dashboard/src/styles.css"
+            ],
+            "outputPath": "dist/avaltrust-dashboard"
           },
           "configurations": {
             "production": {
               "fileReplacements": [
                 {
-                  "replace": "src/app/environments/environment.ts",
-                  "with": "src/app/environments/environment.prod.ts"
+                  "replace": "projects/dashboard/src/app/environments/environment.ts",
+                  "with": "projects/dashboard/src/app/environments/environment.prod.ts"
                 }
               ],
               "budgets": [
@@ -59,6 +61,15 @@
               "optimization": false,
               "extractLicenses": false,
               "sourceMap": true
+            },
+            "testing": {
+              "aot": false,
+              "optimization": false,
+              "extractLicenses": false,
+              "polyfills": [
+                "zone.js",
+                "zone.js/testing"
+              ]
             }
           },
           "defaultConfiguration": "production"
@@ -79,27 +90,127 @@
           "builder": "@angular/build:extract-i18n"
         },
         "test": {
-          "builder": "@angular/build:karma",
+          "builder": "@angular/build:unit-test",
           "options": {
+            "tsConfig": "projects/dashboard/tsconfig.spec.json",
+            "buildTarget": ":build:testing",
+            "runner": "vitest"
+          }
+        }
+      }
+    },
+    "landing": {
+      "projectType": "application",
+      "schematics": {},
+      "root": "projects/landing",
+      "sourceRoot": "projects/landing/src",
+      "prefix": "at",
+      "architect": {
+        "build": {
+          "builder": "@angular/build:application",
+          "options": {
+            "browser": "projects/landing/src/main.ts",
             "polyfills": [
-              "zone.js",
-              "zone.js/testing"
+              "zone.js"
             ],
-            "tsConfig": "tsconfig.spec.json",
+            "tsConfig": "projects/landing/tsconfig.app.json",
             "assets": [
               {
                 "glob": "**/*",
-                "input": "public"
-              },
-              {
-                "glob": "**/*",
-                "input": "src/assets",
-                "output": "/assets"
+                "input": "projects/landing/public"
               }
             ],
             "styles": [
-              "src/styles.css"
-            ]
+              "projects/shared-ui/styles/tokens.css",
+              "projects/landing/src/styles.css"
+            ],
+            "server": "projects/landing/src/main.server.ts",
+            "outputMode": "static",
+            "security": {
+              "allowedHosts": []
+            },
+            "outputPath": "dist/landing"
+          },
+          "configurations": {
+            "production": {
+              "budgets": [
+                {
+                  "type": "initial",
+                  "maximumWarning": "500kB",
+                  "maximumError": "1MB"
+                },
+                {
+                  "type": "anyComponentStyle",
+                  "maximumWarning": "4kB",
+                  "maximumError": "8kB"
+                }
+              ],
+              "outputHashing": "all"
+            },
+            "development": {
+              "optimization": false,
+              "extractLicenses": false,
+              "sourceMap": true
+            },
+            "testing": {
+              "aot": false,
+              "optimization": false,
+              "extractLicenses": false,
+              "polyfills": [
+                "zone.js",
+                "zone.js/testing"
+              ]
+            }
+          },
+          "defaultConfiguration": "production"
+        },
+        "serve": {
+          "builder": "@angular/build:dev-server",
+          "configurations": {
+            "production": {
+              "buildTarget": "landing:build:production"
+            },
+            "development": {
+              "buildTarget": "landing:build:development"
+            }
+          },
+          "defaultConfiguration": "development"
+        },
+        "extract-i18n": {
+          "builder": "@angular/build:extract-i18n"
+        },
+        "test": {
+          "builder": "@angular/build:unit-test",
+          "options": {
+            "tsConfig": "projects/landing/tsconfig.spec.json",
+            "buildTarget": ":build:testing",
+            "runner": "vitest"
+          }
+        }
+      }
+    },
+    "shared-ui": {
+      "projectType": "library",
+      "root": "projects/shared-ui",
+      "sourceRoot": "projects/shared-ui/src",
+      "prefix": "at",
+      "architect": {
+        "build": {
+          "builder": "@angular/build:ng-packagr",
+          "configurations": {
+            "production": {
+              "tsConfig": "projects/shared-ui/tsconfig.lib.prod.json"
+            },
+            "development": {
+              "tsConfig": "projects/shared-ui/tsconfig.lib.json"
+            }
+          },
+          "defaultConfiguration": "production"
+        },
+        "test": {
+          "builder": "@angular/build:unit-test",
+          "options": {
+            "tsConfig": "projects/shared-ui/tsconfig.spec.json"
           }
         }
       }

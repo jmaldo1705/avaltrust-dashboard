@@ -1,59 +1,62 @@
-# AvaltrustDashboard
+# AvalTrust · workspace web
 
-This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 20.2.2.
+Workspace de Angular con las dos aplicaciones web de AvalTrust y la librería
+de marca que comparten. El backend es Spring Boot y vive en otro repositorio
+(`AvalTrustBack`).
 
-## Development server
-
-To start a local development server, run:
-
-```bash
-ng serve
+```
+projects/
+├── dashboard/    aplicación privada (app.avaltrust.co) — SPA con login por rol
+├── landing/      sitio público (avaltrust.co) — prerenderizado a HTML estático
+└── shared-ui/    tokens de marca y componentes comunes a las dos
 ```
 
-Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
+## Requisitos
 
-## Code scaffolding
+- Node **≥ 22.22.3** (Angular 22 no arranca con Node 20)
+- npm 11
 
-Angular CLI includes powerful code scaffolding tools. To generate a new component, run:
-
-```bash
-ng generate component component-name
-```
-
-For a complete list of available schematics (such as `components`, `directives`, or `pipes`), run:
+## Desarrollo
 
 ```bash
-ng generate --help
+npm install
+npm start            # dashboard en http://localhost:4200
+npm run start:landing # landing en http://localhost:4200
 ```
 
-## Building
-
-To build the project run:
+## Build
 
 ```bash
-ng build
+npm run build          # dashboard -> dist/avaltrust-dashboard/browser
+npm run build:landing  # landing   -> dist/landing/browser (HTML ya prerenderizado)
 ```
 
-This will compile your project and store the build artifacts in the `dist/` directory. By default, the production build optimizes your application for performance and speed.
+La landing usa `@angular/ssr` con `outputMode: "static"`: el prerender ocurre
+en el build y el resultado es HTML plano por ruta. **No hay servidor Node en
+producción** — se publica en S3 + CloudFront igual que el dashboard, y los
+buscadores reciben el HTML completo en lugar de un `<div>` vacío.
 
-## Running unit tests
-
-To execute unit tests with the [Karma](https://karma-runner.github.io) test runner, use the following command:
+## Tests
 
 ```bash
-ng test
+npm test               # dashboard (Vitest)
+npm run test:landing
+npx ng test shared-ui
 ```
 
-## Running end-to-end tests
+Karma quedó atrás: el runner es el builder `@angular/build:unit-test` sobre
+Vitest, con jsdom como entorno DOM.
 
-For end-to-end (e2e) testing, run:
+## Tokens de marca
 
-```bash
-ng e2e
-```
+`projects/shared-ui/styles/tokens.css` es la fuente de verdad del color, la
+tipografía y el ritmo visual. Se carga desde `angular.json` antes del
+`styles.css` de cada aplicación, así que ambas parten de la misma paleta.
+Al escribir estilos, usar las variables (`var(--at-accent)`) en lugar de
+repetir valores hexadecimales.
 
-Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
+## Despliegue
 
-## Additional Resources
-
-For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
+`.github/workflows/deploy.yml` despliega el **dashboard** a S3 + CloudFront en
+cada push a `master`, autenticándose con un rol OIDC (sin llaves estáticas).
+La landing se despliega desde su propio repositorio hasta el cutover.

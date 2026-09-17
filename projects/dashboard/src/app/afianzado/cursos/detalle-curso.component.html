@@ -1,0 +1,189 @@
+<app-header
+  [isSidebarOpen]="isSidebarOpen"
+  [isUserMenuOpen]="isUserMenuOpen"
+  (toggleSidebar)="toggleSidebar()"
+  (toggleUserMenu)="toggleUserMenu()"
+  (closeUserMenu)="handleUserMenuClose()"
+  (navigate)="onHeaderNavigate($event)"
+  (logout)="onLogout()"
+></app-header>
+
+<app-sidebar
+  [isOpen]="isSidebarOpen"
+  (close)="handleSidebarClose()"
+  (navigate)="onSidebarNavigate($event)"
+></app-sidebar>
+
+<main class="main-content">
+  @if (loading) {
+    <div class="loading-container">
+      <div class="loader"></div>
+      <p>Cargando módulo...</p>
+    </div>
+  }
+
+  @if (error) {
+    <div class="error-container">
+      <div class="error-icon">⚠️</div>
+      <h2>{{ error }}</h2>
+      <button class="btn-volver" (click)="volver()">Volver a Escuela Financiera</button>
+    </div>
+  }
+
+  @if (!loading && !error && modulo) {
+    <div class="curso-container">
+      <!-- Botón de volver -->
+      <button class="btn-back" (click)="volver()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M19 12H5M12 19l-7-7 7-7"/>
+        </svg>
+        Volver
+      </button>
+      <!-- Cabecera del módulo -->
+      <div class="modulo-header">
+        <div class="modulo-icon-large">{{ modulo.icono }}</div>
+        <h1 class="modulo-titulo">{{ modulo.titulo }}</h1>
+        <p class="modulo-descripcion">{{ modulo.descripcion }}</p>
+        <div class="modulo-meta">
+          <span class="duracion">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="10"/>
+              <polyline points="12 6 12 12 16 14"/>
+            </svg>
+            {{ modulo.duracionEstimada }}
+          </span>
+        </div>
+      </div>
+      <!-- Introducción -->
+      @if (modulo.introduccion) {
+        <section class="seccion introduccion">
+          <div class="seccion-icon">📖</div>
+          <h2 class="seccion-titulo">Introducción</h2>
+          <p class="seccion-texto">{{ modulo.introduccion }}</p>
+        </section>
+      }
+      <!-- Objetivos del módulo -->
+      @if (modulo.objetivos && modulo.objetivos.length > 0) {
+        <section class="seccion objetivos">
+          <div class="seccion-icon">🎯</div>
+          <h2 class="seccion-titulo">Objetivos del Módulo</h2>
+          <ul class="objetivos-lista">
+            @for (objetivo of modulo.objetivos; track objetivo) {
+              <li class="objetivo-item">
+                <svg class="check-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                  <polyline points="20 6 9 17 4 12"/>
+                </svg>
+                {{ objetivo }}
+              </li>
+            }
+          </ul>
+        </section>
+      }
+      <!-- Contenido del módulo -->
+      @if (modulo.secciones && modulo.secciones.length > 0) {
+        <section class="seccion contenido">
+          <div class="seccion-icon">📚</div>
+          <h2 class="seccion-titulo">Contenido</h2>
+          @for (seccion of modulo.secciones; track seccion) {
+            <div class="seccion-modulo">
+              <h3 class="seccion-modulo-titulo">{{ seccion.titulo }}</h3>
+              @for (punto of seccion.puntos; track punto; let i = $index) {
+                <div class="punto-contenido">
+                  <div class="punto-header">
+                    <span class="punto-numero">{{ i + 1 }}</span>
+                    <h4 class="punto-titulo">{{ punto.titulo }}</h4>
+                  </div>
+                  @if (punto.descripcion) {
+                    <p class="punto-descripcion">{{ punto.descripcion }}</p>
+                  }
+                  <!-- Ejemplos prácticos -->
+                  @if (punto.ejemplos && punto.ejemplos.length > 0) {
+                    <div class="ejemplos">
+                      @for (ejemplo of punto.ejemplos; track ejemplo) {
+                        <div class="ejemplo">
+                          <div class="ejemplo-content">
+                            <span class="ejemplo-icon">✏️</span>
+                            <p class="ejemplo-texto">{{ ejemplo.texto }}</p>
+                          </div>
+                        </div>
+                      }
+                    </div>
+                  }
+                </div>
+              }
+            </div>
+          }
+        </section>
+      }
+      <!-- Evaluación del curso -->
+      <section class="seccion evaluacion">
+        <div class="evaluacion-content">
+          <div class="evaluacion-icon">{{ modulo.completado ? '✅' : '📝' }}</div>
+          <h2 class="evaluacion-titulo">
+            {{ modulo.completado ? '¡Curso Completado!' : 'Evaluación del Curso' }}
+          </h2>
+          @if (!modulo.completado) {
+            <p class="evaluacion-texto">
+              Pon a prueba tus conocimientos con nuestra evaluación.
+              Necesitas obtener al menos 70% para aprobar el curso.
+            </p>
+          }
+          @if (modulo.completado) {
+            <p class="evaluacion-texto completado">
+              ¡Felicitaciones! Has completado exitosamente este curso@if (modulo.porcentaje) {
+              <span>
+                con una calificación de <strong>{{modulo.porcentaje}}%</strong></span>
+                }@if (modulo.puntajeObtenido && modulo.puntajeTotal) {
+                <span>
+                ({{modulo.puntajeObtenido}}/{{modulo.puntajeTotal}} puntos)</span>
+                }.
+                <br><br>
+                Puedes volver a tomar la evaluación si deseas mejorar tu puntaje.
+              </p>
+            }
+            <button class="btn-evaluacion" [class.completado]="modulo.completado" (click)="irAEvaluacion()">
+              @if (!modulo.completado) {
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M9 11l3 3L22 4"/>
+                  <path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/>
+                </svg>
+              }
+              @if (modulo.completado) {
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M9 11l3 3L22 4"/>
+                  <circle cx="12" cy="12" r="10"/>
+                </svg>
+              }
+              {{ modulo.completado ? 'Ver Evaluación' : 'Tomar Evaluación' }}
+            </button>
+          </div>
+        </section>
+        <!-- Cierre inspiracional - Solo si el curso está aprobado -->
+        @if (modulo.completado && modulo.mensajeCierre) {
+          <section class="seccion cierre">
+            <div class="cierre-content">
+              <div class="cierre-icon">🌟</div>
+              <h2 class="cierre-titulo">¡Felicitaciones!</h2>
+              <p class="cierre-texto">{{ modulo.mensajeCierre }}</p>
+              <div class="cierre-buttons">
+                <button class="btn-certificado" (click)="descargarCertificado()">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/>
+                    <polyline points="7 10 12 15 17 10"/>
+                    <line x1="12" y1="15" x2="12" y2="3"/>
+                  </svg>
+                  Descargar Certificado
+                </button>
+                <button class="btn-continuar" (click)="volver()">
+                  Continuar Aprendiendo
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M5 12h14M12 5l7 7-7 7"/>
+                  </svg>
+                </button>
+              </div>
+            </div>
+          </section>
+        }
+      </div>
+    }
+  </main>

@@ -1,0 +1,100 @@
+/* ──────────────────────────────────────────────────────────────
+   AvalTrust · tokens de marca
+   Fuente de verdad del color, la tipografia y el ritmo visual que
+   comparten la landing (projects/landing) y el dashboard
+   (projects/dashboard). Los valores salen de la paleta que el
+   dashboard ya usa en produccion, para que sitio y producto se lean
+   como una sola marca.
+   Se carga desde angular.json, antes del styles.css de cada app.
+   ────────────────────────────────────────────────────────────── */
+
+:root {
+  /* Marca ------------------------------------------------------ */
+  --at-navy-900: #06213b;   /* fondo profundo: hero, login */
+  --at-navy-700: #12365f;   /* superficies oscuras, botones solidos */
+  --at-blue-500: #3b82f6;   /* acento principal, enlaces, foco */
+  --at-blue-600: #2563eb;   /* hover del acento */
+  --at-violet-500: #667eea; /* pareja de degradados */
+
+  /* Neutros ---------------------------------------------------- */
+  --at-white: #ffffff;
+  --at-slate-50: #f8fafc;   /* fondo de pagina claro */
+  --at-slate-100: #f1f5f9;
+  --at-slate-200: #e2e8f0;  /* bordes y separadores */
+  --at-slate-500: #64748b;  /* texto secundario */
+  --at-slate-800: #1e293b;  /* texto principal */
+
+  /* Estados ---------------------------------------------------- */
+  --at-success: #10b981;
+  --at-success-strong: #059669;
+  --at-warning: #f59e0b;
+  --at-warning-strong: #d97706;
+  --at-danger: #dc2626;
+  --at-danger-soft: #fef2f2;
+
+  /* Roles semanticos (lo que se usa en los componentes) --------- */
+  --at-bg: var(--at-slate-50);
+  --at-surface: var(--at-white);
+  --at-surface-inverse: var(--at-navy-900);
+  --at-border: var(--at-slate-200);
+  --at-text: var(--at-slate-800);
+  --at-text-muted: var(--at-slate-500);
+  --at-text-on-dark: #e5e7eb;
+  --at-accent: var(--at-blue-500);
+  --at-accent-hover: var(--at-blue-600);
+  --at-focus-ring: 0 0 0 3px rgb(59 130 246 / 0.35);
+
+  /* Degradados recurrentes ------------------------------------- */
+  --at-gradient-hero: linear-gradient(180deg, var(--at-navy-900) 0%, var(--at-navy-700) 100%);
+  --at-gradient-accent: linear-gradient(135deg, var(--at-violet-500), var(--at-blue-600));
+
+  /* Tipografia ------------------------------------------------- */
+  --at-font-sans: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, Arial, sans-serif;
+  --at-text-xs: 0.75rem;
+  --at-text-sm: 0.875rem;
+  --at-text-base: 1rem;
+  --at-text-lg: 1.125rem;
+  --at-text-xl: 1.5rem;
+  --at-text-2xl: 2rem;
+  --at-text-3xl: clamp(2.25rem, 5vw, 3.5rem);   /* titulares de la landing */
+  --at-weight-normal: 400;
+  --at-weight-medium: 500;
+  --at-weight-semibold: 600;
+  --at-weight-bold: 700;
+  --at-leading-tight: 1.2;
+  --at-leading-normal: 1.6;
+
+  /* Ritmo y forma ---------------------------------------------- */
+  --at-space-1: 0.25rem;
+  --at-space-2: 0.5rem;
+  --at-space-3: 0.75rem;
+  --at-space-4: 1rem;
+  --at-space-6: 1.5rem;
+  --at-space-8: 2rem;
+  --at-space-12: 3rem;
+  --at-space-16: 4rem;
+  --at-radius-sm: 6px;
+  --at-radius-md: 10px;
+  --at-radius-lg: 16px;
+  --at-radius-pill: 999px;
+  --at-shadow-sm: 0 2px 4px rgb(0 0 0 / 0.05);
+  --at-shadow-md: 0 4px 12px rgb(0 0 0 / 0.1);
+  --at-shadow-lg: 0 24px 70px rgb(0 0 0 / 0.24);
+
+  /* Layout ----------------------------------------------------- */
+  --at-container: 1200px;
+  --at-header-height: 64px;
+  --at-sidebar-width: 280px;
+}
+
+/* Quien prefiera menos movimiento, que no lo tenga. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
