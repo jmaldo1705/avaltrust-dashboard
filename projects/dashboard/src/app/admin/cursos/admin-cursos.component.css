@@ -135,7 +135,7 @@
 
 .cursos-table thead {
   color: #dffcff;
-  background: linear-gradient(135deg, #07182f, #12365f);
+  background: linear-gradient(135deg, #07182f, var(--at-navy-700));
 }
 
 .cursos-table th {
@@ -204,7 +204,7 @@
   justify-content: center;
   width: 42px;
   height: 42px;
-  color: #06213b;
+  color: var(--at-navy-900);
   background: linear-gradient(135deg, var(--brand-cyan), var(--brand-green));
   border-radius: 8px;
   font-size: 1.1rem;
@@ -304,7 +304,7 @@
 }
 
 .page-number.active {
-  color: #06213b;
+  color: var(--at-navy-900);
   background: linear-gradient(135deg, var(--brand-cyan), var(--brand-green));
   border-color: transparent;
 }
@@ -336,7 +336,7 @@
   justify-content: center;
   width: 64px;
   height: 64px;
-  color: #06213b;
+  color: var(--at-navy-900);
   background: linear-gradient(135deg, var(--brand-cyan), var(--brand-green));
   border-radius: 8px;
 }

@@ -1,6 +1,6 @@
 :host {
   --brand-navy: #07182f;
-  --brand-blue: #12365f;
+  --brand-blue: var(--at-navy-700);
   --brand-cyan: #02c7d9;
   --brand-green: #22c7a9;
   --ink: #102033;
@@ -85,7 +85,7 @@
   justify-content: center;
   width: 78px;
   height: 78px;
-  color: #06213b;
+  color: var(--at-navy-900);
   background: linear-gradient(135deg, var(--brand-cyan), var(--brand-green));
   border: 1px solid rgba(255, 255, 255, 0.24);
   border-radius: 8px;
@@ -147,7 +147,7 @@
 
 .primary-button {
   width: fit-content;
-  color: #06213b;
+  color: var(--at-navy-900);
   background: linear-gradient(135deg, var(--brand-cyan), var(--brand-green));
 }
 

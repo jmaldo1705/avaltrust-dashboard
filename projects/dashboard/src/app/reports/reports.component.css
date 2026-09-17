@@ -156,7 +156,7 @@
   left: 6px;
   width: 5px;
   height: 9px;
-  border: solid #06213b;
+  border: solid var(--at-navy-900);
   border-width: 0 2px 2px 0;
   transform: rotate(45deg);
 }
@@ -272,7 +272,7 @@
 
 .format-btn.active,
 .format-btn:hover {
-  color: #06213b;
+  color: var(--at-navy-900);
   background: linear-gradient(135deg, rgba(2, 199, 217, 0.92), rgba(34, 199, 169, 0.92));
   border-color: transparent;
   transform: translateY(-1px);
@@ -324,7 +324,7 @@
   left: 6px;
   width: 5px;
   height: 10px;
-  border: solid #06213b;
+  border: solid var(--at-navy-900);
   border-width: 0 2px 2px 0;
   transform: rotate(45deg);
 }
@@ -351,7 +351,7 @@
 .empty-icon {
   width: 56px;
   height: 56px;
-  color: #06213b;
+  color: var(--at-navy-900);
   background: linear-gradient(135deg, var(--brand-cyan), var(--brand-green));
 }
 

@@ -1,6 +1,6 @@
 :host {
   --brand-navy: #07182f;
-  --brand-blue: #12365f;
+  --brand-blue: var(--at-navy-700);
   --brand-cyan: #02c7d9;
   --brand-green: #22c7a9;
   --brand-pink: #f45f9a;
@@ -226,7 +226,7 @@
 }
 
 .mode-btn.active {
-  color: #06213b;
+  color: var(--at-navy-900);
   background: linear-gradient(135deg, var(--brand-cyan), var(--brand-green));
 }
 
@@ -500,7 +500,7 @@
 .primary-btn,
 .template-btn {
   padding: 0.6rem 0.9rem;
-  color: #06213b;
+  color: var(--at-navy-900);
   background: linear-gradient(135deg, var(--brand-cyan), var(--brand-green));
 }
 
@@ -648,7 +648,7 @@
 .drop-icon {
   width: 72px;
   height: 72px;
-  color: #06213b;
+  color: var(--at-navy-900);
   background: linear-gradient(135deg, var(--brand-cyan), var(--brand-green));
   box-shadow: 0 16px 32px rgba(2, 199, 217, 0.2);
 }

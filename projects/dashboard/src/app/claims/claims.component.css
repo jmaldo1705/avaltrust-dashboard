@@ -84,7 +84,7 @@
 
 .claims-page .btn-primary,
 .claims-page .btn-template {
-  color: #06213b;
+  color: var(--at-navy-900);
   background: linear-gradient(135deg, var(--brand-cyan), var(--brand-green));
 }
 
@@ -110,7 +110,7 @@
 .claims-page .upload-instructions {
   margin-bottom: 1rem;
   padding: 1rem;
-  color: #12365f;
+  color: var(--at-navy-700);
   background: #f4f8fb;
   border: 1px solid var(--line);
   border-radius: 8px;
@@ -181,7 +181,7 @@
   justify-content: center;
   width: 56px;
   height: 56px;
-  color: #06213b;
+  color: var(--at-navy-900);
   background: linear-gradient(135deg, var(--brand-cyan), var(--brand-green));
   border-radius: 8px;
   font-size: 0;
@@ -256,7 +256,7 @@
   width: 16px;
   height: 16px;
   border: 2px solid rgba(6, 33, 59, 0.25);
-  border-top-color: #06213b;
+  border-top-color: var(--at-navy-900);
   border-radius: 50%;
   animation: spin 0.8s linear infinite;
 }

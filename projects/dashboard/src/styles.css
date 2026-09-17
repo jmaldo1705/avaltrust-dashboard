@@ -206,7 +206,7 @@
 .dashboard-page .modal-close {
   width: 36px;
   height: 36px;
-  color: #12365f;
+  color: var(--at-navy-700);
   background: #edf6fb;
   border: 0;
 }
@@ -267,7 +267,7 @@
   min-height: 38px;
   padding: 0.55rem 0.9rem;
   color: white;
-  background: #12365f;
+  background: var(--at-navy-700);
 }
 
 @media (max-width: 767px) {

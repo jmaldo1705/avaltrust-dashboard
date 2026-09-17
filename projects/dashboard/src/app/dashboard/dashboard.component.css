@@ -1,6 +1,6 @@
 :host {
   --brand-navy: #07182f;
-  --brand-blue: #12365f;
+  --brand-blue: var(--at-navy-700);
   --brand-cyan: #02c7d9;
   --brand-green: #22c7a9;
   --brand-pink: #f45f9a;
@@ -179,7 +179,7 @@
 .icon-button {
   width: 38px;
   height: 38px;
-  color: #06213b;
+  color: var(--at-navy-900);
   background: linear-gradient(135deg, var(--brand-cyan), var(--brand-green));
 }
 
@@ -330,7 +330,7 @@
 .export-btn {
   min-height: 42px;
   padding: 0.6rem 0.85rem;
-  color: #06213b;
+  color: var(--at-navy-900);
   background: linear-gradient(135deg, var(--brand-cyan), var(--brand-green));
 }
 

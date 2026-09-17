@@ -1722,7 +1722,7 @@
 .toolbar-btn.primary,
 .btn-upload-submit,
 .btn-export-confirm {
-  color: #06213b;
+  color: var(--at-navy-900);
   background: linear-gradient(135deg, #02c7d9, #22c7a9);
   border-color: transparent;
   box-shadow: none;
@@ -1732,7 +1732,7 @@
 .btn-export,
 .btn-download,
 .btn-retry {
-  color: #12365f;
+  color: var(--at-navy-700);
   background: #ffffff;
   border: 1px solid #d9e4ef;
   box-shadow: 0 10px 22px rgba(15, 23, 42, 0.06);
@@ -1790,7 +1790,7 @@
   width: 44px;
   height: 44px;
   color: #ffffff;
-  background: linear-gradient(135deg, #12365f, #02c7d9);
+  background: linear-gradient(135deg, var(--at-navy-700), #02c7d9);
   border-radius: 8px;
   font-size: 1rem;
 }
@@ -1887,7 +1887,7 @@
   min-height: 42px;
   justify-content: center;
   padding: 0.62rem 0.85rem;
-  color: #12365f;
+  color: var(--at-navy-700);
   background: #f4f8fb;
   border: 1px solid #d9e4ef;
 }
@@ -1902,7 +1902,7 @@
 
 .data-table thead {
   color: #dffcff;
-  background: linear-gradient(135deg, #07182f, #12365f);
+  background: linear-gradient(135deg, #07182f, var(--at-navy-700));
 }
 
 .data-table th {
@@ -1955,7 +1955,7 @@
 
 .badge-cancelado,
 .badge-juridica {
-  color: #12365f;
+  color: var(--at-navy-700);
   background: #e8eef7;
 }
 
@@ -1968,7 +1968,7 @@
   width: 36px;
   height: 36px;
   padding: 0;
-  color: #06213b;
+  color: var(--at-navy-900);
   background: linear-gradient(135deg, #02c7d9, #22c7a9);
   border: 0;
   font-size: 0;
@@ -2028,7 +2028,7 @@
   align-items: center;
   justify-content: center;
   min-height: 38px;
-  color: #12365f;
+  color: var(--at-navy-700);
   background: #ffffff;
   border: 1px solid #d9e4ef;
 }
@@ -2040,13 +2040,13 @@
 
 .pagination-btn:hover:not(:disabled),
 .pagination-number:hover {
-  color: #06213b;
+  color: var(--at-navy-900);
   background: #e0f7fb;
   border-color: rgba(2, 199, 217, 0.45);
 }
 
 .pagination-number.active {
-  color: #06213b;
+  color: var(--at-navy-900);
   background: linear-gradient(135deg, #02c7d9, #22c7a9);
   border-color: transparent;
 }
@@ -2072,7 +2072,7 @@
   color: #ffffff;
   background:
     radial-gradient(circle at 92% 0%, rgba(2, 199, 217, 0.18), transparent 36%),
-    linear-gradient(135deg, #07182f, #12365f);
+    linear-gradient(135deg, #07182f, var(--at-navy-700));
   background-size: auto;
   border-bottom: 1px solid rgba(2, 199, 217, 0.22);
 }

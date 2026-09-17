@@ -10,8 +10,8 @@
 
 :root {
   /* Marca ------------------------------------------------------ */
-  --at-navy-900: #06213b;   /* fondo profundo: hero, login */
-  --at-navy-700: #12365f;   /* superficies oscuras, botones solidos */
+  --at-navy-900: #030d17;   /* fondo profundo: hero, pie, login */
+  --at-navy-700: #0a1b2b;   /* superficies oscuras, botones solidos */
   --at-blue-500: #3b82f6;   /* acento principal, enlaces, foco */
   --at-blue-600: #2563eb;   /* hover del acento */
   --at-violet-500: #667eea; /* pareja de degradados */

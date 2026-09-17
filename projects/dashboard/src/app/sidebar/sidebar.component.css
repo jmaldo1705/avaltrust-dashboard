@@ -1,6 +1,6 @@
 :host {
   --brand-navy: #07182f;
-  --brand-blue: #12365f;
+  --brand-blue: var(--at-navy-700);
   --brand-cyan: #02c7d9;
   --brand-green: #22c7a9;
   --brand-pink: #f45f9a;

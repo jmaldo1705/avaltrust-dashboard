@@ -70,7 +70,7 @@
 
 .audit-tabs button:hover,
 .audit-tabs button.active {
-  color: #06213b;
+  color: var(--at-navy-900);
   background: linear-gradient(135deg, var(--brand-cyan), var(--brand-green));
   transform: translateY(-1px);
 }
@@ -244,7 +244,7 @@
 
 .audit-table thead {
   color: #dffcff;
-  background: linear-gradient(135deg, #07182f, #12365f);
+  background: linear-gradient(135deg, #07182f, var(--at-navy-700));
 }
 
 .audit-table th {
@@ -294,7 +294,7 @@
   flex-shrink: 0;
   width: 38px;
   height: 38px;
-  color: #06213b;
+  color: var(--at-navy-900);
   background: linear-gradient(135deg, var(--brand-cyan), var(--brand-green));
   border-radius: 8px;
   font-weight: 900;
@@ -411,7 +411,7 @@
   justify-content: center;
   width: 64px;
   height: 64px;
-  color: #06213b;
+  color: var(--at-navy-900);
   background: linear-gradient(135deg, var(--brand-cyan), var(--brand-green));
   border-radius: 8px;
 }
@@ -477,7 +477,7 @@
 }
 
 .page-number.active {
-  color: #06213b;
+  color: var(--at-navy-900);
   background: linear-gradient(135deg, var(--brand-cyan), var(--brand-green));
   border-color: transparent;
 }
