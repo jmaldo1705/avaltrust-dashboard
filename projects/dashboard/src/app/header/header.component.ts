@@ -1,5 +1,5 @@
 import { Component, inject, Input, Output, EventEmitter } from '@angular/core';
-import {CommonModule, NgOptimizedImage} from '@angular/common';
+import { NgOptimizedImage } from '@angular/common';
 import {
   LucideChevronDown,
   LucideCircleUserRound,
@@ -15,7 +15,6 @@ import { UiStateService } from '../ui-state.service';
   selector: 'app-header',
   standalone: true,
   imports: [
-    CommonModule,
     NgOptimizedImage,
     LucideChevronDown,
     LucideCircleUserRound,
@@ -23,7 +22,7 @@ import { UiStateService } from '../ui-state.service';
     LucideMenu,
     LucideSettings,
     LucideUserRound
-  ],
+],
   templateUrl: './header.component.html',
   styleUrls: ['./header.component.css']
 })

@@ -39,20 +39,30 @@
             [disabled]="isDashboardLoading">
             <svg lucideRefreshCw [class.spinning]="isDashboardLoading"></svg>
           </button>
-          <div class="filter-shell command-filter" *ngIf="isAliadoFilterVisible">
-            <svg lucideListFilter></svg>
-            <app-filtro-aliados (selectionChange)="onAliadoFilterChange($event)"></app-filtro-aliados>
-          </div>
+          @if (isAliadoFilterVisible) {
+            <div class="filter-shell command-filter">
+              <svg lucideListFilter></svg>
+              <app-filtro-aliados (selectionChange)="onAliadoFilterChange($event)"></app-filtro-aliados>
+            </div>
+          }
         </div>
 
         <div class="command-primary">
           <span>Cartera total</span>
-          <strong *ngIf="!isDashboardLoading; else metricSkeleton">
-            {{ portfolioStats.totalPortfolio | currency:'COP':'symbol':'1.0-0' }}
-          </strong>
+          @if (!isDashboardLoading) {
+            <strong>
+              {{ portfolioStats.totalPortfolio | currency:'COP':'symbol':'1.0-0' }}
+            </strong>
+          } @else {
+            <span class="skeleton skeleton-value"></span>
+          }
           <small [class.positive]="portfolioStats.portfolioGrowth >= 0" [class.negative]="portfolioStats.portfolioGrowth < 0">
-            <svg *ngIf="portfolioStats.portfolioGrowth >= 0" lucideTrendingUp></svg>
-            <svg *ngIf="portfolioStats.portfolioGrowth < 0" lucideTrendingDown></svg>
+            @if (portfolioStats.portfolioGrowth >= 0) {
+              <svg lucideTrendingUp></svg>
+            }
+            @if (portfolioStats.portfolioGrowth < 0) {
+              <svg lucideTrendingDown></svg>
+            }
             {{ portfolioStats.portfolioGrowth >= 0 ? '+' : '' }}{{ portfolioStats.portfolioGrowth }}% vs mes anterior
           </small>
         </div>
@@ -89,13 +99,17 @@
           </div>
         </div>
 
-        <div class="dashboard-alert" *ngIf="dashboardError">
-          <svg lucideAlertTriangle></svg>
-          <div>
-            <strong>{{ dashboardError }}</strong>
-            <p *ngIf="dashboardSectionErrors.length">{{ dashboardSectionErrors.join(' ') }}</p>
+        @if (dashboardError) {
+          <div class="dashboard-alert">
+            <svg lucideAlertTriangle></svg>
+            <div>
+              <strong>{{ dashboardError }}</strong>
+              @if (dashboardSectionErrors.length) {
+                <p>{{ dashboardSectionErrors.join(' ') }}</p>
+              }
+            </div>
           </div>
-        </div>
+        }
 
         <section class="metric-strip" [class.is-loading]="isDashboardLoading">
           <article class="metric-tile tile-money">
@@ -104,9 +118,13 @@
             </div>
             <div>
               <span>Cartera</span>
-              <strong *ngIf="!isDashboardLoading; else metricSkeleton">
-                {{ portfolioStats.totalPortfolio | currency:'COP':'symbol':'1.0-0' }}
-              </strong>
+              @if (!isDashboardLoading) {
+                <strong>
+                  {{ portfolioStats.totalPortfolio | currency:'COP':'symbol':'1.0-0' }}
+                </strong>
+              } @else {
+                <span class="skeleton skeleton-value"></span>
+              }
             </div>
           </article>
 
@@ -116,9 +134,13 @@
             </div>
             <div>
               <span>Usuarios</span>
-              <strong *ngIf="!isDashboardLoading; else metricSkeleton">
-                {{ portfolioStats.activeUsers | number }}
-              </strong>
+              @if (!isDashboardLoading) {
+                <strong>
+                  {{ portfolioStats.activeUsers | number }}
+                </strong>
+              } @else {
+                <span class="skeleton skeleton-value"></span>
+              }
             </div>
           </article>
 
@@ -128,9 +150,13 @@
             </div>
             <div>
               <span>Mora promedio</span>
-              <strong *ngIf="!isDashboardLoading; else metricSkeleton">
-                {{ portfolioStats.averageDelayDays }} dias
-              </strong>
+              @if (!isDashboardLoading) {
+                <strong>
+                  {{ portfolioStats.averageDelayDays }} dias
+                </strong>
+              } @else {
+                <span class="skeleton skeleton-value"></span>
+              }
             </div>
           </article>
 
@@ -140,9 +166,13 @@
             </div>
             <div>
               <span>Cobertura</span>
-              <strong *ngIf="!isDashboardLoading; else metricSkeleton">
-                {{ coverageRatio | number:'1.0-1' }}%
-              </strong>
+              @if (!isDashboardLoading) {
+                <strong>
+                  {{ coverageRatio | number:'1.0-1' }}%
+                </strong>
+              } @else {
+                <span class="skeleton skeleton-value"></span>
+              }
             </div>
           </article>
         </section>
@@ -183,34 +213,40 @@
           </div>
         </div>
 
-        <div class="skeleton-list" *ngIf="isDashboardLoading; else distributionContent">
-          <span></span>
-          <span></span>
-          <span></span>
-        </div>
-
-        <ng-template #distributionContent>
-          <div class="empty-state panel-empty" *ngIf="moraDistribution.length === 0">
-            <svg lucideInfo></svg>
-            <span>No hay distribucion de mora disponible.</span>
+        @if (isDashboardLoading) {
+          <div class="skeleton-list">
+            <span></span>
+            <span></span>
+            <span></span>
           </div>
-
-          <div class="risk-segments" *ngIf="moraDistribution.length > 0">
-            <div class="risk-row" *ngFor="let category of moraDistribution" [class]="category.severity">
-              <div class="risk-label">
-                <span>{{ category.name }}</span>
-                <small>{{ category.count }} usuarios</small>
-              </div>
-              <div class="risk-bar">
-                <span [style.width.%]="category.percentage"></span>
-              </div>
-              <div class="risk-value">
-                <strong>{{ category.percentage | number:'1.0-1' }}%</strong>
-                <small>{{ category.amount | currency:'COP':'symbol':'1.0-0' }}</small>
-              </div>
+        } @else {
+          @if (moraDistribution.length === 0) {
+            <div class="empty-state panel-empty">
+              <svg lucideInfo></svg>
+              <span>No hay distribucion de mora disponible.</span>
             </div>
-          </div>
-        </ng-template>
+          }
+          @if (moraDistribution.length > 0) {
+            <div class="risk-segments">
+              @for (category of moraDistribution; track category) {
+                <div class="risk-row" [class]="category.severity">
+                  <div class="risk-label">
+                    <span>{{ category.name }}</span>
+                    <small>{{ category.count }} usuarios</small>
+                  </div>
+                  <div class="risk-bar">
+                    <span [style.width.%]="category.percentage"></span>
+                  </div>
+                  <div class="risk-value">
+                    <strong>{{ category.percentage | number:'1.0-1' }}%</strong>
+                    <small>{{ category.amount | currency:'COP':'symbol':'1.0-0' }}</small>
+                  </div>
+                </div>
+              }
+            </div>
+          }
+        }
+
       </article>
 
       <article class="alerts-panel">
@@ -223,40 +259,54 @@
         </div>
 
         <div class="alerts-list">
-          <div class="skeleton-list" *ngIf="isDashboardLoading; else alertsContent">
-            <span></span>
-            <span></span>
-            <span></span>
-          </div>
-
-          <ng-template #alertsContent>
-            <div class="empty-state panel-empty" *ngIf="alerts.length === 0">
-              <svg lucideBell></svg>
-              <span>No hay alertas activas.</span>
+          @if (isDashboardLoading) {
+            <div class="skeleton-list">
+              <span></span>
+              <span></span>
+              <span></span>
             </div>
-
-            <button class="alert-item" *ngFor="let alert of alerts" [class]="alert.severity" type="button" (click)="handleAlert(alert)">
-              <span class="alert-icon" [ngSwitch]="alert.severity">
-                <svg *ngSwitchCase="'error'" lucideAlertTriangle></svg>
-                <svg *ngSwitchCase="'warning'" lucideBell></svg>
-                <svg *ngSwitchDefault lucideInfo></svg>
-              </span>
-              <span class="alert-content">
-                <span class="alert-title">{{ alert.title }}</span>
-                <span class="alert-description">{{ alert.description }}</span>
-                <span class="alert-meta">
-                  <span>{{ alert.timestamp | date:'short' }}</span>
-                  <span class="alert-aliado-badge" *ngIf="isAliadoFilterVisible && alert.aliadoEstrategicoNombre">
-                    <svg lucideBuilding2></svg>
-                    {{ alert.aliadoEstrategicoNombre }}
+          } @else {
+            @if (alerts.length === 0) {
+              <div class="empty-state panel-empty">
+                <svg lucideBell></svg>
+                <span>No hay alertas activas.</span>
+              </div>
+            }
+            @for (alert of alerts; track alert) {
+              <button class="alert-item" [class]="alert.severity" type="button" (click)="handleAlert(alert)">
+                <span class="alert-icon">
+                  @switch (alert.severity) {
+                    @case ('error') {
+                      <svg lucideAlertTriangle></svg>
+                    }
+                    @case ('warning') {
+                      <svg lucideBell></svg>
+                    }
+                    @default {
+                      <svg lucideInfo></svg>
+                    }
+                  }
+                </span>
+                <span class="alert-content">
+                  <span class="alert-title">{{ alert.title }}</span>
+                  <span class="alert-description">{{ alert.description }}</span>
+                  <span class="alert-meta">
+                    <span>{{ alert.timestamp | date:'short' }}</span>
+                    @if (isAliadoFilterVisible && alert.aliadoEstrategicoNombre) {
+                      <span class="alert-aliado-badge">
+                        <svg lucideBuilding2></svg>
+                        {{ alert.aliadoEstrategicoNombre }}
+                      </span>
+                    }
                   </span>
                 </span>
-              </span>
-              <span class="alert-action">
-                <svg lucideEye></svg>
-              </span>
-            </button>
-          </ng-template>
+                <span class="alert-action">
+                  <svg lucideEye></svg>
+                </span>
+              </button>
+            }
+          }
+
         </div>
       </article>
     </section>
@@ -268,8 +318,12 @@
           <h2>Usuarios con mora</h2>
         </div>
         <button class="export-btn" type="button" (click)="exportTopDelinquents()" [disabled]="isExportingDelinquents || delinquentsLoading">
-          <svg *ngIf="!isExportingDelinquents" lucideDownload></svg>
-          <svg *ngIf="isExportingDelinquents" lucideLoaderCircle class="spinning"></svg>
+          @if (!isExportingDelinquents) {
+            <svg lucideDownload></svg>
+          }
+          @if (isExportingDelinquents) {
+            <svg lucideLoaderCircle class="spinning"></svg>
+          }
           {{ isExportingDelinquents ? 'Exportando' : 'Exportar' }}
         </button>
       </div>
@@ -297,209 +351,261 @@
         </div>
       </div>
 
-      <div class="table-error" *ngIf="delinquentsError">
-        <svg lucideAlertTriangle></svg>
-        <span>{{ delinquentsError }}</span>
-      </div>
+      @if (delinquentsError) {
+        <div class="table-error">
+          <svg lucideAlertTriangle></svg>
+          <span>{{ delinquentsError }}</span>
+        </div>
+      }
 
       <div class="delinquents-table" [class.loading]="delinquentsLoading" [class.with-aliado]="isAliadoFilterVisible">
         <div class="table-header">
           <button class="col-name sortable" type="button" [class.active]="delinquentsSortBy === 'name'" (click)="changeDelinquentsSort('name')">
             Usuario
-            <svg *ngIf="delinquentsSortBy !== 'name'" lucideChevronsUpDown></svg>
-            <svg *ngIf="delinquentsSortBy === 'name' && delinquentsSortDir === 'asc'" lucideChevronUp></svg>
-            <svg *ngIf="delinquentsSortBy === 'name' && delinquentsSortDir === 'desc'" lucideChevronDown></svg>
+            @if (delinquentsSortBy !== 'name') {
+              <svg lucideChevronsUpDown></svg>
+            }
+            @if (delinquentsSortBy === 'name' && delinquentsSortDir === 'asc') {
+              <svg lucideChevronUp></svg>
+            }
+            @if (delinquentsSortBy === 'name' && delinquentsSortDir === 'desc') {
+              <svg lucideChevronDown></svg>
+            }
           </button>
           <button class="col-amount sortable" type="button" [class.active]="delinquentsSortBy === 'debtAmount'" (click)="changeDelinquentsSort('debtAmount')">
             Deuda
-            <svg *ngIf="delinquentsSortBy !== 'debtAmount'" lucideChevronsUpDown></svg>
-            <svg *ngIf="delinquentsSortBy === 'debtAmount' && delinquentsSortDir === 'asc'" lucideChevronUp></svg>
-            <svg *ngIf="delinquentsSortBy === 'debtAmount' && delinquentsSortDir === 'desc'" lucideChevronDown></svg>
+            @if (delinquentsSortBy !== 'debtAmount') {
+              <svg lucideChevronsUpDown></svg>
+            }
+            @if (delinquentsSortBy === 'debtAmount' && delinquentsSortDir === 'asc') {
+              <svg lucideChevronUp></svg>
+            }
+            @if (delinquentsSortBy === 'debtAmount' && delinquentsSortDir === 'desc') {
+              <svg lucideChevronDown></svg>
+            }
           </button>
           <button class="col-days sortable" type="button" [class.active]="delinquentsSortBy === 'delayDays'" (click)="changeDelinquentsSort('delayDays')">
             Mora
-            <svg *ngIf="delinquentsSortBy !== 'delayDays'" lucideChevronsUpDown></svg>
-            <svg *ngIf="delinquentsSortBy === 'delayDays' && delinquentsSortDir === 'asc'" lucideChevronUp></svg>
-            <svg *ngIf="delinquentsSortBy === 'delayDays' && delinquentsSortDir === 'desc'" lucideChevronDown></svg>
+            @if (delinquentsSortBy !== 'delayDays') {
+              <svg lucideChevronsUpDown></svg>
+            }
+            @if (delinquentsSortBy === 'delayDays' && delinquentsSortDir === 'asc') {
+              <svg lucideChevronUp></svg>
+            }
+            @if (delinquentsSortBy === 'delayDays' && delinquentsSortDir === 'desc') {
+              <svg lucideChevronDown></svg>
+            }
           </button>
           <button class="col-rate sortable" type="button" [class.active]="delinquentsSortBy === 'guaranteeRate'" (click)="changeDelinquentsSort('guaranteeRate')">
             Obligacion
-            <svg *ngIf="delinquentsSortBy !== 'guaranteeRate'" lucideChevronsUpDown></svg>
-            <svg *ngIf="delinquentsSortBy === 'guaranteeRate' && delinquentsSortDir === 'asc'" lucideChevronUp></svg>
-            <svg *ngIf="delinquentsSortBy === 'guaranteeRate' && delinquentsSortDir === 'desc'" lucideChevronDown></svg>
+            @if (delinquentsSortBy !== 'guaranteeRate') {
+              <svg lucideChevronsUpDown></svg>
+            }
+            @if (delinquentsSortBy === 'guaranteeRate' && delinquentsSortDir === 'asc') {
+              <svg lucideChevronUp></svg>
+            }
+            @if (delinquentsSortBy === 'guaranteeRate' && delinquentsSortDir === 'desc') {
+              <svg lucideChevronDown></svg>
+            }
           </button>
-          <div class="col-aliado" *ngIf="isAliadoFilterVisible">Aliado</div>
+          @if (isAliadoFilterVisible) {
+            <div class="col-aliado">Aliado</div>
+          }
           <div class="col-actions">Detalle</div>
         </div>
 
-        <div class="table-row" *ngFor="let user of visibleDelinquentUsers; trackBy: trackByUserId">
-          <div class="col-name" data-label="Usuario">
-            <div class="user-info">
-              <div class="user-name">{{ user.name }}</div>
-              <div class="user-id">{{ user.identification }}</div>
+        @for (user of visibleDelinquentUsers; track trackByUserId($index, user)) {
+          <div class="table-row">
+            <div class="col-name" data-label="Usuario">
+              <div class="user-info">
+                <div class="user-name">{{ user.name }}</div>
+                <div class="user-id">{{ user.identification }}</div>
+              </div>
+            </div>
+            <div class="col-amount" data-label="Deuda">
+              <span class="amount-value">{{ user.debtAmount | currency:'COP':'symbol':'1.0-0' }}</span>
+            </div>
+            <div class="col-days" data-label="Mora">
+              <span class="days-badge" [class]="getDaysSeverity(user.delayDays)">
+                {{ user.delayDays }} dias
+              </span>
+            </div>
+            <div class="col-rate" data-label="Obligacion">{{ user.guaranteeRate }}</div>
+            @if (isAliadoFilterVisible) {
+              <div class="col-aliado" data-label="Aliado">
+                <span class="aliado-badge" [class.has-aliado]="user.aliadoEstrategicoNombre">
+                  {{ user.aliadoEstrategicoNombre || 'Sin aliado' }}
+                </span>
+              </div>
+            }
+            <div class="col-actions" data-label="Detalle">
+              <button class="action-btn-small" type="button" (click)="viewUserDetail(user.id)">
+                <svg lucideEye></svg>
+                Ver
+              </button>
             </div>
           </div>
-          <div class="col-amount" data-label="Deuda">
-            <span class="amount-value">{{ user.debtAmount | currency:'COP':'symbol':'1.0-0' }}</span>
+        }
+
+        @if (delinquentsLoading) {
+          <div class="loading-state">
+            <svg lucideLoaderCircle class="spinning"></svg>
+            <span>Cargando datos</span>
           </div>
-          <div class="col-days" data-label="Mora">
-            <span class="days-badge" [class]="getDaysSeverity(user.delayDays)">
-              {{ user.delayDays }} dias
-            </span>
+        }
+
+        @if (!delinquentsLoading && !delinquentsError && visibleDelinquentUsers.length === 0) {
+          <div class="empty-state table-empty">
+            <svg lucideInfo></svg>
+            <span>No hay usuarios con mora para mostrar.</span>
           </div>
-          <div class="col-rate" data-label="Obligacion">{{ user.guaranteeRate }}</div>
-          <div class="col-aliado" data-label="Aliado" *ngIf="isAliadoFilterVisible">
-            <span class="aliado-badge" [class.has-aliado]="user.aliadoEstrategicoNombre">
-              {{ user.aliadoEstrategicoNombre || 'Sin aliado' }}
-            </span>
+        }
+      </div>
+
+      @if (delinquentsTotalElements > 0) {
+        <div class="pagination">
+          <div class="result-count">
+            Mostrando {{ delinquentsRangeStart + 1 }}-{{ delinquentsRangeEnd }} de {{ delinquentsTotalElements }}
           </div>
-          <div class="col-actions" data-label="Detalle">
-            <button class="action-btn-small" type="button" (click)="viewUserDetail(user.id)">
-              <svg lucideEye></svg>
-              Ver
+          <div class="page-controls">
+            <button class="page-btn" type="button" (click)="prevDelinquentsPage()" [disabled]="delinquentsCurrentPage === 1 || delinquentsLoading">
+              <svg lucideChevronLeft></svg>
+            </button>
+            @for (p of delinquentsPagesArray; track p) {
+              <button class="page-btn" type="button" [class.active]="p === delinquentsCurrentPage" (click)="goToDelinquentsPage(p)" [disabled]="delinquentsLoading">
+                {{ p }}
+              </button>
+            }
+            <button class="page-btn" type="button" (click)="nextDelinquentsPage()" [disabled]="delinquentsCurrentPage === delinquentsTotalPages || delinquentsLoading">
+              <svg lucideChevronRight></svg>
             </button>
           </div>
         </div>
-
-        <div class="loading-state" *ngIf="delinquentsLoading">
-          <svg lucideLoaderCircle class="spinning"></svg>
-          <span>Cargando datos</span>
-        </div>
-
-        <div class="empty-state table-empty" *ngIf="!delinquentsLoading && !delinquentsError && visibleDelinquentUsers.length === 0">
-          <svg lucideInfo></svg>
-          <span>No hay usuarios con mora para mostrar.</span>
-        </div>
-      </div>
-
-      <div class="pagination" *ngIf="delinquentsTotalElements > 0">
-        <div class="result-count">
-          Mostrando {{ delinquentsRangeStart + 1 }}-{{ delinquentsRangeEnd }} de {{ delinquentsTotalElements }}
-        </div>
-        <div class="page-controls">
-          <button class="page-btn" type="button" (click)="prevDelinquentsPage()" [disabled]="delinquentsCurrentPage === 1 || delinquentsLoading">
-            <svg lucideChevronLeft></svg>
-          </button>
-          <button class="page-btn" type="button" *ngFor="let p of delinquentsPagesArray" [class.active]="p === delinquentsCurrentPage" (click)="goToDelinquentsPage(p)" [disabled]="delinquentsLoading">
-            {{ p }}
-          </button>
-          <button class="page-btn" type="button" (click)="nextDelinquentsPage()" [disabled]="delinquentsCurrentPage === delinquentsTotalPages || delinquentsLoading">
-            <svg lucideChevronRight></svg>
-          </button>
-        </div>
-      </div>
+      }
     </section>
 
-    <div class="modal-backdrop" *ngIf="isUserModalOpen" (click)="closeUserModal()">
-      <div class="modal" (click)="$event.stopPropagation()">
-        <div class="modal-header">
-          <div>
-            <span class="section-kicker">Detalle</span>
-            <h3>Usuario y obligacion</h3>
+    @if (isUserModalOpen) {
+      <div class="modal-backdrop" (click)="closeUserModal()">
+        <div class="modal" (click)="$event.stopPropagation()">
+          <div class="modal-header">
+            <div>
+              <span class="section-kicker">Detalle</span>
+              <h3>Usuario y obligacion</h3>
+            </div>
+            <button class="modal-close" type="button" (click)="closeUserModal()" aria-label="Cerrar">
+              <svg lucideX></svg>
+            </button>
           </div>
-          <button class="modal-close" type="button" (click)="closeUserModal()" aria-label="Cerrar">
-            <svg lucideX></svg>
-          </button>
-        </div>
-
-        <div class="modal-body">
-          <div *ngIf="userModalLoading" class="modal-loading">
-            <svg lucideLoaderCircle class="spinning"></svg>
-            <span>Cargando detalle</span>
+          <div class="modal-body">
+            @if (userModalLoading) {
+              <div class="modal-loading">
+                <svg lucideLoaderCircle class="spinning"></svg>
+                <span>Cargando detalle</span>
+              </div>
+            }
+            @if (userModalError && !userModalLoading) {
+              <div class="modal-error">
+                <svg lucideAlertTriangle></svg>
+                <span>{{ userModalError }}</span>
+              </div>
+            }
+            @if (!userModalLoading && !userModalError && selectedUserDetail) {
+              <div class="detail-grid">
+                <div class="detail-row">
+                  <div class="detail-label">Obligacion</div>
+                  <div class="detail-value">{{ selectedUserDetail.obligacion }}</div>
+                </div>
+                <div class="detail-row">
+                  <div class="detail-label">Documento</div>
+                  <div class="detail-value">{{ selectedUserDetail.tipoDocumento }} {{ selectedUserDetail.numeroDocumento }}</div>
+                </div>
+                <div class="detail-row">
+                  <div class="detail-label">Nombres</div>
+                  <div class="detail-value">{{ selectedUserDetail.nombres }} {{ selectedUserDetail.apellidos }}</div>
+                </div>
+                <div class="detail-row">
+                  <div class="detail-label">Tipo cliente</div>
+                  <div class="detail-value">{{ selectedUserDetail.tipoCliente }}</div>
+                </div>
+                <div class="detail-row">
+                  <div class="detail-label">Fecha desembolso</div>
+                  <div class="detail-value">{{ selectedUserDetail.fechaDesembolso | date:'shortDate' }}</div>
+                </div>
+                <div class="detail-row">
+                  <div class="detail-label">Plazo inicial</div>
+                  <div class="detail-value">{{ selectedUserDetail.plazoInicial }} meses</div>
+                </div>
+                <div class="detail-row">
+                  <div class="detail-label">Valor desembolso</div>
+                  <div class="detail-value">{{ selectedUserDetail.valorDesembolso | currency:'COP':'symbol':'1.0-0' }}</div>
+                </div>
+                <div class="detail-row">
+                  <div class="detail-label">Valor fianza</div>
+                  <div class="detail-value">{{ selectedUserDetail.valorAval | currency:'COP':'symbol':'1.0-0' }}</div>
+                </div>
+                <div class="detail-row">
+                  <div class="detail-label">Interes</div>
+                  <div class="detail-value">{{ selectedUserDetail.interes | currency:'COP':'symbol':'1.0-0' }}</div>
+                </div>
+                <div class="detail-row">
+                  <div class="detail-label">Tasa fianza</div>
+                  <div class="detail-value">{{ selectedUserDetail.tasaAval }}%</div>
+                </div>
+                @if (selectedUserDetail.otrosConceptos != null) {
+                  <div class="detail-row">
+                    <div class="detail-label">Otros conceptos</div>
+                    <div class="detail-value">{{ selectedUserDetail.otrosConceptos | currency:'COP':'symbol':'1.0-0' }}</div>
+                  </div>
+                }
+                @if (selectedUserDetail.abonoAval != null) {
+                  <div class="detail-row">
+                    <div class="detail-label">Abono fianza</div>
+                    <div class="detail-value">{{ selectedUserDetail.abonoAval | currency:'COP':'symbol':'1.0-0' }}</div>
+                  </div>
+                }
+                @if (selectedUserDetail.abonoCapital != null) {
+                  <div class="detail-row">
+                    <div class="detail-label">Abono capital</div>
+                    <div class="detail-value">{{ selectedUserDetail.abonoCapital | currency:'COP':'symbol':'1.0-0' }}</div>
+                  </div>
+                }
+                <div class="detail-row highlight">
+                  <div class="detail-label">Total deuda</div>
+                  <div class="detail-value">{{ selectedUserDetail.totalDeuda | currency:'COP':'symbol':'1.0-0' }}</div>
+                </div>
+                <div class="detail-row">
+                  <div class="detail-label">Fecha vencimiento</div>
+                  <div class="detail-value">{{ selectedUserDetail.fechaVencimiento | date:'shortDate' }}</div>
+                </div>
+                @if (selectedUserDetail.diasMora != null) {
+                  <div class="detail-row">
+                    <div class="detail-label">Dias de mora</div>
+                    <div class="detail-value">{{ selectedUserDetail.diasMora }}</div>
+                  </div>
+                }
+                @if (selectedUserDetail.fechaPago) {
+                  <div class="detail-row">
+                    <div class="detail-label">Fecha ultimo pago</div>
+                    <div class="detail-value">{{ selectedUserDetail.fechaPago | date:'shortDate' }}</div>
+                  </div>
+                }
+                <div class="detail-row">
+                  <div class="detail-label">Estado del credito</div>
+                  <div class="detail-value">{{ selectedUserDetail.estadoCredito }}</div>
+                </div>
+                <div class="detail-row">
+                  <div class="detail-label">Periodicidad</div>
+                  <div class="detail-value">{{ selectedUserDetail.periodicidad }}</div>
+                </div>
+              </div>
+            }
           </div>
-          <div *ngIf="userModalError && !userModalLoading" class="modal-error">
-            <svg lucideAlertTriangle></svg>
-            <span>{{ userModalError }}</span>
+          <div class="modal-footer">
+            <button class="primary-btn" type="button" (click)="closeUserModal()">Cerrar</button>
           </div>
-
-          <div *ngIf="!userModalLoading && !userModalError && selectedUserDetail" class="detail-grid">
-            <div class="detail-row">
-              <div class="detail-label">Obligacion</div>
-              <div class="detail-value">{{ selectedUserDetail.obligacion }}</div>
-            </div>
-            <div class="detail-row">
-              <div class="detail-label">Documento</div>
-              <div class="detail-value">{{ selectedUserDetail.tipoDocumento }} {{ selectedUserDetail.numeroDocumento }}</div>
-            </div>
-            <div class="detail-row">
-              <div class="detail-label">Nombres</div>
-              <div class="detail-value">{{ selectedUserDetail.nombres }} {{ selectedUserDetail.apellidos }}</div>
-            </div>
-            <div class="detail-row">
-              <div class="detail-label">Tipo cliente</div>
-              <div class="detail-value">{{ selectedUserDetail.tipoCliente }}</div>
-            </div>
-            <div class="detail-row">
-              <div class="detail-label">Fecha desembolso</div>
-              <div class="detail-value">{{ selectedUserDetail.fechaDesembolso | date:'shortDate' }}</div>
-            </div>
-            <div class="detail-row">
-              <div class="detail-label">Plazo inicial</div>
-              <div class="detail-value">{{ selectedUserDetail.plazoInicial }} meses</div>
-            </div>
-            <div class="detail-row">
-              <div class="detail-label">Valor desembolso</div>
-              <div class="detail-value">{{ selectedUserDetail.valorDesembolso | currency:'COP':'symbol':'1.0-0' }}</div>
-            </div>
-            <div class="detail-row">
-              <div class="detail-label">Valor fianza</div>
-              <div class="detail-value">{{ selectedUserDetail.valorAval | currency:'COP':'symbol':'1.0-0' }}</div>
-            </div>
-            <div class="detail-row">
-              <div class="detail-label">Interes</div>
-              <div class="detail-value">{{ selectedUserDetail.interes | currency:'COP':'symbol':'1.0-0' }}</div>
-            </div>
-            <div class="detail-row">
-              <div class="detail-label">Tasa fianza</div>
-              <div class="detail-value">{{ selectedUserDetail.tasaAval }}%</div>
-            </div>
-            <div class="detail-row" *ngIf="selectedUserDetail.otrosConceptos != null">
-              <div class="detail-label">Otros conceptos</div>
-              <div class="detail-value">{{ selectedUserDetail.otrosConceptos | currency:'COP':'symbol':'1.0-0' }}</div>
-            </div>
-            <div class="detail-row" *ngIf="selectedUserDetail.abonoAval != null">
-              <div class="detail-label">Abono fianza</div>
-              <div class="detail-value">{{ selectedUserDetail.abonoAval | currency:'COP':'symbol':'1.0-0' }}</div>
-            </div>
-            <div class="detail-row" *ngIf="selectedUserDetail.abonoCapital != null">
-              <div class="detail-label">Abono capital</div>
-              <div class="detail-value">{{ selectedUserDetail.abonoCapital | currency:'COP':'symbol':'1.0-0' }}</div>
-            </div>
-            <div class="detail-row highlight">
-              <div class="detail-label">Total deuda</div>
-              <div class="detail-value">{{ selectedUserDetail.totalDeuda | currency:'COP':'symbol':'1.0-0' }}</div>
-            </div>
-            <div class="detail-row">
-              <div class="detail-label">Fecha vencimiento</div>
-              <div class="detail-value">{{ selectedUserDetail.fechaVencimiento | date:'shortDate' }}</div>
-            </div>
-            <div class="detail-row" *ngIf="selectedUserDetail.diasMora != null">
-              <div class="detail-label">Dias de mora</div>
-              <div class="detail-value">{{ selectedUserDetail.diasMora }}</div>
-            </div>
-            <div class="detail-row" *ngIf="selectedUserDetail.fechaPago">
-              <div class="detail-label">Fecha ultimo pago</div>
-              <div class="detail-value">{{ selectedUserDetail.fechaPago | date:'shortDate' }}</div>
-            </div>
-            <div class="detail-row">
-              <div class="detail-label">Estado del credito</div>
-              <div class="detail-value">{{ selectedUserDetail.estadoCredito }}</div>
-            </div>
-            <div class="detail-row">
-              <div class="detail-label">Periodicidad</div>
-              <div class="detail-value">{{ selectedUserDetail.periodicidad }}</div>
-            </div>
-          </div>
-        </div>
-
-        <div class="modal-footer">
-          <button class="primary-btn" type="button" (click)="closeUserModal()">Cerrar</button>
         </div>
       </div>
-    </div>
+    }
 
-    <ng-template #metricSkeleton>
-      <span class="skeleton skeleton-value"></span>
-    </ng-template>
   </main>
 </div>

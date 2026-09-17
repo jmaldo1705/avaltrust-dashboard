@@ -8,13 +8,13 @@
     (navigate)="onHeaderNavigate($event)"
     (logout)="logout()">
   </app-header>
-  
+
   <div class="dashboard-content">
     <app-sidebar
       (sidebarClose)="onSidebarClose()"
       (navigate)="onSidebarNavigate($event)">
     </app-sidebar>
-    
+
     <main class="main-content">
       <!-- Header -->
       <div class="page-header">
@@ -23,246 +23,254 @@
       </div>
 
       <!-- Mensajes -->
-      <div *ngIf="successMessage" class="alert alert-success">
-        {{ successMessage }}
-      </div>
-      <div *ngIf="error && !showModal" class="alert alert-error">
-        {{ error }}
-      </div>
+      @if (successMessage) {
+        <div class="alert alert-success">
+          {{ successMessage }}
+        </div>
+      }
+      @if (error && !showModal) {
+        <div class="alert alert-error">
+          {{ error }}
+        </div>
+      }
 
       <!-- Controles -->
       <div class="controls-section">
         <div class="search-box">
-          <input 
-            type="text" 
-            [(ngModel)]="searchTerm" 
+          <input
+            type="text"
+            [(ngModel)]="searchTerm"
             placeholder="Buscar por nombre, NIT o correo..."
             class="search-input">
-        </div>
-        
-        <div class="action-buttons">
-          <label class="checkbox-label">
-            <input type="checkbox" [(ngModel)]="mostrarInactivos">
-            Mostrar inactivos
-          </label>
-          
-          <button class="btn btn-primary" (click)="openCreateModal()">
-            + Nuevo Aliado
-          </button>
-        </div>
-      </div>
+          </div>
 
-      <!-- Tabla -->
-      <div class="table-container">
-        <table class="data-table" *ngIf="!loading && aliadosFiltrados.length > 0">
-          <thead>
-            <tr>
-              <th>Estado</th>
-              <th>Nombre</th>
-              <th>NIT</th>
-              <th>Correo</th>
-              <th>Teléfono</th>
-              <th>% Capitalización</th>
-              <th>Fecha Creación</th>
-              <th>Acciones</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr *ngFor="let aliado of aliadosFiltrados">
-              <td>
-                <span class="status-badge" [ngClass]="aliado.activo ? 'active' : 'inactive'">
-                  {{ aliado.activo ? 'Activo' : 'Inactivo' }}
-                </span>
-              </td>
-              <td><strong>{{ aliado.nombre }}</strong></td>
-              <td>{{ aliado.nit }}</td>
-              <td>{{ aliado.correo }}</td>
-              <td>{{ aliado.telefono || '-' }}</td>
-              <td>
-                <span class="percentage-badge">
-                  {{ (aliado.porcentajeCapitalizacion || 100) | number:'1.2-2' }}%
-                </span>
-              </td>
-              <td>{{ aliado.fechaCreacion | date:'dd/MM/yyyy' }}</td>
-              <td class="actions-cell">
-                <button class="btn btn-sm btn-edit" (click)="openEditModal(aliado)" title="Editar">
-                  ✏️
-                </button>
-                <button 
-                  *ngIf="aliado.activo" 
-                  class="btn btn-sm btn-danger" 
-                  (click)="desactivar(aliado)"
-                  title="Desactivar">
-                  🚫
-                </button>
-                <button 
-                  *ngIf="!aliado.activo" 
-                  class="btn btn-sm btn-success" 
-                  (click)="activar(aliado)"
-                  title="Activar">
-                  ✅
-                </button>
-              </td>
-            </tr>
-          </tbody>
-        </table>
+          <div class="action-buttons">
+            <label class="checkbox-label">
+              <input type="checkbox" [(ngModel)]="mostrarInactivos">
+              Mostrar inactivos
+            </label>
 
-        <div *ngIf="loading" class="loading-spinner">
-          <p>Cargando aliados...</p>
+            <button class="btn btn-primary" (click)="openCreateModal()">
+              + Nuevo Aliado
+            </button>
+          </div>
         </div>
 
-        <div *ngIf="!loading && aliadosFiltrados.length === 0" class="no-data">
-          <p>No se encontraron aliados estratégicos</p>
+        <!-- Tabla -->
+        <div class="table-container">
+          @if (!loading && aliadosFiltrados.length > 0) {
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Estado</th>
+                  <th>Nombre</th>
+                  <th>NIT</th>
+                  <th>Correo</th>
+                  <th>Teléfono</th>
+                  <th>% Capitalización</th>
+                  <th>Fecha Creación</th>
+                  <th>Acciones</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (aliado of aliadosFiltrados; track aliado) {
+                  <tr>
+                    <td>
+                      <span class="status-badge" [ngClass]="aliado.activo ? 'active' : 'inactive'">
+                        {{ aliado.activo ? 'Activo' : 'Inactivo' }}
+                      </span>
+                    </td>
+                    <td><strong>{{ aliado.nombre }}</strong></td>
+                    <td>{{ aliado.nit }}</td>
+                    <td>{{ aliado.correo }}</td>
+                    <td>{{ aliado.telefono || '-' }}</td>
+                    <td>
+                      <span class="percentage-badge">
+                        {{ (aliado.porcentajeCapitalizacion || 100) | number:'1.2-2' }}%
+                      </span>
+                    </td>
+                    <td>{{ aliado.fechaCreacion | date:'dd/MM/yyyy' }}</td>
+                    <td class="actions-cell">
+                      <button class="btn btn-sm btn-edit" (click)="openEditModal(aliado)" title="Editar">
+                        ✏️
+                      </button>
+                      @if (aliado.activo) {
+                        <button
+                          class="btn btn-sm btn-danger"
+                          (click)="desactivar(aliado)"
+                          title="Desactivar">
+                          🚫
+                        </button>
+                      }
+                      @if (!aliado.activo) {
+                        <button
+                          class="btn btn-sm btn-success"
+                          (click)="activar(aliado)"
+                          title="Activar">
+                          ✅
+                        </button>
+                      }
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          }
+
+          @if (loading) {
+            <div class="loading-spinner">
+              <p>Cargando aliados...</p>
+            </div>
+          }
+
+          @if (!loading && aliadosFiltrados.length === 0) {
+            <div class="no-data">
+              <p>No se encontraron aliados estratégicos</p>
+            </div>
+          }
         </div>
-      </div>
-    </main>
-  </div>
-</div>
-
-<!-- Modal -->
-<div class="modal-overlay" *ngIf="showModal">
-  <div class="modal-content" (click)="$event.stopPropagation()">
-    <div class="modal-header">
-      <h2>{{ modalMode === 'create' ? 'Nuevo Aliado Estratégico' : 'Editar Aliado Estratégico' }}</h2>
-      <button class="btn-close" (click)="closeModal()">×</button>
-    </div>
-
-    <div class="modal-body">
-      <div *ngIf="error" class="alert alert-error">{{ error }}</div>
-
-      <form>
-        <div class="form-group">
-          <label>Nombre de la Empresa *</label>
-          <input 
-            type="text" 
-            [(ngModel)]="formData.nombre" 
-            name="nombre"
-            placeholder="Ej: Empresa ABC S.A.S."
-            class="form-control"
-            required>
-        </div>
-
-        <div class="form-group">
-          <label>NIT *</label>
-          <input 
-            type="text" 
-            [(ngModel)]="formData.nit" 
-            name="nit"
-            placeholder="Ej: 123456789-0"
-            class="form-control"
-            [disabled]="modalMode === 'edit'"
-            required>
-          <small *ngIf="modalMode === 'edit'" class="form-hint">El NIT no se puede modificar</small>
-        </div>
-
-        <div class="form-group">
-          <label>Correo Electrónico *</label>
-          <input 
-            type="email" 
-            [(ngModel)]="formData.correo" 
-            name="correo"
-            placeholder="contacto@empresa.com"
-            class="form-control"
-            required>
-        </div>
-
-        <div class="form-group">
-          <label>Dirección</label>
-          <input 
-            type="text" 
-            [(ngModel)]="formData.direccion" 
-            name="direccion"
-            placeholder="Calle 123 #45-67"
-            class="form-control">
-        </div>
-
-        <div class="form-group">
-          <label>Teléfono</label>
-          <input 
-            type="text" 
-            [(ngModel)]="formData.telefono" 
-            name="telefono"
-            placeholder="+57 300 123 4567"
-            class="form-control">
-        </div>
-
-        <div class="form-group">
-          <label>Porcentaje de Capitalización del Fondo (%)</label>
-          <input 
-            type="number" 
-            [(ngModel)]="formData.porcentajeCapitalizacion" 
-            name="porcentajeCapitalizacion"
-            min="0"
-            max="100"
-            step="0.01"
-            placeholder="100.00"
-            class="form-control">
-          <small class="form-text">Porcentaje de capitalización aplicado al cálculo de cobertura (0-100)</small>
-        </div>
-
-        <!-- Sección para Certificados de Ingresos -->
-        <div class="form-section-divider">
-          <span>Información para Certificados</span>
-        </div>
-
-        <div class="form-group">
-          <label>Nombre del Contador Público</label>
-          <input 
-            type="text" 
-            [(ngModel)]="formData.nombreContador" 
-            name="nombreContador"
-            placeholder="Ej: Juan Pérez López"
-            class="form-control">
-          <small class="form-text">Requerido para generar Certificados de Ingresos</small>
-        </div>
-
-        <div class="form-group">
-          <label>Tarjeta Profesional del Contador</label>
-          <input 
-            type="text" 
-            [(ngModel)]="formData.tarjetaProfesionalContador" 
-            name="tarjetaProfesionalContador"
-            placeholder="Ej: 123456-T"
-            class="form-control">
-        </div>
-
-        <div class="form-group">
-          <label>Nombre del Representante Legal</label>
-          <input 
-            type="text" 
-            [(ngModel)]="formData.nombreRepresentanteLegal" 
-            name="nombreRepresentanteLegal"
-            placeholder="Ej: María García Rodríguez"
-            class="form-control">
-          <small class="form-text">Requerido para generar Certificados de Ingresos</small>
-        </div>
-
-        <div class="form-group">
-          <label>Observaciones</label>
-          <textarea 
-            [(ngModel)]="formData.observaciones" 
-            name="observaciones"
-            rows="3"
-            placeholder="Notas adicionales..."
-            class="form-control"></textarea>
-        </div>
-
-        <div class="form-group" *ngIf="modalMode === 'edit'">
-          <label class="checkbox-label">
-            <input type="checkbox" [(ngModel)]="formData.activo" name="activo">
-            Aliado activo
-          </label>
-        </div>
-      </form>
-    </div>
-
-    <div class="modal-footer">
-      <button class="btn btn-secondary" (click)="closeModal()" [disabled]="loading">
-        Cancelar
-      </button>
-      <button class="btn btn-primary" (click)="save()" [disabled]="loading">
-        {{ loading ? 'Guardando...' : 'Guardar' }}
-      </button>
+      </main>
     </div>
   </div>
-</div>
+
+  <!-- Modal -->
+  @if (showModal) {
+    <div class="modal-overlay">
+      <div class="modal-content" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+          <h2>{{ modalMode === 'create' ? 'Nuevo Aliado Estratégico' : 'Editar Aliado Estratégico' }}</h2>
+          <button class="btn-close" (click)="closeModal()">×</button>
+        </div>
+        <div class="modal-body">
+          @if (error) {
+            <div class="alert alert-error">{{ error }}</div>
+          }
+          <form>
+            <div class="form-group">
+              <label>Nombre de la Empresa *</label>
+              <input
+                type="text"
+                [(ngModel)]="formData.nombre"
+                name="nombre"
+                placeholder="Ej: Empresa ABC S.A.S."
+                class="form-control"
+                required>
+              </div>
+              <div class="form-group">
+                <label>NIT *</label>
+                <input
+                  type="text"
+                  [(ngModel)]="formData.nit"
+                  name="nit"
+                  placeholder="Ej: 123456789-0"
+                  class="form-control"
+                  [disabled]="modalMode === 'edit'"
+                  required>
+                  @if (modalMode === 'edit') {
+                    <small class="form-hint">El NIT no se puede modificar</small>
+                  }
+                </div>
+                <div class="form-group">
+                  <label>Correo Electrónico *</label>
+                  <input
+                    type="email"
+                    [(ngModel)]="formData.correo"
+                    name="correo"
+                    placeholder="contacto@empresa.com"
+                    class="form-control"
+                    required>
+                  </div>
+                  <div class="form-group">
+                    <label>Dirección</label>
+                    <input
+                      type="text"
+                      [(ngModel)]="formData.direccion"
+                      name="direccion"
+                      placeholder="Calle 123 #45-67"
+                      class="form-control">
+                    </div>
+                    <div class="form-group">
+                      <label>Teléfono</label>
+                      <input
+                        type="text"
+                        [(ngModel)]="formData.telefono"
+                        name="telefono"
+                        placeholder="+57 300 123 4567"
+                        class="form-control">
+                      </div>
+                      <div class="form-group">
+                        <label>Porcentaje de Capitalización del Fondo (%)</label>
+                        <input
+                          type="number"
+                          [(ngModel)]="formData.porcentajeCapitalizacion"
+                          name="porcentajeCapitalizacion"
+                          min="0"
+                          max="100"
+                          step="0.01"
+                          placeholder="100.00"
+                          class="form-control">
+                          <small class="form-text">Porcentaje de capitalización aplicado al cálculo de cobertura (0-100)</small>
+                        </div>
+                        <!-- Sección para Certificados de Ingresos -->
+                        <div class="form-section-divider">
+                          <span>Información para Certificados</span>
+                        </div>
+                        <div class="form-group">
+                          <label>Nombre del Contador Público</label>
+                          <input
+                            type="text"
+                            [(ngModel)]="formData.nombreContador"
+                            name="nombreContador"
+                            placeholder="Ej: Juan Pérez López"
+                            class="form-control">
+                            <small class="form-text">Requerido para generar Certificados de Ingresos</small>
+                          </div>
+                          <div class="form-group">
+                            <label>Tarjeta Profesional del Contador</label>
+                            <input
+                              type="text"
+                              [(ngModel)]="formData.tarjetaProfesionalContador"
+                              name="tarjetaProfesionalContador"
+                              placeholder="Ej: 123456-T"
+                              class="form-control">
+                            </div>
+                            <div class="form-group">
+                              <label>Nombre del Representante Legal</label>
+                              <input
+                                type="text"
+                                [(ngModel)]="formData.nombreRepresentanteLegal"
+                                name="nombreRepresentanteLegal"
+                                placeholder="Ej: María García Rodríguez"
+                                class="form-control">
+                                <small class="form-text">Requerido para generar Certificados de Ingresos</small>
+                              </div>
+                              <div class="form-group">
+                                <label>Observaciones</label>
+                                <textarea
+                                  [(ngModel)]="formData.observaciones"
+                                  name="observaciones"
+                                  rows="3"
+                                  placeholder="Notas adicionales..."
+                                class="form-control"></textarea>
+                              </div>
+                              @if (modalMode === 'edit') {
+                                <div class="form-group">
+                                  <label class="checkbox-label">
+                                    <input type="checkbox" [(ngModel)]="formData.activo" name="activo">
+                                    Aliado activo
+                                  </label>
+                                </div>
+                              }
+                            </form>
+                          </div>
+                          <div class="modal-footer">
+                            <button class="btn btn-secondary" (click)="closeModal()" [disabled]="loading">
+                              Cancelar
+                            </button>
+                            <button class="btn btn-primary" (click)="save()" [disabled]="loading">
+                              {{ loading ? 'Guardando...' : 'Guardar' }}
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    }

@@ -1,5 +1,5 @@
 import { Component, OnInit, inject } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { Router } from '@angular/router';
 import { CursosService } from './cursos.service';
 import { Modulo } from './curso.interface';
@@ -10,7 +10,7 @@ import { AuthService } from '../../auth/auth.service';
 @Component({
   selector: 'app-lista-cursos',
   standalone: true,
-  imports: [CommonModule, HeaderComponent, SidebarComponent],
+  imports: [HeaderComponent, SidebarComponent],
   templateUrl: './lista-cursos.component.html',
   styleUrls: ['./lista-cursos.component.css']
 })

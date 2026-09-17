@@ -41,10 +41,12 @@
       </button>
     </section>
 
-    <div class="profile-alert" *ngIf="profileError">
-      <svg lucideShieldCheck></svg>
-      <span>{{ profileError }}</span>
-    </div>
+    @if (profileError) {
+      <div class="profile-alert">
+        <svg lucideShieldCheck></svg>
+        <span>{{ profileError }}</span>
+      </div>
+    }
 
     <section class="profile-grid">
       <article class="profile-card identity-card">
@@ -82,22 +84,26 @@
         </div>
 
         <div class="role-list">
-          <span class="role-chip" *ngFor="let role of roleLabels">
-            <svg lucideShieldCheck></svg>
-            {{ role }}
-          </span>
+          @for (role of roleLabels; track role) {
+            <span class="role-chip">
+              <svg lucideShieldCheck></svg>
+              {{ role }}
+            </span>
+          }
         </div>
 
-        <div class="permission-strip" *ngIf="userPermissions()?.permissions as permissions">
-          <div>
-            <span>Panel admin</span>
-            <strong>{{ permissions['canViewAdminPanel'] ? 'Habilitado' : 'No habilitado' }}</strong>
+        @if (userPermissions()?.permissions; as permissions) {
+          <div class="permission-strip">
+            <div>
+              <span>Panel admin</span>
+              <strong>{{ permissions['canViewAdminPanel'] ? 'Habilitado' : 'No habilitado' }}</strong>
+            </div>
+            <div>
+              <span>Gestion usuarios</span>
+              <strong>{{ permissions['canManageUsers'] ? 'Habilitado' : 'No habilitado' }}</strong>
+            </div>
           </div>
-          <div>
-            <span>Gestion usuarios</span>
-            <strong>{{ permissions['canManageUsers'] ? 'Habilitado' : 'No habilitado' }}</strong>
-          </div>
-        </div>
+        }
       </article>
 
       <article class="profile-card security-card">
@@ -131,67 +137,68 @@
           {{ isPasswordFormOpen ? 'Cerrar cambio' : 'Cambiar contrasena' }}
         </button>
 
-        <div class="inline-alert success" *ngIf="passwordSuccess">
-          <svg lucideShieldCheck></svg>
-          <span>{{ passwordSuccess }}</span>
-        </div>
-
-        <form class="password-form" *ngIf="isPasswordFormOpen" (ngSubmit)="submitPasswordChange()">
-          <div class="inline-alert error" *ngIf="passwordError">
+        @if (passwordSuccess) {
+          <div class="inline-alert success">
             <svg lucideShieldCheck></svg>
-            <span>{{ passwordError }}</span>
+            <span>{{ passwordSuccess }}</span>
           </div>
+        }
 
-          <label class="password-field">
-            <span>Contrasena actual</span>
-            <input
-              type="password"
-              name="currentPassword"
-              [(ngModel)]="currentPassword"
-              [disabled]="isPasswordSaving"
-              autocomplete="current-password"
-              required>
-          </label>
-
-          <label class="password-field">
-            <span>Nueva contrasena</span>
-            <input
-              type="password"
-              name="newPassword"
-              [(ngModel)]="newPassword"
-              [disabled]="isPasswordSaving"
-              autocomplete="new-password"
-              minlength="6"
-              required>
-          </label>
-
-          <label class="password-field">
-            <span>Confirmar contrasena</span>
-            <input
-              type="password"
-              name="confirmPassword"
-              [(ngModel)]="confirmPassword"
-              [disabled]="isPasswordSaving"
-              autocomplete="new-password"
-              required>
-          </label>
-
-          <div class="password-rules">
-            <span [class.valid]="newPassword.length >= 6">Minimo 6 caracteres</span>
-            <span [class.valid]="newPassword && !passwordSameAsCurrent">Diferente a la actual</span>
-            <span [class.valid]="confirmPassword && !passwordMismatch">Confirmacion correcta</span>
-          </div>
-
-          <div class="password-actions">
-            <button class="secondary-button" type="button" (click)="togglePasswordForm()" [disabled]="isPasswordSaving">
-              Cancelar
-            </button>
-            <button class="primary-button" type="submit" [disabled]="!canSubmitPasswordChange">
-              <svg lucideRefreshCw [class.spinning]="isPasswordSaving"></svg>
-              Guardar cambio
-            </button>
-          </div>
-        </form>
+        @if (isPasswordFormOpen) {
+          <form class="password-form" (ngSubmit)="submitPasswordChange()">
+            @if (passwordError) {
+              <div class="inline-alert error">
+                <svg lucideShieldCheck></svg>
+                <span>{{ passwordError }}</span>
+              </div>
+            }
+            <label class="password-field">
+              <span>Contrasena actual</span>
+              <input
+                type="password"
+                name="currentPassword"
+                [(ngModel)]="currentPassword"
+                [disabled]="isPasswordSaving"
+                autocomplete="current-password"
+                required>
+            </label>
+            <label class="password-field">
+              <span>Nueva contrasena</span>
+              <input
+                type="password"
+                name="newPassword"
+                [(ngModel)]="newPassword"
+                [disabled]="isPasswordSaving"
+                autocomplete="new-password"
+                minlength="6"
+                required>
+            </label>
+            <label class="password-field">
+              <span>Confirmar contrasena</span>
+              <input
+                type="password"
+                name="confirmPassword"
+                [(ngModel)]="confirmPassword"
+                [disabled]="isPasswordSaving"
+                autocomplete="new-password"
+                required>
+            </label>
+            <div class="password-rules">
+              <span [class.valid]="newPassword.length >= 6">Minimo 6 caracteres</span>
+              <span [class.valid]="newPassword && !passwordSameAsCurrent">Diferente a la actual</span>
+              <span [class.valid]="confirmPassword && !passwordMismatch">Confirmacion correcta</span>
+            </div>
+            <div class="password-actions">
+              <button class="secondary-button" type="button" (click)="togglePasswordForm()" [disabled]="isPasswordSaving">
+                Cancelar
+              </button>
+              <button class="primary-button" type="submit" [disabled]="!canSubmitPasswordChange">
+                <svg lucideRefreshCw [class.spinning]="isPasswordSaving"></svg>
+                Guardar cambio
+              </button>
+            </div>
+          </form>
+        }
       </article>
     </section>
   </main>

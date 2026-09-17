@@ -1,5 +1,5 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { ActivatedRoute, Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { EvaluacionService } from './evaluacion.service';
@@ -16,140 +16,158 @@ import {
 @Component({
   selector: 'app-evaluacion-curso',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [FormsModule],
   template: `
     <div class="evaluacion-container">
       <!-- Loading -->
-      <div *ngIf="loading" class="loading">
-        <div class="spinner"></div>
-        <p>Cargando evaluación...</p>
-      </div>
-
+      @if (loading) {
+        <div class="loading">
+          <div class="spinner"></div>
+          <p>Cargando evaluación...</p>
+        </div>
+      }
+    
       <!-- Error -->
-      <div *ngIf="error" class="error-message">
-        <p>{{ error }}</p>
-        <button (click)="volver()" class="btn-secondary">Volver</button>
-      </div>
-
+      @if (error) {
+        <div class="error-message">
+          <p>{{ error }}</p>
+          <button (click)="volver()" class="btn-secondary">Volver</button>
+        </div>
+      }
+    
       <!-- Formulario de Evaluación -->
-      <div *ngIf="!loading && !error && !mostrarResultado && evaluacion" class="evaluacion-form">
-        <div class="header-evaluacion">
-          <h2>📝 Evaluación: {{ evaluacion.cursoTitulo }}</h2>
-          <div class="info-evaluacion">
-            <span class="badge">{{ evaluacion.totalPreguntas }} preguntas</span>
-            <span class="badge">{{ evaluacion.puntajeTotal }} puntos totales</span>
-            <span class="timer">⏱️ {{ formatearTiempo(tiempoTranscurrido) }}</span>
-          </div>
-        </div>
-
-        <div class="progreso-bar">
-          <div class="progreso-fill" [style.width.%]="progreso"></div>
-          <span class="progreso-text">{{ respuestasCompletas }} / {{ evaluacion.totalPreguntas }}</span>
-        </div>
-
-        <div class="pregunta-container" *ngFor="let pregunta of evaluacion.preguntas">
-          <div class="pregunta-card">
-            <div class="pregunta-header">
-              <span class="pregunta-numero">Pregunta {{ pregunta.orden }}</span>
-              <span class="pregunta-puntos">{{ pregunta.puntos }} puntos</span>
+      @if (!loading && !error && !mostrarResultado && evaluacion) {
+        <div class="evaluacion-form">
+          <div class="header-evaluacion">
+            <h2>📝 Evaluación: {{ evaluacion.cursoTitulo }}</h2>
+            <div class="info-evaluacion">
+              <span class="badge">{{ evaluacion.totalPreguntas }} preguntas</span>
+              <span class="badge">{{ evaluacion.puntajeTotal }} puntos totales</span>
+              <span class="timer">⏱️ {{ formatearTiempo(tiempoTranscurrido) }}</span>
             </div>
-            <h3 class="pregunta-texto">{{ pregunta.pregunta }}</h3>
-
-            <div class="opciones-lista">
-              <div 
-                *ngFor="let opcion of pregunta.opciones"
-                class="opcion-item"
-                [class.selected]="respuestas.get(pregunta.id) === opcion.id"
-                (click)="seleccionarOpcion(pregunta.id, opcion.id)">
-                <div class="radio-custom">
-                  <div class="radio-inner" *ngIf="respuestas.get(pregunta.id) === opcion.id"></div>
+          </div>
+          <div class="progreso-bar">
+            <div class="progreso-fill" [style.width.%]="progreso"></div>
+            <span class="progreso-text">{{ respuestasCompletas }} / {{ evaluacion.totalPreguntas }}</span>
+          </div>
+          @for (pregunta of evaluacion.preguntas; track pregunta) {
+            <div class="pregunta-container">
+              <div class="pregunta-card">
+                <div class="pregunta-header">
+                  <span class="pregunta-numero">Pregunta {{ pregunta.orden }}</span>
+                  <span class="pregunta-puntos">{{ pregunta.puntos }} puntos</span>
                 </div>
-                <span class="opcion-texto">{{ opcion.textoOpcion }}</span>
+                <h3 class="pregunta-texto">{{ pregunta.pregunta }}</h3>
+                <div class="opciones-lista">
+                  @for (opcion of pregunta.opciones; track opcion) {
+                    <div
+                      class="opcion-item"
+                      [class.selected]="respuestas.get(pregunta.id) === opcion.id"
+                      (click)="seleccionarOpcion(pregunta.id, opcion.id)">
+                      <div class="radio-custom">
+                        @if (respuestas.get(pregunta.id) === opcion.id) {
+                          <div class="radio-inner"></div>
+                        }
+                      </div>
+                      <span class="opcion-texto">{{ opcion.textoOpcion }}</span>
+                    </div>
+                  }
+                </div>
               </div>
             </div>
+          }
+          <div class="actions-footer">
+            <button (click)="volver()" class="btn-secondary">Cancelar</button>
+            <button
+              (click)="enviarEvaluacion()"
+              class="btn-primary"
+              [disabled]="!evaluacionCompleta()">
+              Enviar Evaluación
+            </button>
           </div>
         </div>
-
-        <div class="actions-footer">
-          <button (click)="volver()" class="btn-secondary">Cancelar</button>
-          <button 
-            (click)="enviarEvaluacion()" 
-            class="btn-primary"
-            [disabled]="!evaluacionCompleta()">
-            Enviar Evaluación
-          </button>
-        </div>
-      </div>
-
+      }
+    
       <!-- Resultado de Evaluación -->
-      <div *ngIf="mostrarResultado && resultado" class="resultado-container">
-        <div class="resultado-header" [class.aprobado]="resultado.aprobado" [class.no-aprobado]="!resultado.aprobado">
-          <div class="resultado-icon">
-            {{ resultado.aprobado ? '🎉' : '📚' }}
-          </div>
-          <h2>{{ resultado.aprobado ? '¡Felicitaciones!' : '¡Sigue Intentando!' }}</h2>
-          <p class="resultado-subtitulo">{{ resultado.cursoTitulo }}</p>
-        </div>
-
-        <div class="resultado-stats">
-          <div class="stat-card">
-            <div class="stat-value">{{ resultado.puntajeObtenido }}</div>
-            <div class="stat-label">de {{ resultado.puntajeTotal }} puntos</div>
-          </div>
-          <div class="stat-card">
-            <div class="stat-value">{{ resultado.porcentaje }}%</div>
-            <div class="stat-label">Porcentaje</div>
-          </div>
-          <div class="stat-card">
-            <div class="stat-value">{{ resultado.respuestasCorrectas }}</div>
-            <div class="stat-label">de {{ resultado.totalPreguntas }} correctas</div>
-          </div>
-        </div>
-
-        <div class="resultado-estado">
-          <div *ngIf="resultado.aprobado" class="aprobado-badge">
-            ✅ APROBADO
-          </div>
-          <div *ngIf="!resultado.aprobado" class="no-aprobado-badge">
-            ⚠️ NO APROBADO (Mínimo requerido: 70%)
-          </div>
-        </div>
-
-        <div class="mensaje-cierre" *ngIf="resultado.mensajeCierre">
-          <p>{{ resultado.mensajeCierre }}</p>
-        </div>
-
-        <div class="detalle-respuestas">
-          <h3>📋 Detalle de Respuestas</h3>
-          <div *ngFor="let detalle of resultado.detalleRespuestas" class="detalle-item">
-            <div class="detalle-pregunta">
-              <span class="detalle-icon">{{ detalle.esCorrecta ? '✅' : '❌' }}</span>
-              <span class="detalle-texto">{{ detalle.pregunta }}</span>
+      @if (mostrarResultado && resultado) {
+        <div class="resultado-container">
+          <div class="resultado-header" [class.aprobado]="resultado.aprobado" [class.no-aprobado]="!resultado.aprobado">
+            <div class="resultado-icon">
+              {{ resultado.aprobado ? '🎉' : '📚' }}
             </div>
-            <div class="detalle-respuesta">
-              <p class="tu-respuesta">
-                <strong>Tu respuesta:</strong> {{ detalle.opcionSeleccionadaTexto }}
-              </p>
-              <p class="respuesta-correcta" *ngIf="!detalle.esCorrecta">
-                <strong>Correcta:</strong> {{ detalle.opcionCorrectaTexto }}
-              </p>
-              <p class="puntos">{{ detalle.puntosObtenidos }} / {{ detalle.puntosPosibles }} puntos</p>
+            <h2>{{ resultado.aprobado ? '¡Felicitaciones!' : '¡Sigue Intentando!' }}</h2>
+            <p class="resultado-subtitulo">{{ resultado.cursoTitulo }}</p>
+          </div>
+          <div class="resultado-stats">
+            <div class="stat-card">
+              <div class="stat-value">{{ resultado.puntajeObtenido }}</div>
+              <div class="stat-label">de {{ resultado.puntajeTotal }} puntos</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-value">{{ resultado.porcentaje }}%</div>
+              <div class="stat-label">Porcentaje</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-value">{{ resultado.respuestasCorrectas }}</div>
+              <div class="stat-label">de {{ resultado.totalPreguntas }} correctas</div>
             </div>
           </div>
+          <div class="resultado-estado">
+            @if (resultado.aprobado) {
+              <div class="aprobado-badge">
+                ✅ APROBADO
+              </div>
+            }
+            @if (!resultado.aprobado) {
+              <div class="no-aprobado-badge">
+                ⚠️ NO APROBADO (Mínimo requerido: 70%)
+              </div>
+            }
+          </div>
+          @if (resultado.mensajeCierre) {
+            <div class="mensaje-cierre">
+              <p>{{ resultado.mensajeCierre }}</p>
+            </div>
+          }
+          <div class="detalle-respuestas">
+            <h3>📋 Detalle de Respuestas</h3>
+            @for (detalle of resultado.detalleRespuestas; track detalle) {
+              <div class="detalle-item">
+                <div class="detalle-pregunta">
+                  <span class="detalle-icon">{{ detalle.esCorrecta ? '✅' : '❌' }}</span>
+                  <span class="detalle-texto">{{ detalle.pregunta }}</span>
+                </div>
+                <div class="detalle-respuesta">
+                  <p class="tu-respuesta">
+                    <strong>Tu respuesta:</strong> {{ detalle.opcionSeleccionadaTexto }}
+                  </p>
+                  @if (!detalle.esCorrecta) {
+                    <p class="respuesta-correcta">
+                      <strong>Correcta:</strong> {{ detalle.opcionCorrectaTexto }}
+                    </p>
+                  }
+                  <p class="puntos">{{ detalle.puntosObtenidos }} / {{ detalle.puntosPosibles }} puntos</p>
+                </div>
+              </div>
+            }
+          </div>
+          <div class="actions-footer">
+            <button (click)="volverAlCurso()" class="btn-secondary">Volver al Curso</button>
+            @if (resultado.aprobado) {
+              <button (click)="descargarCertificado()" class="btn-primary">
+                📄 Descargar Certificado
+              </button>
+            }
+            @if (!resultado.aprobado) {
+              <button (click)="reintentar()" class="btn-primary">
+                🔄 Intentar Nuevamente
+              </button>
+            }
+          </div>
         </div>
-
-        <div class="actions-footer">
-          <button (click)="volverAlCurso()" class="btn-secondary">Volver al Curso</button>
-          <button *ngIf="resultado.aprobado" (click)="descargarCertificado()" class="btn-primary">
-            📄 Descargar Certificado
-          </button>
-          <button *ngIf="!resultado.aprobado" (click)="reintentar()" class="btn-primary">
-            🔄 Intentar Nuevamente
-          </button>
-        </div>
-      </div>
+      }
     </div>
-  `,
+    `,
   styleUrls: ['./evaluacion-curso.component.css']
 })
 export class EvaluacionCursoComponent implements OnInit, OnDestroy {

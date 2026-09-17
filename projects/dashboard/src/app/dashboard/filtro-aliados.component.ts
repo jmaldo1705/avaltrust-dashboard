@@ -1,5 +1,5 @@
 import { Component, inject, OnDestroy, OnInit, Output, EventEmitter, Input } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { FormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../environments/environment';
@@ -19,7 +19,7 @@ export interface FiltroAliadosEvent {
 @Component({
   selector: 'app-filtro-aliados',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [FormsModule],
   template: `
     <div class="filtro-aliados-container">
       <div class="filtro-header">
@@ -27,13 +27,15 @@ export interface FiltroAliadosEvent {
           <span class="filtro-icon"></span>
           Filtrar por aliado estrategico
         </label>
-        <span class="filtro-count" *ngIf="!isAllSelected && selectedIds.size > 0">
-          {{ selectedIds.size }} seleccionado{{ selectedIds.size > 1 ? 's' : '' }}
-        </span>
+        @if (!isAllSelected && selectedIds.size > 0) {
+          <span class="filtro-count">
+            {{ selectedIds.size }} seleccionado{{ selectedIds.size > 1 ? 's' : '' }}
+          </span>
+        }
       </div>
-
+    
       <div class="filtro-dropdown" [class.open]="isDropdownOpen">
-        <button 
+        <button
           type="button"
           class="filtro-toggle"
           [attr.aria-expanded]="isDropdownOpen"
@@ -43,74 +45,77 @@ export interface FiltroAliadosEvent {
           </span>
           <span class="toggle-arrow" [class.open]="isDropdownOpen"></span>
         </button>
-
-        <div class="filtro-menu" *ngIf="isDropdownOpen" (click)="$event.stopPropagation()">
-          <!-- Barra de búsqueda -->
-          <div class="filtro-search">
-            <input
-              type="text"
-              class="search-input"
-              placeholder="Buscar aliado..."
-              [(ngModel)]="searchTerm"
-              (ngModelChange)="filterAliados()">
-            <span class="search-icon"></span>
-          </div>
-
-          <!-- Opción "Todos" -->
-          <div class="filtro-option all-option">
-            <label class="checkbox-label">
+    
+        @if (isDropdownOpen) {
+          <div class="filtro-menu" (click)="$event.stopPropagation()">
+            <!-- Barra de búsqueda -->
+            <div class="filtro-search">
               <input
-                type="checkbox"
-                [checked]="isAllSelected"
-                (change)="selectAll()">
-              <span class="checkbox-text strong">Todos los Aliados</span>
-            </label>
-          </div>
-
-          <div class="filtro-divider"></div>
-
-          <!-- Lista de aliados -->
-          <div class="filtro-options" *ngIf="filteredAliados.length > 0">
-            <div class="filtro-option" *ngFor="let aliado of filteredAliados">
-              <label class="checkbox-label">
-                <input
-                  type="checkbox"
-                  [checked]="selectedIds.has(aliado.id)"
-                  [disabled]="isAllSelected"
-                  (change)="toggleAliado(aliado.id)">
-                <span class="checkbox-text" [class.disabled]="isAllSelected">
-                  {{ aliado.nombre }}
-                  <span class="aliado-nit">{{ aliado.nit }}</span>
-                </span>
-              </label>
+                type="text"
+                class="search-input"
+                placeholder="Buscar aliado..."
+                [(ngModel)]="searchTerm"
+                (ngModelChange)="filterAliados()">
+                <span class="search-icon"></span>
+              </div>
+              <!-- Opción "Todos" -->
+              <div class="filtro-option all-option">
+                <label class="checkbox-label">
+                  <input
+                    type="checkbox"
+                    [checked]="isAllSelected"
+                    (change)="selectAll()">
+                    <span class="checkbox-text strong">Todos los Aliados</span>
+                  </label>
+                </div>
+                <div class="filtro-divider"></div>
+                <!-- Lista de aliados -->
+                @if (filteredAliados.length > 0) {
+                  <div class="filtro-options">
+                    @for (aliado of filteredAliados; track aliado) {
+                      <div class="filtro-option">
+                        <label class="checkbox-label">
+                          <input
+                            type="checkbox"
+                            [checked]="selectedIds.has(aliado.id)"
+                            [disabled]="isAllSelected"
+                            (change)="toggleAliado(aliado.id)">
+                            <span class="checkbox-text" [class.disabled]="isAllSelected">
+                              {{ aliado.nombre }}
+                              <span class="aliado-nit">{{ aliado.nit }}</span>
+                            </span>
+                          </label>
+                        </div>
+                      }
+                    </div>
+                  }
+                  @if (filteredAliados.length === 0) {
+                    <div class="filtro-empty">
+                      <span class="empty-icon"></span>
+                      <p>No se encontraron aliados</p>
+                    </div>
+                  }
+                  <!-- Botones de acción -->
+                  <div class="filtro-actions">
+                    <button
+                      type="button"
+                      class="btn-action btn-clear"
+                      (click)="clearAll()"
+                      [disabled]="selectedIds.size === 0 && isAllSelected">
+                      Limpiar
+                    </button>
+                    <button
+                      type="button"
+                      class="btn-action btn-apply"
+                      (click)="applyFilter()">
+                      Aplicar Filtro
+                    </button>
+                  </div>
+                </div>
+              }
             </div>
           </div>
-
-          <div class="filtro-empty" *ngIf="filteredAliados.length === 0">
-            <span class="empty-icon"></span>
-            <p>No se encontraron aliados</p>
-          </div>
-
-          <!-- Botones de acción -->
-          <div class="filtro-actions">
-            <button 
-              type="button"
-              class="btn-action btn-clear"
-              (click)="clearAll()"
-              [disabled]="selectedIds.size === 0 && isAllSelected">
-              Limpiar
-            </button>
-            <button 
-              type="button"
-              class="btn-action btn-apply"
-              (click)="applyFilter()">
-              Aplicar Filtro
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
-  `,
+    `,
   styles: [`
     .filtro-aliados-container {
       position: relative;

@@ -45,77 +45,83 @@
           </span>
         </a>
 
-        <a
-          class="nav-link"
-          *ngIf="!auth.hasRole('ROLE_AFIANZADO')"
-          [class.active]="isActive('/dashboard')"
-          (click)="navigateTo('/dashboard')">
-          <span class="nav-icon"><svg lucideLayoutDashboard></svg></span>
-          <span class="nav-content">
-            <span class="nav-title">Dashboard</span>
-            <span class="nav-description">Panel principal</span>
-          </span>
-        </a>
+        @if (!auth.hasRole('ROLE_AFIANZADO')) {
+          <a
+            class="nav-link"
+            [class.active]="isActive('/dashboard')"
+            (click)="navigateTo('/dashboard')">
+            <span class="nav-icon"><svg lucideLayoutDashboard></svg></span>
+            <span class="nav-content">
+              <span class="nav-title">Dashboard</span>
+              <span class="nav-description">Panel principal</span>
+            </span>
+          </a>
+        }
 
-        <a
-          class="nav-link"
-          *ngIf="!auth.hasRole('ROLE_AFIANZADO') && !auth.hasRole('ROLE_CONSULTA')"
-          [class.active]="isActive('/portfolio')"
-          (click)="navigateTo('/portfolio')">
-          <span class="nav-icon"><svg lucideFileSpreadsheet></svg></span>
-          <span class="nav-content">
-            <span class="nav-title">Cargue Cartera</span>
-            <span class="nav-description">Gestion de archivos</span>
-          </span>
-        </a>
+        @if (!auth.hasRole('ROLE_AFIANZADO') && !auth.hasRole('ROLE_CONSULTA')) {
+          <a
+            class="nav-link"
+            [class.active]="isActive('/portfolio')"
+            (click)="navigateTo('/portfolio')">
+            <span class="nav-icon"><svg lucideFileSpreadsheet></svg></span>
+            <span class="nav-content">
+              <span class="nav-title">Cargue Cartera</span>
+              <span class="nav-description">Gestion de archivos</span>
+            </span>
+          </a>
+        }
 
-        <a
-          class="nav-link"
-          *ngIf="!auth.hasRole('ROLE_AFIANZADO')"
-          [class.active]="isActive('/estado-cartera')"
-          (click)="navigateTo('/estado-cartera')">
-          <span class="nav-icon"><svg lucideHouse></svg></span>
-          <span class="nav-content">
-            <span class="nav-title">Estado Cartera</span>
-            <span class="nav-description">Listado de cartera</span>
-          </span>
-        </a>
+        @if (!auth.hasRole('ROLE_AFIANZADO')) {
+          <a
+            class="nav-link"
+            [class.active]="isActive('/estado-cartera')"
+            (click)="navigateTo('/estado-cartera')">
+            <span class="nav-icon"><svg lucideHouse></svg></span>
+            <span class="nav-content">
+              <span class="nav-title">Estado Cartera</span>
+              <span class="nav-description">Listado de cartera</span>
+            </span>
+          </a>
+        }
 
-        <a
-          class="nav-link"
-          *ngIf="!auth.hasRole('ROLE_AFIANZADO') && !auth.hasRole('ROLE_CONSULTA')"
-          [class.active]="isActive('/claims')"
-          (click)="navigateTo('/claims')">
-          <span class="nav-icon"><svg lucideClipboardCheck></svg></span>
-          <span class="nav-content">
-            <span class="nav-title">Cargue Siniestros</span>
-            <span class="nav-description">Gestion siniestros</span>
-          </span>
-        </a>
+        @if (!auth.hasRole('ROLE_AFIANZADO') && !auth.hasRole('ROLE_CONSULTA')) {
+          <a
+            class="nav-link"
+            [class.active]="isActive('/claims')"
+            (click)="navigateTo('/claims')">
+            <span class="nav-icon"><svg lucideClipboardCheck></svg></span>
+            <span class="nav-content">
+              <span class="nav-title">Cargue Siniestros</span>
+              <span class="nav-description">Gestion siniestros</span>
+            </span>
+          </a>
+        }
 
-        <a
-          class="nav-link"
-          *ngIf="!auth.hasRole('ROLE_AFIANZADO')"
-          [class.active]="isActive('/documentos')"
-          (click)="navigateTo('/documentos')">
-          <span class="nav-icon"><svg lucideFileText></svg></span>
-          <span class="nav-content">
-            <span class="nav-title">Documentos</span>
-            <span class="nav-description">Informes personalizados</span>
-          </span>
-        </a>
+        @if (!auth.hasRole('ROLE_AFIANZADO')) {
+          <a
+            class="nav-link"
+            [class.active]="isActive('/documentos')"
+            (click)="navigateTo('/documentos')">
+            <span class="nav-icon"><svg lucideFileText></svg></span>
+            <span class="nav-content">
+              <span class="nav-title">Documentos</span>
+              <span class="nav-description">Informes personalizados</span>
+            </span>
+          </a>
+        }
 
-        <a
-          class="nav-link"
-          *ngIf="!auth.hasRole('ROLE_AFIANZADO')"
-          [class.active]="isActive('/certificados')"
-          (click)="navigateTo('/certificados')">
-          <span class="nav-icon"><svg lucideBadgeCheck></svg></span>
-          <span class="nav-content">
-            <span class="nav-title">Certificados</span>
-            <span class="nav-description">Certificados oficiales</span>
-          </span>
-        </a>
+        @if (!auth.hasRole('ROLE_AFIANZADO')) {
+          <a
+            class="nav-link"
+            [class.active]="isActive('/certificados')"
+            (click)="navigateTo('/certificados')">
+            <span class="nav-icon"><svg lucideBadgeCheck></svg></span>
+            <span class="nav-content">
+              <span class="nav-title">Certificados</span>
+              <span class="nav-description">Certificados oficiales</span>
+            </span>
+          </a>
+        }
       </div>
 
       <div class="nav-section admin-section" *appHasRole="'ROLE_ADMIN'">Administracion</div>

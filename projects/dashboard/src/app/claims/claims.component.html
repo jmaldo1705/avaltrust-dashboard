@@ -75,29 +75,41 @@
           </div>
         </div>
 
-        <div class="result-card" *ngIf="uploadResult" [ngClass]="uploadResult.success ? 'success' : 'error'">
-          <div class="result-icon">
-            <svg *ngIf="uploadResult.success" lucideCheckCircle></svg>
-            <svg *ngIf="!uploadResult.success" lucideCircleAlert></svg>
-          </div>
-          <div class="result-content">
-            <h3>{{ uploadResult.success ? 'Operacion exitosa' : 'Operacion con errores' }}</h3>
-            <p>{{ uploadResult.message }}</p>
-            <div class="result-details" *ngIf="uploadResult.records">
-              <span>Registros procesados</span>
-              <strong>{{ uploadResult.records }}</strong>
+        @if (uploadResult) {
+          <div class="result-card" [ngClass]="uploadResult.success ? 'success' : 'error'">
+            <div class="result-icon">
+              @if (uploadResult.success) {
+                <svg lucideCheckCircle></svg>
+              }
+              @if (!uploadResult.success) {
+                <svg lucideCircleAlert></svg>
+              }
             </div>
-            <div class="error-list" *ngIf="uploadResult.errors && uploadResult.errors.length > 0">
-              <strong>Errores encontrados</strong>
-              <ul>
-                <li *ngFor="let error of uploadResult.errors">{{ error }}</li>
-              </ul>
+            <div class="result-content">
+              <h3>{{ uploadResult.success ? 'Operacion exitosa' : 'Operacion con errores' }}</h3>
+              <p>{{ uploadResult.message }}</p>
+              @if (uploadResult.records) {
+                <div class="result-details">
+                  <span>Registros procesados</span>
+                  <strong>{{ uploadResult.records }}</strong>
+                </div>
+              }
+              @if (uploadResult.errors && uploadResult.errors.length > 0) {
+                <div class="error-list">
+                  <strong>Errores encontrados</strong>
+                  <ul>
+                    @for (error of uploadResult.errors; track error) {
+                      <li>{{ error }}</li>
+                    }
+                  </ul>
+                </div>
+              }
             </div>
+            <button type="button" class="icon-button muted" aria-label="Cerrar resultado" (click)="uploadResult = null">
+              <svg lucideX></svg>
+            </button>
           </div>
-          <button type="button" class="icon-button muted" aria-label="Cerrar resultado" (click)="uploadResult = null">
-            <svg lucideX></svg>
-          </button>
-        </div>
+        }
 
         <section class="workflow-grid">
           <article class="workflow-card">
@@ -139,32 +151,40 @@
     </div>
 
     <!-- Resultado de la operación -->
-    <div class="result-container" *ngIf="uploadResult">
-      <div class="result-card" [ngClass]="uploadResult.success ? 'success' : 'error'">
-        <div class="result-icon">
-          {{ uploadResult.success ? '✅' : '❌' }}
-        </div>
-        <div class="result-content">
-          <h4>{{ uploadResult.success ? 'Operación Exitosa' : 'Error en la Operación' }}</h4>
-          <p>{{ uploadResult.message }}</p>
-          <div class="result-details" *ngIf="uploadResult.records">
-            <span>Registros procesados: <strong>{{ uploadResult.records }}</strong></span>
+    @if (uploadResult) {
+      <div class="result-container">
+        <div class="result-card" [ngClass]="uploadResult.success ? 'success' : 'error'">
+          <div class="result-icon">
+            {{ uploadResult.success ? '✅' : '❌' }}
           </div>
-          <div class="error-list" *ngIf="uploadResult.errors && uploadResult.errors.length > 0">
-            <h5>Errores encontrados:</h5>
-            <ul>
-              <li *ngFor="let error of uploadResult.errors">{{ error }}</li>
-            </ul>
+          <div class="result-content">
+            <h4>{{ uploadResult.success ? 'Operación Exitosa' : 'Error en la Operación' }}</h4>
+            <p>{{ uploadResult.message }}</p>
+            @if (uploadResult.records) {
+              <div class="result-details">
+                <span>Registros procesados: <strong>{{ uploadResult.records }}</strong></span>
+              </div>
+            }
+            @if (uploadResult.errors && uploadResult.errors.length > 0) {
+              <div class="error-list">
+                <h5>Errores encontrados:</h5>
+                <ul>
+                  @for (error of uploadResult.errors; track error) {
+                    <li>{{ error }}</li>
+                  }
+                </ul>
+              </div>
+            }
           </div>
+          <button
+            type="button"
+            class="result-close"
+            (click)="uploadResult = null">
+            ✕
+          </button>
         </div>
-        <button
-          type="button"
-          class="result-close"
-          (click)="uploadResult = null">
-          ✕
-        </button>
       </div>
-    </div>
+    }
 
     <!-- Navegación por pestañas -->
     <div class="tabs-container">
@@ -218,359 +238,395 @@
                     class="form-control"
                     placeholder="Ej: OBL-2025-0001"
                     [class.error]="getFieldError('obligacion')">
-                  <div class="error-message" *ngIf="getFieldError('obligacion')">
-                    {{ getFieldError('obligacion') }}
+                    @if (getFieldError('obligacion')) {
+                      <div class="error-message">
+                        {{ getFieldError('obligacion') }}
+                      </div>
+                    }
                   </div>
-                </div>
 
-                <!-- Fecha Solicitud -->
-                <div class="form-group">
-                  <label for="fechaSolicitud" class="form-label">
-                    Fecha Solicitud <span class="required">*</span>
-                  </label>
-                  <input
-                    id="fechaSolicitud"
-                    type="date"
-                    formControlName="fechaSolicitud"
-                    class="form-control"
-                    [class.error]="getFieldError('fechaSolicitud')">
-                  <div class="error-message" *ngIf="getFieldError('fechaSolicitud')">
-                    {{ getFieldError('fechaSolicitud') }}
+                  <!-- Fecha Solicitud -->
+                  <div class="form-group">
+                    <label for="fechaSolicitud" class="form-label">
+                      Fecha Solicitud <span class="required">*</span>
+                    </label>
+                    <input
+                      id="fechaSolicitud"
+                      type="date"
+                      formControlName="fechaSolicitud"
+                      class="form-control"
+                      [class.error]="getFieldError('fechaSolicitud')">
+                      @if (getFieldError('fechaSolicitud')) {
+                        <div class="error-message">
+                          {{ getFieldError('fechaSolicitud') }}
+                        </div>
+                      }
+                    </div>
+
+                    <!-- Aval -->
+                    <div class="form-group">
+                      <label for="aval" class="form-label">
+                        Aval <span class="required">*</span>
+                      </label>
+                      <input
+                        id="aval"
+                        type="text"
+                        formControlName="aval"
+                        class="form-control"
+                        placeholder="Información del aval"
+                        [class.error]="getFieldError('aval')">
+                        @if (getFieldError('aval')) {
+                          <div class="error-message">
+                            {{ getFieldError('aval') }}
+                          </div>
+                        }
+                      </div>
+                    </div>
                   </div>
-                </div>
 
-                <!-- Aval -->
-                <div class="form-group">
-                  <label for="aval" class="form-label">
-                    Aval <span class="required">*</span>
-                  </label>
-                  <input
-                    id="aval"
-                    type="text"
-                    formControlName="aval"
-                    class="form-control"
-                    placeholder="Información del aval"
-                    [class.error]="getFieldError('aval')">
-                  <div class="error-message" *ngIf="getFieldError('aval')">
-                    {{ getFieldError('aval') }}
-                  </div>
-                </div>
-              </div>
-            </div>
+                  <!-- Sección: Información Financiera -->
+                  <div class="form-section">
+                    <div class="section-header">
+                      <h4>Información Financiera</h4>
+                    </div>
 
-            <!-- Sección: Información Financiera -->
-            <div class="form-section">
-              <div class="section-header">
-                <h4>Información Financiera</h4>
-              </div>
+                    <div class="form-grid">
+                      <!-- Valor Capital -->
+                      <div class="form-group">
+                        <label for="valorCapital" class="form-label">
+                          Valor Capital <span class="required">*</span>
+                        </label>
+                        <input
+                          id="valorCapital"
+                          type="number"
+                          formControlName="valorCapital"
+                          class="form-control"
+                          placeholder="0.00"
+                          step="0.01"
+                          min="0.01"
+                          [class.error]="getFieldError('valorCapital')">
+                          @if (getFieldError('valorCapital')) {
+                            <div class="error-message">
+                              {{ getFieldError('valorCapital') }}
+                            </div>
+                          }
+                        </div>
 
-              <div class="form-grid">
-                <!-- Valor Capital -->
-                <div class="form-group">
-                  <label for="valorCapital" class="form-label">
-                    Valor Capital <span class="required">*</span>
-                  </label>
-                  <input
-                    id="valorCapital"
-                    type="number"
-                    formControlName="valorCapital"
-                    class="form-control"
-                    placeholder="0.00"
-                    step="0.01"
-                    min="0.01"
-                    [class.error]="getFieldError('valorCapital')">
-                  <div class="error-message" *ngIf="getFieldError('valorCapital')">
-                    {{ getFieldError('valorCapital') }}
-                  </div>
-                </div>
+                        <!-- Intereses -->
+                        <div class="form-group">
+                          <label for="intereses" class="form-label">
+                            Intereses <span class="required">*</span>
+                          </label>
+                          <input
+                            id="intereses"
+                            type="number"
+                            formControlName="intereses"
+                            class="form-control"
+                            placeholder="0.00"
+                            step="0.01"
+                            min="0"
+                            [class.error]="getFieldError('intereses')">
+                            @if (getFieldError('intereses')) {
+                              <div class="error-message">
+                                {{ getFieldError('intereses') }}
+                              </div>
+                            }
+                          </div>
 
-                <!-- Intereses -->
-                <div class="form-group">
-                  <label for="intereses" class="form-label">
-                    Intereses <span class="required">*</span>
-                  </label>
-                  <input
-                    id="intereses"
-                    type="number"
-                    formControlName="intereses"
-                    class="form-control"
-                    placeholder="0.00"
-                    step="0.01"
-                    min="0"
-                    [class.error]="getFieldError('intereses')">
-                  <div class="error-message" *ngIf="getFieldError('intereses')">
-                    {{ getFieldError('intereses') }}
-                  </div>
-                </div>
+                          <!-- Otros Conceptos -->
+                          <div class="form-group">
+                            <label for="otrosConceptos" class="form-label">Otros Conceptos</label>
+                            <input
+                              id="otrosConceptos"
+                              type="number"
+                              formControlName="otrosConceptos"
+                              class="form-control"
+                              placeholder="0.00"
+                              step="0.01"
+                              min="0">
+                            </div>
+                          </div>
+                        </div>
 
-                <!-- Otros Conceptos -->
-                <div class="form-group">
-                  <label for="otrosConceptos" class="form-label">Otros Conceptos</label>
-                  <input
-                    id="otrosConceptos"
-                    type="number"
-                    formControlName="otrosConceptos"
-                    class="form-control"
-                    placeholder="0.00"
-                    step="0.01"
-                    min="0">
-                </div>
-              </div>
-            </div>
+                        <!-- Sección: Información de Contacto -->
+                        <div class="form-section">
+                          <div class="section-header">
+                            <h4>Información de Contacto</h4>
+                          </div>
 
-            <!-- Sección: Información de Contacto -->
-            <div class="form-section">
-              <div class="section-header">
-                <h4>Información de Contacto</h4>
-              </div>
+                          <div class="form-grid">
+                            <!-- Dirección -->
+                            <div class="form-group full-width">
+                              <label for="direccion" class="form-label">
+                                Dirección <span class="required">*</span>
+                              </label>
+                              <input
+                                id="direccion"
+                                type="text"
+                                formControlName="direccion"
+                                class="form-control"
+                                placeholder="Dirección completa"
+                                [class.error]="getFieldError('direccion')">
+                                @if (getFieldError('direccion')) {
+                                  <div class="error-message">
+                                    {{ getFieldError('direccion') }}
+                                  </div>
+                                }
+                              </div>
 
-              <div class="form-grid">
-                <!-- Dirección -->
-                <div class="form-group full-width">
-                  <label for="direccion" class="form-label">
-                    Dirección <span class="required">*</span>
-                  </label>
-                  <input
-                    id="direccion"
-                    type="text"
-                    formControlName="direccion"
-                    class="form-control"
-                    placeholder="Dirección completa"
-                    [class.error]="getFieldError('direccion')">
-                  <div class="error-message" *ngIf="getFieldError('direccion')">
-                    {{ getFieldError('direccion') }}
-                  </div>
-                </div>
+                              <!-- Código Departamento -->
+                              <div class="form-group">
+                                <label for="codigoDepartamento" class="form-label">
+                                  Código Departamento <span class="required">*</span>
+                                </label>
+                                <input
+                                  id="codigoDepartamento"
+                                  type="text"
+                                  formControlName="codigoDepartamento"
+                                  class="form-control"
+                                  placeholder="Ej: 11"
+                                  [class.error]="getFieldError('codigoDepartamento')">
+                                  @if (getFieldError('codigoDepartamento')) {
+                                    <div class="error-message">
+                                      {{ getFieldError('codigoDepartamento') }}
+                                    </div>
+                                  }
+                                </div>
 
-                <!-- Código Departamento -->
-                <div class="form-group">
-                  <label for="codigoDepartamento" class="form-label">
-                    Código Departamento <span class="required">*</span>
-                  </label>
-                  <input
-                    id="codigoDepartamento"
-                    type="text"
-                    formControlName="codigoDepartamento"
-                    class="form-control"
-                    placeholder="Ej: 11"
-                    [class.error]="getFieldError('codigoDepartamento')">
-                  <div class="error-message" *ngIf="getFieldError('codigoDepartamento')">
-                    {{ getFieldError('codigoDepartamento') }}
-                  </div>
-                </div>
+                                <!-- Código Ciudad -->
+                                <div class="form-group">
+                                  <label for="codigoCiudad" class="form-label">
+                                    Código Ciudad <span class="required">*</span>
+                                  </label>
+                                  <input
+                                    id="codigoCiudad"
+                                    type="text"
+                                    formControlName="codigoCiudad"
+                                    class="form-control"
+                                    placeholder="Ej: 11001"
+                                    [class.error]="getFieldError('codigoCiudad')">
+                                    @if (getFieldError('codigoCiudad')) {
+                                      <div class="error-message">
+                                        {{ getFieldError('codigoCiudad') }}
+                                      </div>
+                                    }
+                                  </div>
 
-                <!-- Código Ciudad -->
-                <div class="form-group">
-                  <label for="codigoCiudad" class="form-label">
-                    Código Ciudad <span class="required">*</span>
-                  </label>
-                  <input
-                    id="codigoCiudad"
-                    type="text"
-                    formControlName="codigoCiudad"
-                    class="form-control"
-                    placeholder="Ej: 11001"
-                    [class.error]="getFieldError('codigoCiudad')">
-                  <div class="error-message" *ngIf="getFieldError('codigoCiudad')">
-                    {{ getFieldError('codigoCiudad') }}
-                  </div>
-                </div>
+                                  <!-- Email -->
+                                  <div class="form-group">
+                                    <label for="email" class="form-label">
+                                      Email <span class="required">*</span>
+                                    </label>
+                                    <input
+                                      id="email"
+                                      type="email"
+                                      formControlName="email"
+                                      class="form-control"
+                                      placeholder="ejemplo@correo.com"
+                                      [class.error]="getFieldError('email')">
+                                      @if (getFieldError('email')) {
+                                        <div class="error-message">
+                                          {{ getFieldError('email') }}
+                                        </div>
+                                      }
+                                    </div>
 
-                <!-- Email -->
-                <div class="form-group">
-                  <label for="email" class="form-label">
-                    Email <span class="required">*</span>
-                  </label>
-                  <input
-                    id="email"
-                    type="email"
-                    formControlName="email"
-                    class="form-control"
-                    placeholder="ejemplo@correo.com"
-                    [class.error]="getFieldError('email')">
-                  <div class="error-message" *ngIf="getFieldError('email')">
-                    {{ getFieldError('email') }}
-                  </div>
-                </div>
+                                    <!-- Celular -->
+                                    <div class="form-group">
+                                      <label for="celular" class="form-label">
+                                        Celular <span class="required">*</span>
+                                      </label>
+                                      <input
+                                        id="celular"
+                                        type="text"
+                                        formControlName="celular"
+                                        class="form-control"
+                                        placeholder="3001234567"
+                                        maxlength="10"
+                                        [class.error]="getFieldError('celular')">
+                                        @if (getFieldError('celular')) {
+                                          <div class="error-message">
+                                            {{ getFieldError('celular') }}
+                                          </div>
+                                        }
+                                        <small class="form-hint">10 dígitos sin espacios</small>
+                                      </div>
+                                    </div>
+                                  </div>
 
-                <!-- Celular -->
-                <div class="form-group">
-                  <label for="celular" class="form-label">
-                    Celular <span class="required">*</span>
-                  </label>
-                  <input
-                    id="celular"
-                    type="text"
-                    formControlName="celular"
-                    class="form-control"
-                    placeholder="3001234567"
-                    maxlength="10"
-                    [class.error]="getFieldError('celular')">
-                  <div class="error-message" *ngIf="getFieldError('celular')">
-                    {{ getFieldError('celular') }}
-                  </div>
-                  <small class="form-hint">10 dígitos sin espacios</small>
-                </div>
-              </div>
-            </div>
+                                  <!-- Sección: Información Empresarial -->
+                                  <div class="form-section">
+                                    <div class="section-header">
+                                      <h4>Cargue Archivos</h4>
+                                    </div>
 
-            <!-- Sección: Información Empresarial -->
-            <div class="form-section">
-              <div class="section-header">
-                <h4>Cargue Archivos</h4>
-              </div>
+                                    <div class="form-grid">
+                                      <!-- Convenio NIT -->
+                                      <div class="form-group">
+                                        <label for="convenioNit" class="form-label">
+                                          Convenio NIT <span class="required">*</span>
+                                        </label>
+                                        <input
+                                          id="convenioNit"
+                                          type="text"
+                                          formControlName="convenioNit"
+                                          class="form-control"
+                                          placeholder="NIT del convenio"
+                                          [class.error]="getFieldError('convenioNit')">
+                                          @if (getFieldError('convenioNit')) {
+                                            <div class="error-message">
+                                              {{ getFieldError('convenioNit') }}
+                                            </div>
+                                          }
+                                        </div>
 
-              <div class="form-grid">
-                <!-- Convenio NIT -->
-                <div class="form-group">
-                  <label for="convenioNit" class="form-label">
-                    Convenio NIT <span class="required">*</span>
-                  </label>
-                  <input
-                    id="convenioNit"
-                    type="text"
-                    formControlName="convenioNit"
-                    class="form-control"
-                    placeholder="NIT del convenio"
-                    [class.error]="getFieldError('convenioNit')">
-                  <div class="error-message" *ngIf="getFieldError('convenioNit')">
-                    {{ getFieldError('convenioNit') }}
-                  </div>
-                </div>
+                                        <!-- NIT Empresa -->
+                                        <div class="form-group">
+                                          <label for="nitEmpresa" class="form-label">
+                                            NIT Empresa <span class="required">*</span>
+                                          </label>
+                                          <input
+                                            id="nitEmpresa"
+                                            type="text"
+                                            formControlName="nitEmpresa"
+                                            class="form-control"
+                                            placeholder="NIT de la empresa"
+                                            [class.error]="getFieldError('nitEmpresa')">
+                                            @if (getFieldError('nitEmpresa')) {
+                                              <div class="error-message">
+                                                {{ getFieldError('nitEmpresa') }}
+                                              </div>
+                                            }
+                                          </div>
+                                        </div>
+                                      </div>
 
-                <!-- NIT Empresa -->
-                <div class="form-group">
-                  <label for="nitEmpresa" class="form-label">
-                    NIT Empresa <span class="required">*</span>
-                  </label>
-                  <input
-                    id="nitEmpresa"
-                    type="text"
-                    formControlName="nitEmpresa"
-                    class="form-control"
-                    placeholder="NIT de la empresa"
-                    [class.error]="getFieldError('nitEmpresa')">
-                  <div class="error-message" *ngIf="getFieldError('nitEmpresa')">
-                    {{ getFieldError('nitEmpresa') }}
-                  </div>
-                </div>
-              </div>
-            </div>
+                                      <!-- Botones de acción -->
+                                      <div class="form-actions">
+                                        <button
+                                          type="button"
+                                          class="btn-secondary"
+                                          (click)="claimsForm.reset()"
+                                          [disabled]="isLoading">
+                                          Limpiar Formulario
+                                        </button>
+                                        <button
+                                          type="submit"
+                                          class="btn-primary"
+                                          [disabled]="isLoading || claimsForm.invalid">
+                                        @if (isLoading) {
+                                          <svg lucideLoaderCircle class="spinning"></svg>
+                                        }
+                                        @if (isLoading) {
+                                          <span class="loading-spinner"></span>
+                                        }
+                                        {{ isLoading ? 'Guardando...' : 'Guardar Siniestro' }}
+                                      </button>
+                                    </div>
+                                  </form>
+                                </div>
+                              </div>
 
-            <!-- Botones de acción -->
-            <div class="form-actions">
-              <button
-                type="button"
-                class="btn-secondary"
-                (click)="claimsForm.reset()"
-                [disabled]="isLoading">
-                Limpiar Formulario
-              </button>
-              <button
-                type="submit"
-                class="btn-primary"
-                [disabled]="isLoading || claimsForm.invalid">
-                <svg *ngIf="isLoading" lucideLoaderCircle class="spinning"></svg>
-                <span *ngIf="isLoading" class="loading-spinner"></span>
-                {{ isLoading ? 'Guardando...' : 'Guardar Siniestro' }}
-              </button>
-            </div>
-          </form>
-        </div>
-      </div>
+                              <!-- Pestaña: Carga Masiva -->
+                              <div class="tab-panel" [class.active]="activeTab === 'upload'">
+                                <div class="upload-container">
+                                  <div class="upload-header">
+                                    <h3>Carga Masiva de Siniestros</h3>
+                                    <p>Cargue múltiples registros de siniestros usando archivos Excel o CSV</p>
+                                  </div>
 
-      <!-- Pestaña: Carga Masiva -->
-      <div class="tab-panel" [class.active]="activeTab === 'upload'">
-        <div class="upload-container">
-          <div class="upload-header">
-            <h3>Carga Masiva de Siniestros</h3>
-            <p>Cargue múltiples registros de siniestros usando archivos Excel o CSV</p>
-          </div>
+                                  <!-- Instrucciones -->
+                                  <div class="upload-instructions">
+                                    <h4>📋 Instrucciones de Carga</h4>
+                                    <ul>
+                                      <li>Descargue la plantilla oficial para evitar errores de formato</li>
+                                      <li>Complete todos los campos obligatorios en el archivo</li>
+                                      <li>Formatos soportados: Excel (.xls, .xlsx) y CSV (.csv)</li>
+                                      <li>Tamaño máximo del archivo: 10MB</li>
+                                      <li>Máximo 5,000 registros por archivo</li>
+                                    </ul>
+                                  </div>
 
-          <!-- Instrucciones -->
-          <div class="upload-instructions">
-            <h4>📋 Instrucciones de Carga</h4>
-            <ul>
-              <li>Descargue la plantilla oficial para evitar errores de formato</li>
-              <li>Complete todos los campos obligatorios en el archivo</li>
-              <li>Formatos soportados: Excel (.xls, .xlsx) y CSV (.csv)</li>
-              <li>Tamaño máximo del archivo: 10MB</li>
-              <li>Máximo 5,000 registros por archivo</li>
-            </ul>
-          </div>
+                                  <!-- Descargar plantilla -->
+                                  <div class="template-section">
+                                    <button
+                                      type="button"
+                                      class="btn-template"
+                                      (click)="downloadTemplate()">
+                                      <svg lucideDownload></svg>
+                                      <span class="btn-icon">📥</span>
+                                      Descargar Plantilla Excel
+                                    </button>
+                                  </div>
 
-          <!-- Descargar plantilla -->
-          <div class="template-section">
-            <button
-              type="button"
-              class="btn-template"
-              (click)="downloadTemplate()">
-              <svg lucideDownload></svg>
-              <span class="btn-icon">📥</span>
-              Descargar Plantilla Excel
-            </button>
-          </div>
+                                  <!-- Área de carga de archivos -->
+                                  <div class="upload-area">
+                                    <div class="file-input-container"
+                                      (drop)="onFileDrop($event)"
+                                      (dragover)="onDragOver($event)"
+                                      (dragleave)="onDragLeave($event)"
+                                      [class.drag-over]="isDragging">
+                                      <input
+                                        id="fileInput"
+                                        type="file"
+                                        accept=".xls,.xlsx,.csv"
+                                        (change)="onFileSelected($event)"
+                                        class="file-input">
+                                        <label for="fileInput" class="file-input-label">
+                                          <div class="upload-icon">
+                                            <svg lucideCloudUpload></svg>
+                                          </div>
+                                          <div class="upload-text">
+                                            <span class="primary-text">
+                                              {{ uploadedFile ? uploadedFile.name : 'Seleccionar archivo' }}
+                                            </span>
+                                            <span class="secondary-text">
+                                              Arrastra un archivo aquí o haz clic para seleccionar
+                                            </span>
+                                          </div>
+                                        </label>
+                                      </div>
 
-          <!-- Área de carga de archivos -->
-          <div class="upload-area">
-            <div class="file-input-container"
-                 (drop)="onFileDrop($event)"
-                 (dragover)="onDragOver($event)"
-                 (dragleave)="onDragLeave($event)"
-                 [class.drag-over]="isDragging">
-              <input
-                id="fileInput"
-                type="file"
-                accept=".xls,.xlsx,.csv"
-                (change)="onFileSelected($event)"
-                class="file-input">
-              <label for="fileInput" class="file-input-label">
-                <div class="upload-icon">
-                  <svg lucideCloudUpload></svg>
-                </div>
-                <div class="upload-text">
-                  <span class="primary-text">
-                    {{ uploadedFile ? uploadedFile.name : 'Seleccionar archivo' }}
-                  </span>
-                  <span class="secondary-text">
-                    Arrastra un archivo aquí o haz clic para seleccionar
-                  </span>
-                </div>
-              </label>
-            </div>
+                                      <!-- Información del archivo seleccionado -->
+                                      @if (uploadedFile) {
+                                        <div class="file-info">
+                                          <div class="file-details">
+                                            <div class="file-info-left">
+                                              <span class="file-name">{{ uploadedFile.name }}</span>
+                                              <span class="file-size">{{ (uploadedFile.size / 1024 / 1024).toFixed(2) }} MB</span>
+                                            </div>
+                                            <button
+                                              type="button"
+                                              class="btn-remove-file"
+                                              (click)="removeSelectedFile()"
+                                              title="Quitar archivo">
+                                              ✕
+                                            </button>
+                                          </div>
+                                        </div>
+                                      }
 
-            <!-- Información del archivo seleccionado -->
-            <div class="file-info" *ngIf="uploadedFile">
-              <div class="file-details">
-                <div class="file-info-left">
-                  <span class="file-name">{{ uploadedFile.name }}</span>
-                  <span class="file-size">{{ (uploadedFile.size / 1024 / 1024).toFixed(2) }} MB</span>
-                </div>
-                <button
-                  type="button"
-                  class="btn-remove-file"
-                  (click)="removeSelectedFile()"
-                  title="Quitar archivo">
-                  ✕
-                </button>
-              </div>
-            </div>
-
-            <!-- Botón de carga -->
-            <div class="upload-actions" *ngIf="uploadedFile">
-              <button
-                type="button"
-                class="btn-primary btn-upload"
-                (click)="onUploadFile()"
-                [disabled]="isLoading">
-                <svg *ngIf="isLoading" lucideLoaderCircle class="spinning"></svg>
-                <span *ngIf="isLoading" class="loading-spinner"></span>
-                {{ isLoading ? 'Procesando archivo...' : 'Cargar Archivo' }}
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </main>
-</div>
+                                      <!-- Botón de carga -->
+                                      @if (uploadedFile) {
+                                        <div class="upload-actions">
+                                          <button
+                                            type="button"
+                                            class="btn-primary btn-upload"
+                                            (click)="onUploadFile()"
+                                            [disabled]="isLoading">
+                                          @if (isLoading) {
+                                            <svg lucideLoaderCircle class="spinning"></svg>
+                                          }
+                                          @if (isLoading) {
+                                            <span class="loading-spinner"></span>
+                                          }
+                                          {{ isLoading ? 'Procesando archivo...' : 'Cargar Archivo' }}
+                                        </button>
+                                      </div>
+                                    }
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          </main>
+                        </div>

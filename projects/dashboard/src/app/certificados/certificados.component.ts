@@ -1,5 +1,5 @@
 import { Component, inject, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { catchError, finalize } from 'rxjs/operators';
@@ -16,7 +16,7 @@ import { CertificadosService, CertificadoIngresosResponse } from './certificados
 @Component({
   selector: 'app-certificados',
   standalone: true,
-  imports: [CommonModule, FormsModule, HeaderComponent, SidebarComponent],
+  imports: [FormsModule, HeaderComponent, SidebarComponent],
   templateUrl: './certificados.component.html',
   styleUrls: ['./certificados.component.css']
 })

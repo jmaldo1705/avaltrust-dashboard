@@ -1,39 +1,39 @@
 import { Component, Input, Output, EventEmitter } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 
 @Component({
   selector: 'app-session-warning',
   standalone: true,
-  imports: [CommonModule],
+  imports: [],
   template: `
-    <div class="session-warning-overlay" *ngIf="show">
-      <div class="session-warning-dialog">
-        <div class="session-warning-header">
-          <svg class="warning-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <circle cx="12" cy="12" r="10"></circle>
-            <line x1="12" y1="8" x2="12" y2="12"></line>
-            <line x1="12" y1="16" x2="12.01" y2="16"></line>
-          </svg>
-          <h2>Sesión por expirar</h2>
-        </div>
-        
-        <div class="session-warning-content">
-          <p>Tu sesión está a punto de expirar por inactividad.</p>
-          <p class="countdown">Tiempo restante: <strong>{{ timeRemaining }} segundos</strong></p>
-          <p class="info-text">¿Deseas continuar trabajando en la plataforma?</p>
-        </div>
-        
-        <div class="session-warning-actions">
-          <button class="btn btn-secondary" (click)="onLogout()">
-            Cerrar sesión
-          </button>
-          <button class="btn btn-primary" (click)="onContinue()">
-            Continuar trabajando
-          </button>
+    @if (show) {
+      <div class="session-warning-overlay">
+        <div class="session-warning-dialog">
+          <div class="session-warning-header">
+            <svg class="warning-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="10"></circle>
+              <line x1="12" y1="8" x2="12" y2="12"></line>
+              <line x1="12" y1="16" x2="12.01" y2="16"></line>
+            </svg>
+            <h2>Sesión por expirar</h2>
+          </div>
+          <div class="session-warning-content">
+            <p>Tu sesión está a punto de expirar por inactividad.</p>
+            <p class="countdown">Tiempo restante: <strong>{{ timeRemaining }} segundos</strong></p>
+            <p class="info-text">¿Deseas continuar trabajando en la plataforma?</p>
+          </div>
+          <div class="session-warning-actions">
+            <button class="btn btn-secondary" (click)="onLogout()">
+              Cerrar sesión
+            </button>
+            <button class="btn btn-primary" (click)="onContinue()">
+              Continuar trabajando
+            </button>
+          </div>
         </div>
       </div>
-    </div>
-  `,
+    }
+    `,
   styles: [`
     .session-warning-overlay {
       position: fixed;

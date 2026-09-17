@@ -113,25 +113,26 @@
           </div>
 
           <div class="report-types-grid">
-            <button
-              *ngFor="let reportType of reportTypes"
-              type="button"
-              class="report-type-card"
-              [class.selected]="selectedReportType === reportType.value"
-              (click)="onReportTypeChange(reportType.value)">
-              <span class="report-type-icon">
-                <svg lucideFileSpreadsheet></svg>
-              </span>
-              <span class="report-type-copy">
-                <strong>{{ reportType.label }}</strong>
-                <small>Configurar y descargar</small>
-              </span>
-              <span class="selection-indicator"></span>
-            </button>
+            @for (reportType of reportTypes; track reportType) {
+              <button
+                type="button"
+                class="report-type-card"
+                [class.selected]="selectedReportType === reportType.value"
+                (click)="onReportTypeChange(reportType.value)">
+                <span class="report-type-icon">
+                  <svg lucideFileSpreadsheet></svg>
+                </span>
+                <span class="report-type-copy">
+                  <strong>{{ reportType.label }}</strong>
+                  <small>Configurar y descargar</small>
+                </span>
+                <span class="selection-indicator"></span>
+              </button>
+            }
           </div>
         </section>
 
-        <ng-container *ngIf="selectedReportType; else emptySelection">
+        @if (selectedReportType) {
           <section class="form-section">
             <div class="section-header">
               <div class="section-icon">
@@ -142,30 +143,31 @@
                 <h3>Rango de consulta</h3>
               </div>
             </div>
-
             <div class="form-row one-col">
               <div class="form-group">
                 <label for="timeRange" class="form-label">Rango de tiempo</label>
                 <select id="timeRange" formControlName="timeRange" class="form-control">
-                  <option *ngFor="let range of timeRanges" [value]="range.value">
-                    {{ range.label }}
-                  </option>
+                  @for (range of timeRanges; track range) {
+                    <option [value]="range.value">
+                      {{ range.label }}
+                    </option>
+                  }
                 </select>
               </div>
             </div>
-
-            <div class="form-row" *ngIf="reportsForm.get('timeRange')?.value === 'custom'">
-              <div class="form-group">
-                <label for="startDate" class="form-label">Fecha inicio</label>
-                <input type="date" id="startDate" formControlName="startDate" class="form-control">
+            @if (reportsForm.get('timeRange')?.value === 'custom') {
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="startDate" class="form-label">Fecha inicio</label>
+                  <input type="date" id="startDate" formControlName="startDate" class="form-control">
+                </div>
+                <div class="form-group">
+                  <label for="endDate" class="form-label">Fecha fin</label>
+                  <input type="date" id="endDate" formControlName="endDate" class="form-control">
+                </div>
               </div>
-              <div class="form-group">
-                <label for="endDate" class="form-label">Fecha fin</label>
-                <input type="date" id="endDate" formControlName="endDate" class="form-control">
-              </div>
-            </div>
+            }
           </section>
-
           <section class="form-section">
             <div class="section-header">
               <div class="section-icon">
@@ -176,36 +178,40 @@
                 <h3>Filtros del reporte</h3>
               </div>
             </div>
-
             <div class="form-row">
               <div class="form-group">
                 <label for="documentType" class="form-label">Tipo de documento</label>
                 <select id="documentType" formControlName="documentType" class="form-control">
                   <option value="">Todos los tipos</option>
-                  <option *ngFor="let type of documentTypes" [value]="type.value">
-                    {{ type.label }}
-                  </option>
+                  @for (type of documentTypes; track type) {
+                    <option [value]="type.value">
+                      {{ type.label }}
+                    </option>
+                  }
                 </select>
               </div>
               <div class="form-group">
                 <label for="clientType" class="form-label">Tipo de cliente</label>
                 <select id="clientType" formControlName="clientType" class="form-control">
                   <option value="">Todos los tipos</option>
-                  <option *ngFor="let type of clientTypes" [value]="type.value">
-                    {{ type.label }}
-                  </option>
+                  @for (type of clientTypes; track type) {
+                    <option [value]="type.value">
+                      {{ type.label }}
+                    </option>
+                  }
                 </select>
               </div>
             </div>
-
             <div class="form-row">
               <div class="form-group">
                 <label for="creditState" class="form-label">Estado del credito</label>
                 <select id="creditState" formControlName="creditState" class="form-control">
                   <option value="">Todos los estados</option>
-                  <option *ngFor="let state of creditStates" [value]="state.value">
-                    {{ state.label }}
-                  </option>
+                  @for (state of creditStates; track state) {
+                    <option [value]="state.value">
+                      {{ state.label }}
+                    </option>
+                  }
                 </select>
               </div>
               <div class="form-group">
@@ -218,7 +224,6 @@
                   placeholder="Nombre o documento">
               </div>
             </div>
-
             <div class="form-row">
               <div class="form-group">
                 <label for="minAmount" class="form-label">Monto minimo</label>
@@ -240,9 +245,7 @@
               </div>
             </div>
           </section>
-        </ng-container>
-
-        <ng-template #emptySelection>
+        } @else {
           <section class="empty-selection">
             <div class="empty-icon">
               <svg lucideInfo></svg>
@@ -250,7 +253,8 @@
             <h3>Selecciona un informe para continuar</h3>
             <p>Los filtros y opciones se activan segun el documento elegido.</p>
           </section>
-        </ng-template>
+        }
+
       </section>
 
       <aside class="documents-sidebar">
@@ -275,162 +279,188 @@
           </div>
         </section>
 
-        <section class="side-panel options-panel" *ngIf="selectedReportType">
-          <div class="side-panel-header">
-            <span class="section-kicker">Formato</span>
-            <strong>Descarga</strong>
-          </div>
+        @if (selectedReportType) {
+          <section class="side-panel options-panel">
+            <div class="side-panel-header">
+              <span class="section-kicker">Formato</span>
+              <strong>Descarga</strong>
+            </div>
+            <div class="format-buttons" role="group" aria-label="Formato de salida">
+              <button
+                type="button"
+                class="format-btn"
+                [class.active]="selectedOutputFormat === 'PDF'"
+                (click)="onOutputFormatChange('PDF')">
+                <svg lucideFileText></svg>
+                PDF
+              </button>
+              <button
+                type="button"
+                class="format-btn"
+                [class.active]="selectedOutputFormat === 'EXCEL'"
+                (click)="onOutputFormatChange('EXCEL')">
+                <svg lucideFileSpreadsheet></svg>
+                Excel
+              </button>
+              <button
+                type="button"
+                class="format-btn"
+                [class.active]="selectedOutputFormat === 'CSV'"
+                (click)="onOutputFormatChange('CSV')">
+                <svg lucideFileSpreadsheet></svg>
+                CSV
+              </button>
+            </div>
+            <div class="checkbox-group">
+              <label class="checkbox-label">
+                <input type="checkbox" formControlName="includeCharts">
+                <span class="checkmark"></span>
+                Graficos
+              </label>
+              <label class="checkbox-label">
+                <input type="checkbox" formControlName="includeDetails">
+                <span class="checkmark"></span>
+                Detalles
+              </label>
+              <label class="checkbox-label">
+                <input type="checkbox" formControlName="includeMetrics">
+                <span class="checkmark"></span>
+                Metricas
+              </label>
+            </div>
+          </section>
+        }
 
-          <div class="format-buttons" role="group" aria-label="Formato de salida">
+        @if (selectedReportType) {
+          <section class="side-panel action-panel">
             <button
               type="button"
-              class="format-btn"
-              [class.active]="selectedOutputFormat === 'PDF'"
-              (click)="onOutputFormatChange('PDF')">
-              <svg lucideFileText></svg>
-              PDF
+              class="secondary-btn wide-btn"
+              (click)="previewReport()"
+              [disabled]="isLoading">
+              <svg lucideEye></svg>
+              Vista previa
             </button>
             <button
               type="button"
-              class="format-btn"
-              [class.active]="selectedOutputFormat === 'EXCEL'"
-              (click)="onOutputFormatChange('EXCEL')">
-              <svg lucideFileSpreadsheet></svg>
-              Excel
+              class="primary-btn wide-btn"
+              (click)="generateReport()"
+              [disabled]="isLoading || !selectedReportType">
+              @if (isLoading) {
+                <svg lucideLoaderCircle class="spinning"></svg>
+              }
+              @if (!isLoading) {
+                <svg lucideDownload></svg>
+              }
+              {{ isLoading ? 'Generando...' : 'Descargar ' + selectedOutputFormat }}
             </button>
-            <button
-              type="button"
-              class="format-btn"
-              [class.active]="selectedOutputFormat === 'CSV'"
-              (click)="onOutputFormatChange('CSV')">
-              <svg lucideFileSpreadsheet></svg>
-              CSV
-            </button>
-          </div>
-
-          <div class="checkbox-group">
-            <label class="checkbox-label">
-              <input type="checkbox" formControlName="includeCharts">
-              <span class="checkmark"></span>
-              Graficos
-            </label>
-            <label class="checkbox-label">
-              <input type="checkbox" formControlName="includeDetails">
-              <span class="checkmark"></span>
-              Detalles
-            </label>
-            <label class="checkbox-label">
-              <input type="checkbox" formControlName="includeMetrics">
-              <span class="checkmark"></span>
-              Metricas
-            </label>
-          </div>
-        </section>
-
-        <section class="side-panel action-panel" *ngIf="selectedReportType">
-          <button
-            type="button"
-            class="secondary-btn wide-btn"
-            (click)="previewReport()"
-            [disabled]="isLoading">
-            <svg lucideEye></svg>
-            Vista previa
-          </button>
-          <button
-            type="button"
-            class="primary-btn wide-btn"
-            (click)="generateReport()"
-            [disabled]="isLoading || !selectedReportType">
-            <svg *ngIf="isLoading" lucideLoaderCircle class="spinning"></svg>
-            <svg *ngIf="!isLoading" lucideDownload></svg>
-            {{ isLoading ? 'Generando...' : 'Descargar ' + selectedOutputFormat }}
-          </button>
-        </section>
+          </section>
+        }
       </aside>
     </form>
 
-    <aside class="history-panel" *ngIf="showHistory">
-      <div class="history-header">
-        <div>
-          <span class="section-kicker">Actividad</span>
-          <h3>Historial de reportes</h3>
-        </div>
-        <button class="icon-button muted" type="button" aria-label="Cerrar historial" (click)="toggleHistory()">
-          <svg lucideX></svg>
-        </button>
-      </div>
-      <div class="history-content">
-        <div *ngIf="reportHistory.length === 0" class="empty-state">
-          <svg lucideInfo></svg>
-          <p>No hay reportes generados aun</p>
-        </div>
-        <article *ngFor="let report of reportHistory" class="history-item">
-          <div class="history-item-icon">
-            <svg lucideFileText></svg>
-          </div>
-          <div class="history-item-info">
-            <h4>{{ report.reportTitle }}</h4>
-            <p class="history-meta">
-              <span>{{ formatDate(report.generatedAt) }}</span>
-              <span>{{ formatFileSize(report.fileSize) }}</span>
-              <span [class]="getStatusClass(report.status)">{{ getStatusLabel(report.status) }}</span>
-            </p>
-          </div>
-          <span class="download-count">{{ report.downloadCount }} descargas</span>
-        </article>
-      </div>
-    </aside>
-
-    <div class="preview-modal" *ngIf="showPreview" (click)="closePreview()">
-      <section class="preview-content" (click)="$event.stopPropagation()">
-        <div class="preview-header">
+    @if (showHistory) {
+      <aside class="history-panel">
+        <div class="history-header">
           <div>
-            <span class="section-kicker">Vista previa</span>
-            <h3>{{ previewData?.title || 'Reporte' }}</h3>
+            <span class="section-kicker">Actividad</span>
+            <h3>Historial de reportes</h3>
           </div>
-          <button class="icon-button muted" type="button" aria-label="Cerrar vista previa" (click)="closePreview()">
+          <button class="icon-button muted" type="button" aria-label="Cerrar historial" (click)="toggleHistory()">
             <svg lucideX></svg>
           </button>
         </div>
-
-        <div class="preview-body" *ngIf="previewData">
-          <div class="preview-summary" *ngIf="previewData.summary">
-            <article class="summary-item">
-              <span>Total registros</span>
-              <strong>{{ previewData.summary.totalRecords }}</strong>
-            </article>
-            <article class="summary-item">
-              <span>Monto total</span>
-              <strong>${{ previewData.summary.totalAmount | number:'1.2-2' }}</strong>
-            </article>
-            <article class="summary-item">
-              <span>Promedio</span>
-              <strong>${{ previewData.summary.averageAmount | number:'1.2-2' }}</strong>
-            </article>
-          </div>
-
-          <div class="preview-data" *ngIf="previewData.data && previewData.data.length > 0">
-            <h4>Primeros registros</h4>
-            <div class="data-table-wrapper">
-              <table class="data-table">
-                <thead>
-                  <tr>
-                    <th *ngFor="let key of Object.keys(previewData.data[0])">{{ key }}</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr *ngFor="let row of previewData.data.slice(0, 10)">
-                    <td *ngFor="let key of Object.keys(row)">{{ row[key] }}</td>
-                  </tr>
-                </tbody>
-              </table>
+        <div class="history-content">
+          @if (reportHistory.length === 0) {
+            <div class="empty-state">
+              <svg lucideInfo></svg>
+              <p>No hay reportes generados aun</p>
             </div>
-            <p class="preview-note" *ngIf="previewData.data.length > 10">
-              {{ previewData.data.length - 10 }} registros adicionales
-            </p>
-          </div>
+          }
+          @for (report of reportHistory; track report) {
+            <article class="history-item">
+              <div class="history-item-icon">
+                <svg lucideFileText></svg>
+              </div>
+              <div class="history-item-info">
+                <h4>{{ report.reportTitle }}</h4>
+                <p class="history-meta">
+                  <span>{{ formatDate(report.generatedAt) }}</span>
+                  <span>{{ formatFileSize(report.fileSize) }}</span>
+                  <span [class]="getStatusClass(report.status)">{{ getStatusLabel(report.status) }}</span>
+                </p>
+              </div>
+              <span class="download-count">{{ report.downloadCount }} descargas</span>
+            </article>
+          }
         </div>
-      </section>
-    </div>
+      </aside>
+    }
+
+    @if (showPreview) {
+      <div class="preview-modal" (click)="closePreview()">
+        <section class="preview-content" (click)="$event.stopPropagation()">
+          <div class="preview-header">
+            <div>
+              <span class="section-kicker">Vista previa</span>
+              <h3>{{ previewData?.title || 'Reporte' }}</h3>
+            </div>
+            <button class="icon-button muted" type="button" aria-label="Cerrar vista previa" (click)="closePreview()">
+              <svg lucideX></svg>
+            </button>
+          </div>
+          @if (previewData) {
+            <div class="preview-body">
+              @if (previewData.summary) {
+                <div class="preview-summary">
+                  <article class="summary-item">
+                    <span>Total registros</span>
+                    <strong>{{ previewData.summary.totalRecords }}</strong>
+                  </article>
+                  <article class="summary-item">
+                    <span>Monto total</span>
+                    <strong>${{ previewData.summary.totalAmount | number:'1.2-2' }}</strong>
+                  </article>
+                  <article class="summary-item">
+                    <span>Promedio</span>
+                    <strong>${{ previewData.summary.averageAmount | number:'1.2-2' }}</strong>
+                  </article>
+                </div>
+              }
+              @if (previewData.data && previewData.data.length > 0) {
+                <div class="preview-data">
+                  <h4>Primeros registros</h4>
+                  <div class="data-table-wrapper">
+                    <table class="data-table">
+                      <thead>
+                        <tr>
+                          @for (key of Object.keys(previewData.data[0]); track key) {
+                            <th>{{ key }}</th>
+                          }
+                        </tr>
+                      </thead>
+                      <tbody>
+                        @for (row of previewData.data.slice(0, 10); track row) {
+                          <tr>
+                            @for (key of Object.keys(row); track key) {
+                              <td>{{ row[key] }}</td>
+                            }
+                          </tr>
+                        }
+                      </tbody>
+                    </table>
+                  </div>
+                  @if (previewData.data.length > 10) {
+                    <p class="preview-note">
+                      {{ previewData.data.length - 10 }} registros adicionales
+                    </p>
+                  }
+                </div>
+              }
+            </div>
+          }
+        </section>
+      </div>
+    }
   </main>
 </div>

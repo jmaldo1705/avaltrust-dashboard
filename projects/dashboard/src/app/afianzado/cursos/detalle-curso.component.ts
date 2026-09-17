@@ -1,5 +1,5 @@
 import { Component, OnInit, inject } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { ActivatedRoute, Router } from '@angular/router';
 import { CursosService } from './cursos.service';
 import { EvaluacionService } from './evaluacion.service';
@@ -11,7 +11,7 @@ import { AuthService } from '../../auth/auth.service';
 @Component({
   selector: 'app-detalle-curso',
   standalone: true,
-  imports: [CommonModule, HeaderComponent, SidebarComponent],
+  imports: [HeaderComponent, SidebarComponent],
   templateUrl: './detalle-curso.component.html',
   styleUrls: ['./detalle-curso.component.css']
 })

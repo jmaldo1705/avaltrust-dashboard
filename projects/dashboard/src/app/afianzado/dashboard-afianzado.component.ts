@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { Router } from '@angular/router';
 import { AfianzadoService } from './afianzado.service';
 import { DashboardAfianzado, Obligacion } from './dashboard-afianzado.interface';
@@ -10,7 +10,7 @@ import { AuthService } from '../auth/auth.service';
 @Component({
   selector: 'app-dashboard-afianzado',
   standalone: true,
-  imports: [CommonModule, HeaderComponent, SidebarComponent],
+  imports: [HeaderComponent, SidebarComponent],
   templateUrl: './dashboard-afianzado.component.html',
   styleUrls: ['./dashboard-afianzado.component.css']
 })

@@ -1,5 +1,5 @@
 import { Component, inject, OnInit, computed, signal } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 
@@ -14,7 +14,7 @@ import { AliadoEstrategico } from '../../aliado/aliado.interface';
 @Component({
   selector: 'app-users',
   standalone: true,
-  imports: [CommonModule, FormsModule, HeaderComponent, SidebarComponent],
+  imports: [FormsModule, HeaderComponent, SidebarComponent],
   templateUrl: './users.component.html',
   styleUrls: ['./users.component.css']
 })

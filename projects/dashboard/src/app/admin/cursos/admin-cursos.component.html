@@ -111,164 +111,173 @@
           <label class="page-size-control">
             <span>Por pagina</span>
             <select [value]="pageSize" (change)="cambiarTamanoPagina($event)" [disabled]="loading">
-              <option *ngFor="let option of pageSizeOptions" [value]="option">{{ option }}</option>
+              @for (option of pageSizeOptions; track option) {
+                <option [value]="option">{{ option }}</option>
+              }
             </select>
           </label>
         </div>
       </div>
 
-      <div *ngIf="loading" class="loading-container">
-        <svg lucideLoaderCircle class="spinning"></svg>
-        <p>Cargando cursos...</p>
-      </div>
-
-      <div *ngIf="!loading && errorMessage" class="error-panel">
-        <svg lucideInfo></svg>
-        <div>
-          <strong>No se pudo cargar la informacion</strong>
-          <p>{{ errorMessage }}</p>
+      @if (loading) {
+        <div class="loading-container">
+          <svg lucideLoaderCircle class="spinning"></svg>
+          <p>Cargando cursos...</p>
         </div>
-        <button type="button" class="secondary-btn" (click)="refrescarCursos()">Reintentar</button>
-      </div>
+      }
 
-      <ng-container *ngIf="!loading && !errorMessage">
-        <div *ngIf="cursos.length > 0; else emptyState" class="cursos-table-container">
-          <div class="drag-hint">
-            <svg lucideInfo></svg>
-            <span>Arrastra el control de la izquierda para reordenar solo los cursos de esta pagina.</span>
+      @if (!loading && errorMessage) {
+        <div class="error-panel">
+          <svg lucideInfo></svg>
+          <div>
+            <strong>No se pudo cargar la informacion</strong>
+            <p>{{ errorMessage }}</p>
           </div>
+          <button type="button" class="secondary-btn" (click)="refrescarCursos()">Reintentar</button>
+        </div>
+      }
 
-          <div class="table-scroll">
-            <table class="cursos-table">
-              <thead>
-                <tr>
-                  <th class="handle-col">Orden</th>
-                  <th>Curso</th>
-                  <th>Descripcion</th>
-                  <th>Duracion</th>
-                  <th>Secciones</th>
-                  <th>Estado</th>
-                  <th class="actions-col">Acciones</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr
-                  *ngFor="let curso of cursos; let i = index; trackBy: trackByCursoId"
-                  class="curso-row"
-                  [class.drag-over]="draggedOverIndex === i"
-                  (dragover)="onDragOver($event, i)"
-                  (dragleave)="onDragLeave()"
-                  (drop)="onDrop($event, i)">
-                  <td class="handle-cell">
+      @if (!loading && !errorMessage) {
+        @if (cursos.length > 0) {
+          <div class="cursos-table-container">
+            <div class="drag-hint">
+              <svg lucideInfo></svg>
+              <span>Arrastra el control de la izquierda para reordenar solo los cursos de esta pagina.</span>
+            </div>
+            <div class="table-scroll">
+              <table class="cursos-table">
+                <thead>
+                  <tr>
+                    <th class="handle-col">Orden</th>
+                    <th>Curso</th>
+                    <th>Descripcion</th>
+                    <th>Duracion</th>
+                    <th>Secciones</th>
+                    <th>Estado</th>
+                    <th class="actions-col">Acciones</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (curso of cursos; track trackByCursoId(i, curso); let i = $index) {
+                    <tr
+                      class="curso-row"
+                      [class.drag-over]="draggedOverIndex === i"
+                      (dragover)="onDragOver($event, i)"
+                      (dragleave)="onDragLeave()"
+                      (drop)="onDrop($event, i)">
+                      <td class="handle-cell">
+                        <button
+                          type="button"
+                          class="drag-handle"
+                          draggable="true"
+                          (dragstart)="onDragStart($event, curso)"
+                          (dragend)="onDragEnd($event)"
+                          title="Arrastrar para reordenar">
+                          <svg lucideGripVertical></svg>
+                        </button>
+                        <span>{{ curso.orden || visualIndex(i) }}</span>
+                      </td>
+                      <td>
+                        <div class="course-title-cell">
+                          <span class="course-icon">{{ curso.icono || 'AT' }}</span>
+                          <div>
+                            <strong>{{ curso.titulo }}</strong>
+                            <small>ID {{ curso.id }}</small>
+                          </div>
+                        </div>
+                      </td>
+                      <td>
+                        <div class="curso-descripcion">{{ curso.descripcion }}</div>
+                      </td>
+                      <td>{{ curso.duracionEstimada || 'Sin definir' }}</td>
+                      <td>
+                        <span class="count-pill">{{ curso.secciones.length || 0 }}</span>
+                      </td>
+                      <td>
+                        <span class="status-pill" [class.inactive]="curso.activo === false">
+                          {{ curso.activo === false ? 'Inactivo' : 'Activo' }}
+                        </span>
+                      </td>
+                      <td class="actions-cell">
+                        <div class="action-buttons">
+                          <button class="icon-button muted" type="button" (click)="editarCurso(curso.id!)" title="Editar curso">
+                            <svg lucidePencil></svg>
+                          </button>
+                          <button class="icon-button success" type="button" (click)="editarEvaluacion(curso.id!)" title="Gestionar evaluacion">
+                            <svg lucideClipboardCheck></svg>
+                          </button>
+                          <button class="icon-button danger" type="button" (click)="confirmarEliminar(curso)" title="Eliminar curso">
+                            <svg lucideTrash2></svg>
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+            @if (totalPages > 1) {
+              <div class="pagination-bar">
+                <button type="button" class="pagination-btn" (click)="paginaAnterior()" [disabled]="currentPage === 0 || loading">
+                  <svg lucideChevronLeft></svg>
+                  Anterior
+                </button>
+                <div class="pagination-pages">
+                  @for (page of pageNumbers; track page) {
                     <button
                       type="button"
-                      class="drag-handle"
-                      draggable="true"
-                      (dragstart)="onDragStart($event, curso)"
-                      (dragend)="onDragEnd($event)"
-                      title="Arrastrar para reordenar">
-                      <svg lucideGripVertical></svg>
+                      class="page-number"
+                      [class.active]="page === currentPage"
+                      (click)="irAPagina(page)">
+                      {{ page + 1 }}
                     </button>
-                    <span>{{ curso.orden || visualIndex(i) }}</span>
-                  </td>
-                  <td>
-                    <div class="course-title-cell">
-                      <span class="course-icon">{{ curso.icono || 'AT' }}</span>
-                      <div>
-                        <strong>{{ curso.titulo }}</strong>
-                        <small>ID {{ curso.id }}</small>
-                      </div>
-                    </div>
-                  </td>
-                  <td>
-                    <div class="curso-descripcion">{{ curso.descripcion }}</div>
-                  </td>
-                  <td>{{ curso.duracionEstimada || 'Sin definir' }}</td>
-                  <td>
-                    <span class="count-pill">{{ curso.secciones.length || 0 }}</span>
-                  </td>
-                  <td>
-                    <span class="status-pill" [class.inactive]="curso.activo === false">
-                      {{ curso.activo === false ? 'Inactivo' : 'Activo' }}
-                    </span>
-                  </td>
-                  <td class="actions-cell">
-                    <div class="action-buttons">
-                      <button class="icon-button muted" type="button" (click)="editarCurso(curso.id!)" title="Editar curso">
-                        <svg lucidePencil></svg>
-                      </button>
-                      <button class="icon-button success" type="button" (click)="editarEvaluacion(curso.id!)" title="Gestionar evaluacion">
-                        <svg lucideClipboardCheck></svg>
-                      </button>
-                      <button class="icon-button danger" type="button" (click)="confirmarEliminar(curso)" title="Eliminar curso">
-                        <svg lucideTrash2></svg>
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
+                  }
+                </div>
+                <button type="button" class="pagination-btn" (click)="paginaSiguiente()" [disabled]="currentPage >= totalPages - 1 || loading">
+                  Siguiente
+                  <svg lucideChevronRight></svg>
+                </button>
+              </div>
+            }
           </div>
-
-          <div class="pagination-bar" *ngIf="totalPages > 1">
-            <button type="button" class="pagination-btn" (click)="paginaAnterior()" [disabled]="currentPage === 0 || loading">
-              <svg lucideChevronLeft></svg>
-              Anterior
-            </button>
-
-            <div class="pagination-pages">
-              <button
-                *ngFor="let page of pageNumbers"
-                type="button"
-                class="page-number"
-                [class.active]="page === currentPage"
-                (click)="irAPagina(page)">
-                {{ page + 1 }}
-              </button>
+        } @else {
+          <div class="empty-state">
+            <div class="empty-icon">
+              <svg lucideBookOpen></svg>
             </div>
-
-            <button type="button" class="pagination-btn" (click)="paginaSiguiente()" [disabled]="currentPage >= totalPages - 1 || loading">
-              Siguiente
-              <svg lucideChevronRight></svg>
+            <h3>No hay cursos creados</h3>
+            <p>Comienza creando el primer curso para la Escuela Financiera.</p>
+            <button class="primary-btn" type="button" (click)="nuevoCurso()">
+              <svg lucidePlus></svg>
+              Crear curso
             </button>
           </div>
-        </div>
-      </ng-container>
+        }
+      }
 
-      <ng-template #emptyState>
-        <div class="empty-state">
-          <div class="empty-icon">
-            <svg lucideBookOpen></svg>
-          </div>
-          <h3>No hay cursos creados</h3>
-          <p>Comienza creando el primer curso para la Escuela Financiera.</p>
-          <button class="primary-btn" type="button" (click)="nuevoCurso()">
-            <svg lucidePlus></svg>
-            Crear curso
-          </button>
-        </div>
-      </ng-template>
     </section>
   </main>
 
-  <div *ngIf="showDeleteModal" class="modal-overlay" (click)="cancelarEliminar()">
-    <section class="modal-content" (click)="$event.stopPropagation()">
-      <header class="modal-header">
-        <div>
-          <span class="section-kicker">Confirmacion</span>
-          <h2>Eliminar curso</h2>
+  @if (showDeleteModal) {
+    <div class="modal-overlay" (click)="cancelarEliminar()">
+      <section class="modal-content" (click)="$event.stopPropagation()">
+        <header class="modal-header">
+          <div>
+            <span class="section-kicker">Confirmacion</span>
+            <h2>Eliminar curso</h2>
+          </div>
+          <button class="icon-button muted" type="button" aria-label="Cerrar" (click)="cancelarEliminar()">
+            <svg lucideX></svg>
+          </button>
+        </header>
+        <div class="modal-body">
+          <p>Esta accion eliminara el curso <strong>{{ cursoEliminar?.titulo }}</strong> y la informacion asociada.</p>
         </div>
-        <button class="icon-button muted" type="button" aria-label="Cerrar" (click)="cancelarEliminar()">
-          <svg lucideX></svg>
-        </button>
-      </header>
-      <div class="modal-body">
-        <p>Esta accion eliminara el curso <strong>{{ cursoEliminar?.titulo }}</strong> y la informacion asociada.</p>
-      </div>
-      <footer class="modal-footer">
-        <button class="secondary-btn" type="button" (click)="cancelarEliminar()">Cancelar</button>
-        <button class="danger-btn" type="button" (click)="eliminarCurso()">Eliminar</button>
-      </footer>
-    </section>
-  </div>
+        <footer class="modal-footer">
+          <button class="secondary-btn" type="button" (click)="cancelarEliminar()">Cancelar</button>
+          <button class="danger-btn" type="button" (click)="eliminarCurso()">Eliminar</button>
+        </footer>
+      </section>
+    </div>
+  }
 </div>

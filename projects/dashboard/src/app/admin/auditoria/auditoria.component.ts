@@ -1,5 +1,5 @@
 import { Component, OnInit, inject } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import {
@@ -40,7 +40,6 @@ type AuditTab = 'activity' | 'connections' | 'courses';
   selector: 'app-auditoria',
   standalone: true,
   imports: [
-    CommonModule,
     FormsModule,
     HeaderComponent,
     SidebarComponent,
@@ -58,7 +57,7 @@ type AuditTab = 'activity' | 'connections' | 'courses';
     LucideSearch,
     LucideShieldCheck,
     LucideUserRound
-  ],
+],
   templateUrl: './auditoria.component.html',
   styleUrls: ['./auditoria.component.css']
 })

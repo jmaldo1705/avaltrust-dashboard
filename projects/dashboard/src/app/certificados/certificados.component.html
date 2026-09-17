@@ -31,195 +31,207 @@
 
       <div class="certificates-container">
         <!-- Error Message -->
-        <div class="error-message" *ngIf="errorMessage">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <circle cx="12" cy="12" r="10"/>
-            <line x1="12" y1="8" x2="12" y2="12"/>
-            <line x1="12" y1="16" x2="12.01" y2="16"/>
-          </svg>
-          <span>{{ errorMessage }}</span>
-          <button class="close-error" (click)="errorMessage = ''">×</button>
-        </div>
+        @if (errorMessage) {
+          <div class="error-message">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="10"/>
+              <line x1="12" y1="8" x2="12" y2="12"/>
+              <line x1="12" y1="16" x2="12.01" y2="16"/>
+            </svg>
+            <span>{{ errorMessage }}</span>
+            <button class="close-error" (click)="errorMessage = ''">×</button>
+          </div>
+        }
 
         <!-- Selección de Tipo de Certificado -->
         <div class="form-section">
           <h2 class="section-title">Tipo de Certificado</h2>
           <div class="certificate-types-grid">
-            <div
-              *ngFor="let certType of certificateTypes"
-              class="certificate-type-card"
-              [class.selected]="selectedCertificateType === certType.value"
-              (click)="onCertificateTypeChange(certType.value)">
-              <div class="certificate-type-icon">
-                <span>{{ certType.icon }}</span>
+            @for (certType of certificateTypes; track certType) {
+              <div
+                class="certificate-type-card"
+                [class.selected]="selectedCertificateType === certType.value"
+                (click)="onCertificateTypeChange(certType.value)">
+                <div class="certificate-type-icon">
+                  <span>{{ certType.icon }}</span>
+                </div>
+                <h3>{{ certType.label }}</h3>
+                <div class="selection-indicator"></div>
               </div>
-              <h3>{{ certType.label }}</h3>
-              <div class="selection-indicator"></div>
-            </div>
+            }
           </div>
         </div>
 
         <!-- Configuración del Certificado -->
-        <div class="form-section" *ngIf="selectedCertificateType">
-          <h2 class="section-title">Configuración</h2>
-          
-          <div class="form-row">
-            <div class="form-group">
-              <label for="aliadoSelect">Aliado Estratégico *</label>
-              <select 
-                id="aliadoSelect" 
-                [(ngModel)]="selectedAliadoId"
-                class="form-control">
-                <option [ngValue]="null">Seleccione un aliado</option>
-                <option *ngFor="let aliado of aliados" [ngValue]="aliado.id">
-                  {{ aliado.nombre }} - NIT: {{ aliado.nit }}
-                </option>
-              </select>
-            </div>
-          </div>
-
-          <div class="form-row">
-            <div class="form-group">
-              <label for="fechaInicio">Fecha Inicio del Periodo *</label>
-              <input 
-                type="date" 
-                id="fechaInicio" 
-                [(ngModel)]="fechaInicio"
-                class="form-control">
-            </div>
-            <div class="form-group">
-              <label for="fechaFin">Fecha Fin del Periodo *</label>
-              <input 
-                type="date" 
-                id="fechaFin" 
-                [(ngModel)]="fechaFin"
-                class="form-control">
-            </div>
-          </div>
-        </div>
-
-        <!-- Botones de Acción -->
-        <div class="form-actions" *ngIf="selectedCertificateType">
-          <button
-            type="button"
-            class="btn btn-secondary"
-            (click)="previewCertificate()"
-            [disabled]="isLoading">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
-              <circle cx="12" cy="12" r="3"/>
-            </svg>
-            Vista Previa
-          </button>
-          <button
-            type="button"
-            class="btn btn-primary"
-            (click)="downloadCertificate()"
-            [disabled]="isLoading">
-            <span *ngIf="isLoading" class="loading-spinner"></span>
-            <svg *ngIf="!isLoading" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-              <polyline points="7 10 12 15 17 10"/>
-              <line x1="12" y1="15" x2="12" y2="3"/>
-            </svg>
-            {{ isLoading ? 'Generando...' : 'Descargar PDF' }}
-          </button>
-        </div>
-
-        <!-- Preview Modal -->
-        <div class="preview-modal" *ngIf="showPreview" (click)="closePreview()">
-          <div class="preview-content" (click)="$event.stopPropagation()">
-            <div class="preview-header">
-              <h3>Vista Previa del Certificado</h3>
-              <button class="close-btn" (click)="closePreview()">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <line x1="18" y1="6" x2="6" y2="18"/>
-                  <line x1="6" y1="6" x2="18" y2="18"/>
-                </svg>
-              </button>
-            </div>
-            
-            <div class="preview-body" *ngIf="previewData">
-              <!-- Encabezado del certificado -->
-              <div class="certificate-preview-header">
-                <h4>CERTIFICACIÓN DE CONTADOR PÚBLICO</h4>
-                <p class="company-name">{{ previewData.nombreAliado }}</p>
+        @if (selectedCertificateType) {
+          <div class="form-section">
+            <h2 class="section-title">Configuración</h2>
+            <div class="form-row">
+              <div class="form-group">
+                <label for="aliadoSelect">Aliado Estratégico *</label>
+                <select
+                  id="aliadoSelect"
+                  [(ngModel)]="selectedAliadoId"
+                  class="form-control">
+                  <option [ngValue]="null">Seleccione un aliado</option>
+                  @for (aliado of aliados; track aliado) {
+                    <option [ngValue]="aliado.id">
+                      {{ aliado.nombre }} - NIT: {{ aliado.nit }}
+                    </option>
+                  }
+                </select>
               </div>
-
-              <!-- Información del periodo -->
-              <div class="certificate-info">
-                <p><strong>Periodo:</strong> <span class="highlight">{{ previewData.periodoTexto }}</span></p>
-                <p><strong>Fecha de Certificación:</strong> {{ previewData.fechaCertificado }}</p>
-                <p><strong>NIT Aliado:</strong> {{ previewData.nitAliado }}</p>
-              </div>
-
-              <!-- Tabla de datos -->
-              <div class="certificate-table">
-                <table>
-                  <thead>
-                    <tr>
-                      <th>Descripción</th>
-                      <th>Cant. Créditos</th>
-                      <th>Valor Comisión</th>
-                      <th>IVA</th>
-                      <th>Valor Total</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr>
-                      <td>Recaudado en el mes exento</td>
-                      <td class="highlight">{{ previewData.cantidadCreditos }}</td>
-                      <td class="highlight">{{ formatCurrency(previewData.valorComisionExento) }}</td>
-                      <td class="highlight">{{ formatCurrency(previewData.ivaExento) }}</td>
-                      <td class="highlight">{{ formatCurrency(previewData.valorTotalExento) }}</td>
-                    </tr>
-                    <tr>
-                      <td>Recaudado en el mes</td>
-                      <td class="highlight">{{ previewData.cantidadCreditos }}</td>
-                      <td class="highlight">{{ formatCurrency(previewData.valorComisionGravado) }}</td>
-                      <td class="highlight">{{ formatCurrency(previewData.ivaGravado) }}</td>
-                      <td class="highlight">{{ formatCurrency(previewData.valorTotalGravado) }}</td>
-                    </tr>
-                  </tbody>
-                  <tfoot>
-                    <tr class="total-row">
-                      <td><strong>TOTALES</strong></td>
-                      <td>-</td>
-                      <td><strong>{{ formatCurrency(previewData.totalValorComision) }}</strong></td>
-                      <td><strong>{{ formatCurrency(previewData.totalIva) }}</strong></td>
-                      <td><strong>{{ formatCurrency(previewData.granTotal) }}</strong></td>
-                    </tr>
-                  </tfoot>
-                </table>
-              </div>
-
-              <!-- Información de firmas -->
-              <div class="certificate-signatures">
-                <div class="signature-block">
-                  <p class="signature-line">_______________________________</p>
-                  <p class="signature-name">{{ previewData.nombreContador }}</p>
-                  <p class="signature-role">Contador Público</p>
-                  <p class="signature-detail">Tarjeta Profesional No: {{ previewData.tarjetaProfesional }}</p>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label for="fechaInicio">Fecha Inicio del Periodo *</label>
+                <input
+                  type="date"
+                  id="fechaInicio"
+                  [(ngModel)]="fechaInicio"
+                  class="form-control">
                 </div>
-                <div class="signature-block">
-                  <p class="signature-line">_______________________________</p>
-                  <p class="signature-name">{{ previewData.nombreRepresentanteLegal }}</p>
-                  <p class="signature-role">Representante Legal</p>
-                  <p class="signature-detail">{{ previewData.nombreAliado }}</p>
+                <div class="form-group">
+                  <label for="fechaFin">Fecha Fin del Periodo *</label>
+                  <input
+                    type="date"
+                    id="fechaFin"
+                    [(ngModel)]="fechaFin"
+                    class="form-control">
+                  </div>
                 </div>
               </div>
-            </div>
+            }
 
-            <div class="preview-footer">
-              <button class="btn btn-secondary" (click)="closePreview()">Cerrar</button>
-              <button class="btn btn-primary" (click)="downloadCertificate()" [disabled]="isLoading">
-                <span *ngIf="isLoading" class="loading-spinner"></span>
-                {{ isLoading ? 'Generando...' : 'Descargar PDF' }}
-              </button>
-            </div>
+            <!-- Botones de Acción -->
+            @if (selectedCertificateType) {
+              <div class="form-actions">
+                <button
+                  type="button"
+                  class="btn btn-secondary"
+                  (click)="previewCertificate()"
+                  [disabled]="isLoading">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                    <circle cx="12" cy="12" r="3"/>
+                  </svg>
+                  Vista Previa
+                </button>
+                <button
+                  type="button"
+                  class="btn btn-primary"
+                  (click)="downloadCertificate()"
+                  [disabled]="isLoading">
+                  @if (isLoading) {
+                    <span class="loading-spinner"></span>
+                  }
+                  @if (!isLoading) {
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                      <polyline points="7 10 12 15 17 10"/>
+                      <line x1="12" y1="15" x2="12" y2="3"/>
+                    </svg>
+                  }
+                  {{ isLoading ? 'Generando...' : 'Descargar PDF' }}
+                </button>
+              </div>
+            }
+
+            <!-- Preview Modal -->
+            @if (showPreview) {
+              <div class="preview-modal" (click)="closePreview()">
+                <div class="preview-content" (click)="$event.stopPropagation()">
+                  <div class="preview-header">
+                    <h3>Vista Previa del Certificado</h3>
+                    <button class="close-btn" (click)="closePreview()">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="18" y1="6" x2="6" y2="18"/>
+                        <line x1="6" y1="6" x2="18" y2="18"/>
+                      </svg>
+                    </button>
+                  </div>
+                  @if (previewData) {
+                    <div class="preview-body">
+                      <!-- Encabezado del certificado -->
+                      <div class="certificate-preview-header">
+                        <h4>CERTIFICACIÓN DE CONTADOR PÚBLICO</h4>
+                        <p class="company-name">{{ previewData.nombreAliado }}</p>
+                      </div>
+                      <!-- Información del periodo -->
+                      <div class="certificate-info">
+                        <p><strong>Periodo:</strong> <span class="highlight">{{ previewData.periodoTexto }}</span></p>
+                        <p><strong>Fecha de Certificación:</strong> {{ previewData.fechaCertificado }}</p>
+                        <p><strong>NIT Aliado:</strong> {{ previewData.nitAliado }}</p>
+                      </div>
+                      <!-- Tabla de datos -->
+                      <div class="certificate-table">
+                        <table>
+                          <thead>
+                            <tr>
+                              <th>Descripción</th>
+                              <th>Cant. Créditos</th>
+                              <th>Valor Comisión</th>
+                              <th>IVA</th>
+                              <th>Valor Total</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            <tr>
+                              <td>Recaudado en el mes exento</td>
+                              <td class="highlight">{{ previewData.cantidadCreditos }}</td>
+                              <td class="highlight">{{ formatCurrency(previewData.valorComisionExento) }}</td>
+                              <td class="highlight">{{ formatCurrency(previewData.ivaExento) }}</td>
+                              <td class="highlight">{{ formatCurrency(previewData.valorTotalExento) }}</td>
+                            </tr>
+                            <tr>
+                              <td>Recaudado en el mes</td>
+                              <td class="highlight">{{ previewData.cantidadCreditos }}</td>
+                              <td class="highlight">{{ formatCurrency(previewData.valorComisionGravado) }}</td>
+                              <td class="highlight">{{ formatCurrency(previewData.ivaGravado) }}</td>
+                              <td class="highlight">{{ formatCurrency(previewData.valorTotalGravado) }}</td>
+                            </tr>
+                          </tbody>
+                          <tfoot>
+                            <tr class="total-row">
+                              <td><strong>TOTALES</strong></td>
+                              <td>-</td>
+                              <td><strong>{{ formatCurrency(previewData.totalValorComision) }}</strong></td>
+                              <td><strong>{{ formatCurrency(previewData.totalIva) }}</strong></td>
+                              <td><strong>{{ formatCurrency(previewData.granTotal) }}</strong></td>
+                            </tr>
+                          </tfoot>
+                        </table>
+                      </div>
+                      <!-- Información de firmas -->
+                      <div class="certificate-signatures">
+                        <div class="signature-block">
+                          <p class="signature-line">_______________________________</p>
+                          <p class="signature-name">{{ previewData.nombreContador }}</p>
+                          <p class="signature-role">Contador Público</p>
+                          <p class="signature-detail">Tarjeta Profesional No: {{ previewData.tarjetaProfesional }}</p>
+                        </div>
+                        <div class="signature-block">
+                          <p class="signature-line">_______________________________</p>
+                          <p class="signature-name">{{ previewData.nombreRepresentanteLegal }}</p>
+                          <p class="signature-role">Representante Legal</p>
+                          <p class="signature-detail">{{ previewData.nombreAliado }}</p>
+                        </div>
+                      </div>
+                    </div>
+                  }
+                  <div class="preview-footer">
+                    <button class="btn btn-secondary" (click)="closePreview()">Cerrar</button>
+                    <button class="btn btn-primary" (click)="downloadCertificate()" [disabled]="isLoading">
+                      @if (isLoading) {
+                        <span class="loading-spinner"></span>
+                      }
+                      {{ isLoading ? 'Generando...' : 'Descargar PDF' }}
+                    </button>
+                  </div>
+                </div>
+              </div>
+            }
           </div>
         </div>
-      </div>
+      </main>
     </div>
-  </main>
-</div>

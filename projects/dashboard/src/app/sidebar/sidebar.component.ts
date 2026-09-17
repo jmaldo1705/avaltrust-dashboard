@@ -1,5 +1,5 @@
 import { Component, inject, Input, Output, EventEmitter } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { Router } from '@angular/router';
 import {
   LucideActivity,
@@ -22,7 +22,6 @@ import { HasRoleDirective } from '../auth/has-role.directive';
   selector: 'app-sidebar',
   standalone: true,
   imports: [
-    CommonModule,
     HasRoleDirective,
     LucideActivity,
     LucideBadgeCheck,
@@ -36,7 +35,7 @@ import { HasRoleDirective } from '../auth/has-role.directive';
     LucideLayoutDashboard,
     LucideShieldCheck,
     LucideUsersRound
-  ],
+],
   templateUrl: './sidebar.component.html',
   styleUrls: ['./sidebar.component.css']
 })

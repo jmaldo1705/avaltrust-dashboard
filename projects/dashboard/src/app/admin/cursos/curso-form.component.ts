@@ -1,5 +1,5 @@
 import { Component, OnInit, inject } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { FormsModule } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
 import { HeaderComponent } from '../../header/header.component';
@@ -9,7 +9,7 @@ import { AdminCursosService, CursoAdmin, SeccionAdmin, PuntoContenidoAdmin, Ejem
 @Component({
   selector: 'app-curso-form',
   standalone: true,
-  imports: [CommonModule, FormsModule, HeaderComponent, SidebarComponent],
+  imports: [FormsModule, HeaderComponent, SidebarComponent],
   templateUrl: './curso-form.component.html',
   styleUrls: ['./curso-form.component.css']
 })
@@ -123,10 +123,6 @@ export class CursoFormComponent implements OnInit {
   }
 
   // Gestión de objetivos
-  trackByIndex(index: number): number {
-    return index;
-  }
-
   actualizarObjetivo(index: number, valor: string): void {
     this.curso.objetivos[index] = valor;
   }

@@ -1,5 +1,5 @@
 import { Component, OnInit, inject } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { FormsModule } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
 import { HeaderComponent } from '../../header/header.component';
@@ -9,7 +9,7 @@ import { AdminCursosService, PreguntaAdmin, OpcionAdmin } from './admin-cursos.s
 @Component({
   selector: 'app-evaluacion-form',
   standalone: true,
-  imports: [CommonModule, FormsModule, HeaderComponent, SidebarComponent],
+  imports: [FormsModule, HeaderComponent, SidebarComponent],
   templateUrl: './evaluacion-form.component.html',
   styleUrls: ['./evaluacion-form.component.css']
 })

@@ -1,5 +1,5 @@
 import { Component, OnInit, inject } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { Router } from '@angular/router';
 import { forkJoin } from 'rxjs';
 import {
@@ -28,7 +28,6 @@ import { AuthService } from '../../auth/auth.service';
   selector: 'app-admin-cursos',
   standalone: true,
   imports: [
-    CommonModule,
     HeaderComponent,
     SidebarComponent,
     LucideBookOpen,
@@ -46,7 +45,7 @@ import { AuthService } from '../../auth/auth.service';
     LucideShieldCheck,
     LucideTrash2,
     LucideX
-  ],
+],
   templateUrl: './admin-cursos.component.html',
   styleUrls: ['./admin-cursos.component.css']
 })

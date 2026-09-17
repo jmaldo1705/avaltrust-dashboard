@@ -1,5 +1,5 @@
 import { Component, EventEmitter, Input, Output, OnChanges, SimpleChanges, inject } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { ToastService } from '../services/toast.service';
 
@@ -23,156 +23,160 @@ interface PortfolioItem {
 @Component({
   selector: 'app-actualizacion-pago-modal',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [ReactiveFormsModule],
   template: `
-    <div class="modal-overlay" *ngIf="isOpen" (click)="closeModal()">
-      <div class="modal-container" (click)="$event.stopPropagation()">
-        <!-- Header -->
-        <div class="modal-header">
-          <h3>Actualización de Pago</h3>
-          <button class="btn-close" (click)="closeModal()" type="button">✕</button>
-        </div>
-
-        <!-- Info del crédito -->
-        <div class="credit-info" *ngIf="portfolio">
-          <div class="info-row">
-            <span class="info-label">Obligación:</span>
-            <span class="info-value">{{ portfolio.obligacion }}</span>
+    @if (isOpen) {
+      <div class="modal-overlay" (click)="closeModal()">
+        <div class="modal-container" (click)="$event.stopPropagation()">
+          <!-- Header -->
+          <div class="modal-header">
+            <h3>Actualización de Pago</h3>
+            <button class="btn-close" (click)="closeModal()" type="button">✕</button>
           </div>
-          <div class="info-row">
-            <span class="info-label">Cliente:</span>
-            <span class="info-value">{{ portfolio.nombres }} {{ portfolio.apellidos }}</span>
-          </div>
-          <div class="info-row">
-            <span class="info-label">Documento:</span>
-            <span class="info-value">{{ portfolio.numeroDocumento }}</span>
-          </div>
-          <div class="info-row">
-            <span class="info-label">Total Deuda:</span>
-            <span class="info-value amount-deuda">{{ formatCurrency(portfolio.totalDeuda) }}</span>
-          </div>
-          <div class="info-row">
-            <span class="info-label">Total Fianza:</span>
-            <span class="info-value amount-fianza">{{ formatCurrency(calculateTotalFianza(portfolio)) }}</span>
-          </div>
-        </div>
-
-        <!-- Formulario -->
-        <form [formGroup]="actualizacionForm" (ngSubmit)="onSubmit()">
-          <div class="form-grid">
-            <!-- Fecha de Pago -->
-            <div class="form-group full-width">
-              <label for="fechaPago" class="form-label">
-                Fecha de Pago <span class="required">*</span>
-              </label>
-              <input
-                id="fechaPago"
-                type="date"
-                formControlName="fechaPago"
-                class="form-control"
-                [class.error]="isFieldInvalid('fechaPago')">
-              <div class="error-message" *ngIf="isFieldInvalid('fechaPago')">
-                Este campo es obligatorio
+          <!-- Info del crédito -->
+          @if (portfolio) {
+            <div class="credit-info">
+              <div class="info-row">
+                <span class="info-label">Obligación:</span>
+                <span class="info-value">{{ portfolio.obligacion }}</span>
+              </div>
+              <div class="info-row">
+                <span class="info-label">Cliente:</span>
+                <span class="info-value">{{ portfolio.nombres }} {{ portfolio.apellidos }}</span>
+              </div>
+              <div class="info-row">
+                <span class="info-label">Documento:</span>
+                <span class="info-value">{{ portfolio.numeroDocumento }}</span>
+              </div>
+              <div class="info-row">
+                <span class="info-label">Total Deuda:</span>
+                <span class="info-value amount-deuda">{{ formatCurrency(portfolio.totalDeuda) }}</span>
+              </div>
+              <div class="info-row">
+                <span class="info-label">Total Fianza:</span>
+                <span class="info-value amount-fianza">{{ formatCurrency(calculateTotalFianza(portfolio)) }}</span>
               </div>
             </div>
-
-            <!-- Abono Aval -->
-            <div class="form-group">
-              <label for="abonoAval" class="form-label">
-                Abono Fianza
-              </label>
-              <input
-                id="abonoAval"
-                type="number"
-                formControlName="abonoAval"
-                class="form-control"
-                placeholder="0.00"
-                step="0.01"
-                min="0">
-            </div>
-
-            <!-- Abono Capital -->
-            <div class="form-group">
-              <label for="abonoCapital" class="form-label">
-                Abono Capital
-              </label>
-              <input
-                id="abonoCapital"
-                type="number"
-                formControlName="abonoCapital"
-                class="form-control"
-                placeholder="0.00"
-                step="0.01"
-                min="0">
-            </div>
-
-            <!-- Días de Mora -->
-            <div class="form-group">
-              <label for="diasMora" class="form-label">
-                Días de Mora <span class="required">*</span>
-              </label>
-              <input
-                id="diasMora"
-                type="number"
-                formControlName="diasMora"
-                class="form-control"
-                placeholder="0"
-                min="0"
-                [class.error]="isFieldInvalid('diasMora')">
-              <div class="error-message" *ngIf="isFieldInvalid('diasMora')">
-                Este campo es obligatorio
+          }
+          <!-- Formulario -->
+          <form [formGroup]="actualizacionForm" (ngSubmit)="onSubmit()">
+            <div class="form-grid">
+              <!-- Fecha de Pago -->
+              <div class="form-group full-width">
+                <label for="fechaPago" class="form-label">
+                  Fecha de Pago <span class="required">*</span>
+                </label>
+                <input
+                  id="fechaPago"
+                  type="date"
+                  formControlName="fechaPago"
+                  class="form-control"
+                  [class.error]="isFieldInvalid('fechaPago')">
+                  @if (isFieldInvalid('fechaPago')) {
+                    <div class="error-message">
+                      Este campo es obligatorio
+                    </div>
+                  }
+                </div>
+                <!-- Abono Aval -->
+                <div class="form-group">
+                  <label for="abonoAval" class="form-label">
+                    Abono Fianza
+                  </label>
+                  <input
+                    id="abonoAval"
+                    type="number"
+                    formControlName="abonoAval"
+                    class="form-control"
+                    placeholder="0.00"
+                    step="0.01"
+                    min="0">
+                  </div>
+                  <!-- Abono Capital -->
+                  <div class="form-group">
+                    <label for="abonoCapital" class="form-label">
+                      Abono Capital
+                    </label>
+                    <input
+                      id="abonoCapital"
+                      type="number"
+                      formControlName="abonoCapital"
+                      class="form-control"
+                      placeholder="0.00"
+                      step="0.01"
+                      min="0">
+                    </div>
+                    <!-- Días de Mora -->
+                    <div class="form-group">
+                      <label for="diasMora" class="form-label">
+                        Días de Mora <span class="required">*</span>
+                      </label>
+                      <input
+                        id="diasMora"
+                        type="number"
+                        formControlName="diasMora"
+                        class="form-control"
+                        placeholder="0"
+                        min="0"
+                        [class.error]="isFieldInvalid('diasMora')">
+                        @if (isFieldInvalid('diasMora')) {
+                          <div class="error-message">
+                            Este campo es obligatorio
+                          </div>
+                        }
+                      </div>
+                      <!-- Estado del Crédito -->
+                      <div class="form-group">
+                        <label for="estadoCredito" class="form-label">
+                          Estado del Crédito <span class="required">*</span>
+                        </label>
+                        <select
+                          id="estadoCredito"
+                          formControlName="estadoCredito"
+                          class="form-control"
+                          [class.error]="isFieldInvalid('estadoCredito')">
+                          <option value="">Seleccione estado</option>
+                          <option value="VIGENTE">Vigente</option>
+                          <option value="VENCIDO">Vencido</option>
+                          <option value="CANCELADO">Cancelado</option>
+                          <option value="CASTIGADO">Castigado</option>
+                        </select>
+                        @if (isFieldInvalid('estadoCredito')) {
+                          <div class="error-message">
+                            Este campo es obligatorio
+                          </div>
+                        }
+                      </div>
+                    </div>
+                    <!-- Nota informativa -->
+                    <div class="info-note">
+                      <span class="info-icon">ℹ️</span>
+                      <span>Esta actualización se guardará como un nuevo registro en el historial de pagos.</span>
+                    </div>
+                    <!-- Botones -->
+                    <div class="modal-footer">
+                      <button
+                        type="button"
+                        class="btn-secondary"
+                        (click)="closeModal()"
+                        [disabled]="isSubmitting">
+                        Cancelar
+                      </button>
+                      <button
+                        type="submit"
+                        class="btn-primary"
+                        [disabled]="actualizacionForm.invalid || isSubmitting">
+                        @if (isSubmitting) {
+                          <span class="loading-spinner"></span>
+                        }
+                        {{ isSubmitting ? 'Guardando...' : 'Guardar Actualización' }}
+                      </button>
+                    </div>
+                  </form>
+                </div>
               </div>
-            </div>
-
-            <!-- Estado del Crédito -->
-            <div class="form-group">
-              <label for="estadoCredito" class="form-label">
-                Estado del Crédito <span class="required">*</span>
-              </label>
-              <select
-                id="estadoCredito"
-                formControlName="estadoCredito"
-                class="form-control"
-                [class.error]="isFieldInvalid('estadoCredito')">
-                <option value="">Seleccione estado</option>
-                <option value="VIGENTE">Vigente</option>
-                <option value="VENCIDO">Vencido</option>
-                <option value="CANCELADO">Cancelado</option>
-                <option value="CASTIGADO">Castigado</option>
-              </select>
-              <div class="error-message" *ngIf="isFieldInvalid('estadoCredito')">
-                Este campo es obligatorio
-              </div>
-            </div>
-          </div>
-
-          <!-- Nota informativa -->
-          <div class="info-note">
-            <span class="info-icon">ℹ️</span>
-            <span>Esta actualización se guardará como un nuevo registro en el historial de pagos.</span>
-          </div>
-
-          <!-- Botones -->
-          <div class="modal-footer">
-            <button
-              type="button"
-              class="btn-secondary"
-              (click)="closeModal()"
-              [disabled]="isSubmitting">
-              Cancelar
-            </button>
-            <button
-              type="submit"
-              class="btn-primary"
-              [disabled]="actualizacionForm.invalid || isSubmitting">
-              <span *ngIf="isSubmitting" class="loading-spinner"></span>
-              {{ isSubmitting ? 'Guardando...' : 'Guardar Actualización' }}
-            </button>
-          </div>
-        </form>
-      </div>
-    </div>
-  `,
+            }
+    `,
   styles: [`
     .modal-overlay {
       position: fixed;

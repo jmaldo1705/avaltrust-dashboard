@@ -1,4 +1,4 @@
-import { CommonModule } from '@angular/common';
+
 import { Component, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -7,7 +7,7 @@ import { AuthService } from './auth.service';
 @Component({
   selector: 'app-reset-password',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [FormsModule],
   template: `
     <main class="login-page" aria-label="Restablecer contraseña AvalTrust">
       <section class="auth-card" [class.is-loading]="loading()">

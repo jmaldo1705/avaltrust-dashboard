@@ -1,5 +1,5 @@
 import { Component, inject, signal } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { AuthService } from './auth.service';
@@ -7,7 +7,7 @@ import { AuthService } from './auth.service';
 @Component({
   selector: 'app-change-password',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [FormsModule],
   template: `
     <div class="change-password-container">
       <div class="change-password-card">
@@ -17,20 +17,20 @@ import { AuthService } from './auth.service';
             {{ isRequiredChange() ? 'Por seguridad, debes cambiar tu contrasena antes de continuar' : 'Actualiza tu contrasena de acceso a AvalTrust' }}
           </p>
         </div>
-
+    
         <div class="card-body">
           @if (error()) {
             <div class="alert alert-danger" role="alert">
               {{ error() }}
             </div>
           }
-
+    
           @if (success()) {
             <div class="alert alert-success" role="alert">
               {{ success() }}
             </div>
           }
-
+    
           <form (ngSubmit)="onSubmit()" #passwordForm="ngForm">
             <div class="form-group">
               <label for="currentPassword">Contraseña Actual</label>
@@ -43,12 +43,14 @@ import { AuthService } from './auth.service';
                 required
                 [disabled]="loading()"
                 [placeholder]="isRequiredChange() ? 'Tu contrasena actual (numero de documento)' : 'Ingresa tu contrasena actual'"
-              />
-              <small class="form-text text-muted" *ngIf="isRequiredChange()">
-                Tu contrasena actual es tu numero de documento
-              </small>
+                />
+              @if (isRequiredChange()) {
+                <small class="form-text text-muted">
+                  Tu contrasena actual es tu numero de documento
+                </small>
+              }
             </div>
-
+    
             <div class="form-group">
               <label for="newPassword">Nueva Contraseña</label>
               <input
@@ -61,69 +63,69 @@ import { AuthService } from './auth.service';
                 minlength="6"
                 [disabled]="loading()"
                 placeholder="Mínimo 6 caracteres"
-              />
-              <small class="form-text text-muted">
-                Debe tener al menos 6 caracteres
-              </small>
-            </div>
-
-            <div class="form-group">
-              <label for="confirmPassword">Confirmar Nueva Contraseña</label>
-              <input
-                type="password"
-                id="confirmPassword"
-                class="form-control"
-                [(ngModel)]="confirmPassword"
-                name="confirmPassword"
-                required
-                [disabled]="loading()"
-                placeholder="Repite la nueva contraseña"
-              />
-            </div>
-
-            @if (passwordMismatch()) {
-              <div class="alert alert-warning">
-                Las contraseñas no coinciden
+                />
+                <small class="form-text text-muted">
+                  Debe tener al menos 6 caracteres
+                </small>
               </div>
-            }
-
-            <div class="password-requirements">
-              <p class="requirements-title">Requisitos de la contraseña:</p>
-              <ul>
-                <li [class.valid]="newPassword.length >= 6">Mínimo 6 caracteres</li>
-                <li [class.valid]="newPassword !== currentPassword && newPassword.length > 0">
-                  Diferente a la contraseña actual
-                </li>
-                <li [class.valid]="newPassword === confirmPassword && newPassword.length > 0">
-                  Las contraseñas coinciden
-                </li>
-              </ul>
+    
+              <div class="form-group">
+                <label for="confirmPassword">Confirmar Nueva Contraseña</label>
+                <input
+                  type="password"
+                  id="confirmPassword"
+                  class="form-control"
+                  [(ngModel)]="confirmPassword"
+                  name="confirmPassword"
+                  required
+                  [disabled]="loading()"
+                  placeholder="Repite la nueva contraseña"
+                  />
+                </div>
+    
+                @if (passwordMismatch()) {
+                  <div class="alert alert-warning">
+                    Las contraseñas no coinciden
+                  </div>
+                }
+    
+                <div class="password-requirements">
+                  <p class="requirements-title">Requisitos de la contraseña:</p>
+                  <ul>
+                    <li [class.valid]="newPassword.length >= 6">Mínimo 6 caracteres</li>
+                    <li [class.valid]="newPassword !== currentPassword && newPassword.length > 0">
+                      Diferente a la contraseña actual
+                    </li>
+                    <li [class.valid]="newPassword === confirmPassword && newPassword.length > 0">
+                      Las contraseñas coinciden
+                    </li>
+                  </ul>
+                </div>
+    
+                <button
+                  type="submit"
+                  class="btn btn-primary btn-block"
+                  [disabled]="loading() || !passwordForm.valid || passwordMismatch()"
+                  >
+                  @if (loading()) {
+                    <span class="spinner-border spinner-border-sm me-2"></span>
+                    Cambiando...
+                  } @else {
+                    Cambiar Contraseña
+                  }
+                </button>
+              </form>
             </div>
-
-            <button
-              type="submit"
-              class="btn btn-primary btn-block"
-              [disabled]="loading() || !passwordForm.valid || passwordMismatch()"
-            >
-              @if (loading()) {
-                <span class="spinner-border spinner-border-sm me-2"></span>
-                Cambiando...
-              } @else {
-                Cambiar Contraseña
-              }
-            </button>
-          </form>
+    
+            <div class="card-footer">
+              <p class="info-text">
+                <i class="fas fa-info-circle"></i>
+                Esta contrasena la usaras para futuros inicios de sesion
+              </p>
+            </div>
+          </div>
         </div>
-
-        <div class="card-footer">
-          <p class="info-text">
-            <i class="fas fa-info-circle"></i>
-            Esta contrasena la usaras para futuros inicios de sesion
-          </p>
-        </div>
-      </div>
-    </div>
-  `,
+    `,
   styles: [`
     .change-password-container {
       min-height: 100vh;
