@@ -1,4 +1,4 @@
-import { Component, inject, OnInit, ViewChild } from '@angular/core';
+import { Component, inject, OnInit, ViewChild, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
@@ -77,6 +77,7 @@ interface PortfolioItem {
     LucideWalletCards
   ],
   templateUrl: './estado-cartera.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrls: ['./estado-cartera.component.css']
 })
 export class EstadoCarteraComponent implements OnInit {

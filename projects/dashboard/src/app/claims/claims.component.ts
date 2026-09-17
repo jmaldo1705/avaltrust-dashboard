@@ -1,4 +1,4 @@
-import { Component, inject, OnInit } from '@angular/core';
+import { Component, inject, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
@@ -44,6 +44,7 @@ import { ClaimsTemplateService } from './claims-template.service';
     LucideX
   ],
   templateUrl: './claims.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrls: ['./claims.component.css']
 })
 export class ClaimsComponent implements OnInit {

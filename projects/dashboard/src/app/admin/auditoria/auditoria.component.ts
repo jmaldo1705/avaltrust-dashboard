@@ -1,4 +1,4 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit, inject, ChangeDetectionStrategy } from '@angular/core';
 
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
@@ -59,6 +59,7 @@ type AuditTab = 'activity' | 'connections' | 'courses';
     LucideUserRound
 ],
   templateUrl: './auditoria.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrls: ['./auditoria.component.css']
 })
 export class AuditoriaComponent implements OnInit {

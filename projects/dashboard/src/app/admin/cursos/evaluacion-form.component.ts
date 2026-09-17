@@ -1,4 +1,4 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit, inject, ChangeDetectionStrategy } from '@angular/core';
 
 import { FormsModule } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
@@ -11,6 +11,7 @@ import { AdminCursosService, PreguntaAdmin, OpcionAdmin } from './admin-cursos.s
   standalone: true,
   imports: [FormsModule, HeaderComponent, SidebarComponent],
   templateUrl: './evaluacion-form.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrls: ['./evaluacion-form.component.css']
 })
 export class EvaluacionFormComponent implements OnInit {

@@ -1,4 +1,4 @@
-import { Component, inject, OnDestroy, OnInit, Output, EventEmitter, Input } from '@angular/core';
+import { Component, inject, OnDestroy, OnInit, Output, EventEmitter, Input, ChangeDetectionStrategy } from '@angular/core';
 
 import { FormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
@@ -116,6 +116,7 @@ export interface FiltroAliadosEvent {
             </div>
           </div>
     `,
+  changeDetection: ChangeDetectionStrategy.Eager,
   styles: [`
     .filtro-aliados-container {
       position: relative;

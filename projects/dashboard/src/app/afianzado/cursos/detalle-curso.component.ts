@@ -1,4 +1,4 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit, inject, ChangeDetectionStrategy } from '@angular/core';
 
 import { ActivatedRoute, Router } from '@angular/router';
 import { CursosService } from './cursos.service';
@@ -13,6 +13,7 @@ import { AuthService } from '../../auth/auth.service';
   standalone: true,
   imports: [HeaderComponent, SidebarComponent],
   templateUrl: './detalle-curso.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrls: ['./detalle-curso.component.css']
 })
 export class DetalleCursoComponent implements OnInit {

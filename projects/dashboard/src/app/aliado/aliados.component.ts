@@ -1,4 +1,4 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit, inject, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
@@ -20,6 +20,7 @@ import { UiStateService } from '../ui-state.service';
   standalone: true,
   imports: [CommonModule, FormsModule, HeaderComponent, SidebarComponent],
   templateUrl: './aliados.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrls: ['./aliados.component.css']
 })
 export class AliadosComponent implements OnInit {

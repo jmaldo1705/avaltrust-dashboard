@@ -1,4 +1,4 @@
-import { Component, inject, Input, Output, EventEmitter } from '@angular/core';
+import { Component, inject, Input, Output, EventEmitter, ChangeDetectionStrategy } from '@angular/core';
 
 import { Router } from '@angular/router';
 import {
@@ -37,6 +37,7 @@ import { HasRoleDirective } from '../auth/has-role.directive';
     LucideUsersRound
 ],
   templateUrl: './sidebar.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrls: ['./sidebar.component.css']
 })
 export class SidebarComponent {

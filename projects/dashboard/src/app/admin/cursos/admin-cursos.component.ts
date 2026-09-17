@@ -1,4 +1,4 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit, inject, ChangeDetectionStrategy } from '@angular/core';
 
 import { Router } from '@angular/router';
 import { forkJoin } from 'rxjs';
@@ -47,6 +47,7 @@ import { AuthService } from '../../auth/auth.service';
     LucideX
 ],
   templateUrl: './admin-cursos.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrls: ['./admin-cursos.component.css']
 })
 export class AdminCursosComponent implements OnInit {

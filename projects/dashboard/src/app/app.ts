@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, ChangeDetectionStrategy } from '@angular/core';
 import { NavigationEnd, Router, RouterOutlet } from '@angular/router';
 import { SessionWarningComponent } from './auth/session-warning.component';
 import { ToastContainerComponent } from './services/toast-container.component';
@@ -9,6 +9,7 @@ import { AuditoriaService } from './admin/auditoria/auditoria.service';
 @Component({
   selector: 'app-root',
   imports: [RouterOutlet, SessionWarningComponent, ToastContainerComponent],
+  changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     <router-outlet />
     <app-session-warning 

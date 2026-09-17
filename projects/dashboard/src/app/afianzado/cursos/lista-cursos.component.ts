@@ -1,4 +1,4 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit, inject, ChangeDetectionStrategy } from '@angular/core';
 
 import { Router } from '@angular/router';
 import { CursosService } from './cursos.service';
@@ -12,6 +12,7 @@ import { AuthService } from '../../auth/auth.service';
   standalone: true,
   imports: [HeaderComponent, SidebarComponent],
   templateUrl: './lista-cursos.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrls: ['./lista-cursos.component.css']
 })
 export class ListaCursosComponent implements OnInit {

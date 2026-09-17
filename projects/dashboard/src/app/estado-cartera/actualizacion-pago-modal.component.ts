@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, Output, OnChanges, SimpleChanges, inject } from '@angular/core';
+import { Component, EventEmitter, Input, Output, OnChanges, SimpleChanges, inject, ChangeDetectionStrategy } from '@angular/core';
 
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { ToastService } from '../services/toast.service';
@@ -177,6 +177,7 @@ interface PortfolioItem {
               </div>
             }
     `,
+  changeDetection: ChangeDetectionStrategy.Eager,
   styles: [`
     .modal-overlay {
       position: fixed;

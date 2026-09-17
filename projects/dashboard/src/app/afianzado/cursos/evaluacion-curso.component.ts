@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, ChangeDetectionStrategy } from '@angular/core';
 
 import { ActivatedRoute, Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
@@ -168,6 +168,7 @@ import {
       }
     </div>
     `,
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrls: ['./evaluacion-curso.component.css']
 })
 export class EvaluacionCursoComponent implements OnInit, OnDestroy {

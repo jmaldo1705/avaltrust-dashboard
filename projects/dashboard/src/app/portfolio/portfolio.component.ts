@@ -1,4 +1,4 @@
-import { Component, inject, OnInit } from '@angular/core';
+import { Component, inject, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule, FormsModule } from '@angular/forms';
@@ -54,6 +54,7 @@ import * as XLSX from 'xlsx';
     LucideX
   ],
   templateUrl: './portfolio.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrls: ['./portfolio.component.css']
 })
 export class PortfolioComponent implements OnInit {

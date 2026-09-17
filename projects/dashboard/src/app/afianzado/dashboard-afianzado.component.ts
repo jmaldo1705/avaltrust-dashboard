@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
 
 import { Router } from '@angular/router';
 import { AfianzadoService } from './afianzado.service';
@@ -12,6 +12,7 @@ import { AuthService } from '../auth/auth.service';
   standalone: true,
   imports: [HeaderComponent, SidebarComponent],
   templateUrl: './dashboard-afianzado.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrls: ['./dashboard-afianzado.component.css']
 })
 export class DashboardAfianzadoComponent implements OnInit {

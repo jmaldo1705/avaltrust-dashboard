@@ -1,4 +1,4 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit, inject, ChangeDetectionStrategy } from '@angular/core';
 
 import { FormsModule } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
@@ -11,6 +11,7 @@ import { AdminCursosService, CursoAdmin, SeccionAdmin, PuntoContenidoAdmin, Ejem
   standalone: true,
   imports: [FormsModule, HeaderComponent, SidebarComponent],
   templateUrl: './curso-form.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrls: ['./curso-form.component.css']
 })
 export class CursoFormComponent implements OnInit {

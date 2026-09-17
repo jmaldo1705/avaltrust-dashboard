@@ -25,10 +25,10 @@
   "files": [],
   "references": [
     {
-      "path": "./tsconfig.app.json"
+      "path": "./projects/dashboard/tsconfig.app.json"
     },
     {
-      "path": "./tsconfig.spec.json"
+      "path": "./projects/dashboard/tsconfig.spec.json"
     },
     {
       "path": "./projects/landing/tsconfig.app.json"

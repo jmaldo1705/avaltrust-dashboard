@@ -1,4 +1,4 @@
-import { Component, inject, OnInit } from '@angular/core';
+import { Component, inject, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { FormBuilder, FormGroup, ReactiveFormsModule } from '@angular/forms';
@@ -43,6 +43,7 @@ import { ReportsService } from './reports.service';
     LucideX
   ],
   templateUrl: './reports.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrls: ['./reports.component.css']
 })
 export class ReportsComponent implements OnInit {

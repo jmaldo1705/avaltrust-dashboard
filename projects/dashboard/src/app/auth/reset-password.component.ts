@@ -1,5 +1,5 @@
 
-import { Component, inject, signal } from '@angular/core';
+import { Component, inject, signal, ChangeDetectionStrategy } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { AuthService } from './auth.service';
@@ -73,6 +73,7 @@ import { AuthService } from './auth.service';
       </section>
     </main>
   `,
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrls: ['../login/login.component.css']
 })
 export class ResetPasswordComponent {
