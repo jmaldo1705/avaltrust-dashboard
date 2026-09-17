@@ -30,6 +30,7 @@
               }
             ],
             "styles": [
+              "projects/shared-ui/styles/tokens.css",
               "projects/dashboard/src/styles.css"
             ],
             "outputPath": "dist/avaltrust-dashboard"
@@ -120,6 +121,7 @@
               }
             ],
             "styles": [
+              "projects/shared-ui/styles/tokens.css",
               "projects/landing/src/styles.css"
             ],
             "server": "projects/landing/src/main.server.ts",
@@ -183,6 +185,32 @@
             "tsConfig": "projects/landing/tsconfig.spec.json",
             "buildTarget": ":build:testing",
             "runner": "vitest"
+          }
+        }
+      }
+    },
+    "shared-ui": {
+      "projectType": "library",
+      "root": "projects/shared-ui",
+      "sourceRoot": "projects/shared-ui/src",
+      "prefix": "at",
+      "architect": {
+        "build": {
+          "builder": "@angular/build:ng-packagr",
+          "configurations": {
+            "production": {
+              "tsConfig": "projects/shared-ui/tsconfig.lib.prod.json"
+            },
+            "development": {
+              "tsConfig": "projects/shared-ui/tsconfig.lib.json"
+            }
+          },
+          "defaultConfiguration": "production"
+        },
+        "test": {
+          "builder": "@angular/build:unit-test",
+          "options": {
+            "tsConfig": "projects/shared-ui/tsconfig.spec.json"
           }
         }
       }

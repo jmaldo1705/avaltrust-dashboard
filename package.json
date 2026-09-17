@@ -50,6 +50,7 @@
     "@types/node": "^20.17.19",
     "istanbul-lib-instrument": "^6.0.3",
     "jsdom": "^30.1.0",
+    "ng-packagr": "^22.1.0",
     "typescript": "~6.0.3",
     "vitest": "^4.0.8"
   }
