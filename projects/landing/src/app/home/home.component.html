@@ -1,0 +1,244 @@
+<section id="inicio" class="hero">
+  <picture class="hero__fondo" aria-hidden="true">
+    <source
+      type="image/avif"
+      srcset="img/hero-480.avif 480w, img/hero-720.avif 720w, img/hero-1080.avif 1080w"
+      sizes="100vw"
+    />
+    <img
+      src="img/hero-1080.webp"
+      srcset="img/hero-480.webp 480w, img/hero-720.webp 720w, img/hero-1080.webp 1080w"
+      sizes="100vw"
+      width="1080"
+      height="1080"
+      alt=""
+      fetchpriority="high"
+    />
+  </picture>
+  <div class="at-container hero__interior">
+    <div class="hero__texto">
+      <p class="hero__insignia">Revolucionando el Ecosistema Fintech.</p>
+      <h1 class="hero__titulo">El Futuro del Crédito Empieza Aquí</h1>
+      <p class="hero__entrada">
+        Somos pioneros en transformar cómo Colombia accede al financiamiento. Desbloqueamos
+        oportunidades que antes eran imposibles, construyendo puentes entre la tecnología y la
+        inclusión financiera.
+      </p>
+
+      <dl class="hero__promesas">
+        <div>
+          <dt>Innovación</dt>
+          <dd>Primera plataforma de garantías diseñada 100% para Fintech</dd>
+        </div>
+        <div>
+          <dt>Velocidad</dt>
+          <dd>Respuestas en máximo 24 horas</dd>
+        </div>
+        <div>
+          <dt>Impacto</dt>
+          <dd>Transformando vidas a través del acceso al crédito</dd>
+        </div>
+      </dl>
+    </div>
+
+    <div class="hero__calculadora">
+      <form class="calculadora" (submit)="$event.preventDefault()">
+        <h2 class="calculadora__titulo">Calcula tu cobertura</h2>
+        <p class="calculadora__entrada">
+          Obtén una estimación personalizada de cobertura para tu negocio.
+        </p>
+
+        <div class="campo">
+          <label for="valor-promedio">Valor promedio por crédito</label>
+          <span class="campo__ayuda">Monto típico que otorgas</span>
+          <input
+            id="valor-promedio"
+            type="number"
+            min="0"
+            step="100000"
+            inputmode="numeric"
+            [ngModel]="valorPromedio()"
+            (ngModelChange)="valorPromedio.set(+$event || 0)"
+            name="valorPromedio"
+          />
+        </div>
+
+        <div class="campo">
+          <label for="volumen-mensual">Volumen mensual</label>
+          <span class="campo__ayuda">Créditos otorgados por mes</span>
+          <input
+            id="volumen-mensual"
+            type="number"
+            min="0"
+            step="10"
+            inputmode="numeric"
+            [ngModel]="creditosPorMes()"
+            (ngModelChange)="creditosPorMes.set(+$event || 0)"
+            name="creditosPorMes"
+          />
+        </div>
+
+        <div class="campo">
+          <label for="tasa-impago">
+            Tasa de impagos (90+ días)
+            <output for="tasa-impago" class="campo__valor">{{ tasaFormateada() }}</output>
+          </label>
+          <span class="campo__ayuda">Porcentaje histórico de incumplimiento</span>
+          <input
+            id="tasa-impago"
+            type="range"
+            min="0"
+            max="20"
+            step="0.5"
+            [ngModel]="tasaImpago()"
+            (ngModelChange)="tasaImpago.set(+$event)"
+            name="tasaImpago"
+          />
+        </div>
+
+        <div class="resultado">
+          <div>
+            <span class="resultado__etiqueta">Cobertura Mensual Estimada</span>
+            <strong class="resultado__valor">{{ coberturaFormateada() }}</strong>
+          </div>
+          <div>
+            <span class="resultado__etiqueta">Prima Aproximada</span>
+            <strong class="resultado__valor resultado__valor--acento">{{ primaFormateada() }}</strong>
+          </div>
+        </div>
+
+        <a class="at-btn at-btn--primary calculadora__accion" href="#contacto">
+          Solicita tu garantía
+        </a>
+      </form>
+    </div>
+  </div>
+</section>
+
+<section id="casos" class="at-section">
+  <div class="at-container">
+    <div class="cifras">
+      <div class="cifra">
+        <strong>30min</strong>
+        <span>Tiempo de respuesta</span>
+      </div>
+      <div class="cifra">
+        <strong>24h</strong>
+        <span>Respuestas en máximo 24 horas</span>
+      </div>
+      <div class="cifra">
+        <strong>100%</strong>
+        <span>Soluciones digitales</span>
+      </div>
+    </div>
+
+    <h2 class="at-section-title">Casos de Éxito</h2>
+    <p class="at-section-lead">
+      Historias reales de personas y empresas que han transformado su acceso al crédito con
+      AvalTrust
+    </p>
+
+    <div class="casos">
+      @for (caso of casos; track caso.nombre) {
+        <figure class="at-card caso">
+          <blockquote>{{ caso.cita }}</blockquote>
+          <figcaption>
+            <span class="caso__inicial" aria-hidden="true">{{ caso.nombre.charAt(0) }}</span>
+            <span>
+              <strong>{{ caso.nombre }}</strong>
+              <small>{{ caso.ciudad }}</small>
+            </span>
+          </figcaption>
+        </figure>
+      }
+    </div>
+  </div>
+</section>
+
+<section id="que-es" class="at-section que-es">
+  <div class="at-container">
+    <h2 class="at-section-title">¿Qué es AvalTrust?</h2>
+    <p class="at-section-lead">
+      AvalTrust es una empresa fintech que facilita el acceso al crédito mediante fianzas digitales
+      y garantías innovadoras, seguras y justas. Respaldamos tu crecimiento con tecnología y
+      experiencia.
+    </p>
+
+    <div class="que-es__rejilla">
+      @for (bloque of queEsAvalTrust; track bloque.titulo) {
+        <article class="at-card">
+          <h3>{{ bloque.titulo }}</h3>
+          <p>{{ bloque.texto }}</p>
+        </article>
+      }
+    </div>
+  </div>
+</section>
+
+<section id="fintech" class="at-section at-section--dark">
+  <div class="at-container">
+    <h2 class="at-section-title">¿Por qué tu FinTech necesita esta solución?</h2>
+    <p class="at-section-lead">
+      Proceso en 4 pasos que transforma la gestión de riesgo de tu plataforma
+    </p>
+
+    <ol class="pasos">
+      @for (paso of pasosFintech; track paso.titulo; let i = $index) {
+        <li class="paso">
+          <span class="paso__numero" aria-hidden="true">{{ i + 1 }}</span>
+          <h3>{{ paso.titulo }}</h3>
+          <p>{{ paso.texto }}</p>
+        </li>
+      }
+    </ol>
+  </div>
+</section>
+
+<section id="servicios" class="at-section">
+  <div class="at-container">
+    <h2 class="at-section-title">Nuestros Servicios</h2>
+    <p class="at-section-lead">
+      Cobertura crediticia ajustada a cada tipo de riesgo, con soluciones innovadoras para
+      diferentes segmentos del mercado.
+    </p>
+
+    <div class="servicios">
+      @for (servicio of servicios; track servicio.titulo) {
+        <article class="at-card servicio">
+          <h3>{{ servicio.titulo }}</h3>
+          <p>{{ servicio.texto }}</p>
+          <a [href]="servicio.destino">Conoce más</a>
+        </article>
+      }
+    </div>
+  </div>
+</section>
+
+<section id="preguntas" class="at-section preguntas">
+  <div class="at-container">
+    <h2 class="at-section-title">Preguntas Frecuentes</h2>
+    <p class="at-section-lead">
+      Encuentra respuestas a las dudas más comunes sobre nuestros servicios
+    </p>
+
+    <div class="preguntas__lista">
+      @for (item of preguntas; track item.pregunta) {
+        <details class="pregunta">
+          <summary>{{ item.pregunta }}</summary>
+          <p>{{ item.respuesta }}</p>
+        </details>
+      }
+    </div>
+  </div>
+</section>
+
+<section id="contacto" class="at-section cierre">
+  <div class="at-container cierre__interior">
+    <h2>¿Necesitas garantía para tu crédito?</h2>
+    <p>
+      Habla con un asesor y empieza hoy mismo. Transformamos tu acceso al financiamiento con
+      garantías innovadoras y seguras.
+    </p>
+    <a class="at-btn at-btn--primary" href="mailto:comercial@avaltrust.co">Solicita tu garantía</a>
+  </div>
+</section>

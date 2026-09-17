@@ -1,0 +1,44 @@
+:host {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+main { flex: 1; }
+
+.saltar-contenido {
+  position: absolute;
+  left: var(--at-space-4);
+  top: calc(var(--at-space-4) * -10);
+  z-index: 100;
+  padding: var(--at-space-3) var(--at-space-4);
+  border-radius: var(--at-radius-sm);
+  background: var(--at-white);
+  color: var(--at-navy-900);
+  font-weight: var(--at-weight-semibold);
+  transition: top .2s ease;
+}
+
+.saltar-contenido:focus { top: var(--at-space-4); text-decoration: none; }
+
+.whatsapp {
+  position: fixed;
+  right: var(--at-space-6);
+  bottom: var(--at-space-6);
+  z-index: 60;
+  display: grid;
+  place-items: center;
+  width: 56px;
+  height: 56px;
+  border-radius: var(--at-radius-pill);
+  background: #25d366;
+  color: var(--at-white);
+  box-shadow: var(--at-shadow-md);
+  transition: transform .2s ease;
+}
+
+.whatsapp:hover { transform: scale(1.06); color: var(--at-white); }
+
+@media (max-width: 560px) {
+  .whatsapp { right: var(--at-space-4); bottom: var(--at-space-4); width: 50px; height: 50px; }
+}

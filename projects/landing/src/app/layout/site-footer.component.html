@@ -1,0 +1,62 @@
+<footer class="pie">
+  <div class="at-container pie__rejilla">
+    <div class="pie__columna pie__columna--marca">
+      <img
+        src="img/logo-200.webp"
+        srcset="img/logo-200.webp 200w, img/logo-400.webp 400w"
+        sizes="180px"
+        width="200"
+        height="63"
+        alt="AvalTrust"
+      />
+      <p>
+        Impulsamos la inclusión financiera con soluciones innovadoras de garantía, facilitando un
+        acceso seguro y confiable al crédito para personas, empresas y plataformas Fintech en
+        Colombia.
+      </p>
+    </div>
+
+    <div class="pie__columna">
+      <h3 class="pie__titulo">Somos tu Respaldo Para</h3>
+      <ul class="pie__lista">
+        @for (respaldo of respaldos; track respaldo) {
+          <li>{{ respaldo }}</li>
+        }
+      </ul>
+    </div>
+
+    <div class="pie__columna">
+      <h3 class="pie__titulo">Enlaces rápidos</h3>
+      <ul class="pie__lista">
+        <li><a href="#inicio">Inicio</a></li>
+        <li><a href="#que-es">Qué es AvalTrust</a></li>
+        <li><a href="#servicios">Nuestros Servicios</a></li>
+        <li><a href="#fintech">Para fintechs</a></li>
+        <li><a href="#preguntas">Preguntas Frecuentes</a></li>
+        <li><a href="#contacto">Contáctenos</a></li>
+      </ul>
+    </div>
+
+    <div class="pie__columna">
+      <h3 class="pie__titulo">Estamos para ayudarte</h3>
+      <address class="pie__direccion">
+        CR 46 B 74 SUR 03<br />
+        Edificio Cantoluna<br />
+        Sabaneta, Antioquia.
+      </address>
+      <p class="pie__telefono">
+        <span>Teléfono</span>: <a href="tel:+573027657434">302 765 7434</a>
+      </p>
+      <p><a href="mailto:comercial@avaltrust.co">comercial&#64;avaltrust.co</a></p>
+    </div>
+  </div>
+
+  <div class="at-container pie__legal">
+    <p>
+      &copy; {{ anio }} AvalTrust.
+      <a href="https://avaltrust.co/politica-privacidad.html">Política de privacidad</a> |
+      <a href="https://avaltrust.co/terminos-condiciones.html">Términos y Condiciones</a>
+    </p>
+    <p>Comprometidos con transformar el acceso al crédito.</p>
+  </div>
+</footer>

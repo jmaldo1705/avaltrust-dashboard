@@ -1,0 +1,41 @@
+<header class="cabecera" [class.cabecera--compacta]="compacto()">
+  <div class="at-container cabecera__interior">
+    <a class="cabecera__marca" href="#inicio" (click)="cerrarMenu()">
+      <img
+        src="img/logo-200.webp"
+        srcset="img/logo-200.webp 200w, img/logo-400.webp 400w"
+        sizes="160px"
+        width="200"
+        height="63"
+        alt="AvalTrust"
+      />
+    </a>
+
+    <button
+      type="button"
+      class="cabecera__hamburguesa"
+      [attr.aria-expanded]="menuAbierto()"
+      aria-controls="menu-principal"
+      (click)="alternarMenu()"
+    >
+      <span class="at-visually-hidden">Menú</span>
+      <span class="cabecera__barra" aria-hidden="true"></span>
+      <span class="cabecera__barra" aria-hidden="true"></span>
+      <span class="cabecera__barra" aria-hidden="true"></span>
+    </button>
+
+    <nav id="menu-principal" class="cabecera__nav" [class.cabecera__nav--abierto]="menuAbierto()">
+      <ul class="cabecera__lista">
+        @for (enlace of enlaces; track enlace.destino) {
+          <li>
+            <a [href]="enlace.destino" (click)="cerrarMenu()">{{ enlace.etiqueta }}</a>
+          </li>
+        }
+      </ul>
+      <div class="cabecera__acciones">
+        <a class="cabecera__acceso" [href]="accesoPortal">Iniciar sesión</a>
+        <a class="at-btn at-btn--primary" href="#contacto" (click)="cerrarMenu()">Contáctanos</a>
+      </div>
+    </nav>
+  </div>
+</header>

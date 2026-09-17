@@ -1,0 +1,101 @@
+.cabecera {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  background: transparent;
+  transition: background-color .25s ease, box-shadow .25s ease;
+}
+
+.cabecera--compacta {
+  background: var(--at-navy-900);
+  box-shadow: var(--at-shadow-md);
+}
+
+.cabecera__interior {
+  display: flex;
+  align-items: center;
+  gap: var(--at-space-6);
+  min-height: var(--at-header-height);
+  padding-block: var(--at-space-3);
+}
+
+.cabecera__marca img { width: 160px; height: auto; }
+
+.cabecera__nav {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--at-space-6);
+}
+
+.cabecera__lista {
+  display: flex;
+  gap: var(--at-space-6);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.cabecera__lista a,
+.cabecera__acceso {
+  color: var(--at-text-on-dark);
+  font-size: var(--at-text-sm);
+  font-weight: var(--at-weight-medium);
+}
+.cabecera__lista a:hover,
+.cabecera__acceso:hover { color: var(--at-white); }
+
+.cabecera__acciones {
+  display: flex;
+  align-items: center;
+  gap: var(--at-space-4);
+}
+
+.cabecera__acciones .at-btn { min-height: 42px; padding-inline: var(--at-space-6); }
+
+.cabecera__hamburguesa {
+  display: none;
+  flex-direction: column;
+  gap: 5px;
+  padding: var(--at-space-2);
+  margin-left: auto;
+  background: none;
+  border: 0;
+  cursor: pointer;
+}
+
+.cabecera__barra {
+  display: block;
+  width: 24px;
+  height: 2px;
+  background: var(--at-white);
+  border-radius: 2px;
+}
+
+@media (max-width: 900px) {
+  .cabecera { background: var(--at-navy-900); }
+
+  .cabecera__hamburguesa { display: flex; }
+
+  .cabecera__nav {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 100%;
+    display: none;
+    flex-direction: column;
+    align-items: stretch;
+    gap: var(--at-space-4);
+    padding: var(--at-space-6) var(--at-space-4);
+    background: var(--at-navy-900);
+    border-top: 1px solid rgb(255 255 255 / .12);
+  }
+
+  .cabecera__nav--abierto { display: flex; }
+
+  .cabecera__lista { flex-direction: column; gap: var(--at-space-4); }
+
+  .cabecera__acciones { flex-direction: column; align-items: stretch; gap: var(--at-space-3); }
+  .cabecera__acciones .at-btn { width: 100%; }
+}

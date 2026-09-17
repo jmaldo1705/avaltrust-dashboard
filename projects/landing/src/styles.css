@@ -1,1 +1,117 @@
-/* You can add global styles to this file, and also import other style files */
+/* Base de la landing. El color y el ritmo vienen de shared-ui/styles/tokens.css,
+   que angular.json carga antes que este archivo. */
+
+*,
+*::before,
+*::after { box-sizing: border-box; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  margin: 0;
+  background: var(--at-bg);
+  color: var(--at-text);
+  font-family: var(--at-font-sans);
+  font-size: var(--at-text-base);
+  line-height: var(--at-leading-normal);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+h1, h2, h3, h4 {
+  margin: 0;
+  line-height: var(--at-leading-tight);
+  font-weight: var(--at-weight-bold);
+  text-wrap: balance;
+}
+
+p { margin: 0; }
+
+a { color: var(--at-accent); text-decoration: none; }
+a:hover { color: var(--at-accent-hover); text-decoration: underline; }
+
+img { max-width: 100%; height: auto; display: block; }
+
+:focus-visible {
+  outline: 2px solid var(--at-accent);
+  outline-offset: 2px;
+  border-radius: var(--at-radius-sm);
+}
+
+/* Contenedor y ritmo vertical compartidos por todas las secciones */
+.at-container {
+  width: 100%;
+  max-width: var(--at-container);
+  margin-inline: auto;
+  padding-inline: var(--at-space-4);
+}
+
+.at-section { padding-block: var(--at-space-16); }
+.at-section--dark {
+  background: var(--at-gradient-hero);
+  color: var(--at-text-on-dark);
+}
+.at-section--dark h2 { color: var(--at-white); }
+
+.at-eyebrow {
+  font-size: var(--at-text-sm);
+  font-weight: var(--at-weight-semibold);
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: var(--at-accent);
+  margin-bottom: var(--at-space-2);
+}
+
+.at-section-title { font-size: var(--at-text-2xl); }
+
+.at-section-lead {
+  margin-top: var(--at-space-3);
+  max-width: 62ch;
+  color: var(--at-text-muted);
+  font-size: var(--at-text-lg);
+}
+.at-section--dark .at-section-lead { color: rgb(255 255 255 / .82); }
+
+/* Botones */
+.at-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--at-space-2);
+  min-height: 48px;
+  padding: var(--at-space-3) var(--at-space-6);
+  border: 1px solid transparent;
+  border-radius: var(--at-radius-pill);
+  font: inherit;
+  font-weight: var(--at-weight-semibold);
+  cursor: pointer;
+  transition: background-color .2s ease, color .2s ease, border-color .2s ease;
+}
+.at-btn:hover { text-decoration: none; }
+.at-btn--primary { background: var(--at-accent); color: var(--at-white); }
+.at-btn--primary:hover { background: var(--at-accent-hover); color: var(--at-white); }
+.at-btn--ghost { border-color: currentColor; background: transparent; color: inherit; }
+.at-btn--ghost:hover { background: rgb(255 255 255 / .12); color: inherit; }
+.at-btn--dark { background: var(--at-navy-700); color: var(--at-white); }
+.at-btn--dark:hover { background: var(--at-navy-900); color: var(--at-white); }
+
+/* Tarjeta base */
+.at-card {
+  background: var(--at-surface);
+  border: 1px solid var(--at-border);
+  border-radius: var(--at-radius-lg);
+  padding: var(--at-space-6);
+}
+
+.at-visually-hidden {
+  position: absolute;
+  width: 1px; height: 1px;
+  margin: -1px; padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+@media (max-width: 640px) {
+  .at-section { padding-block: var(--at-space-12); }
+}

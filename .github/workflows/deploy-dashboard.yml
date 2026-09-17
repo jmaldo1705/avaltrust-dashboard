@@ -3,6 +3,16 @@ name: Deploy AvalTrust Dashboard to S3 + CloudFront
 on:
   push:
     branches: [master]
+    # El workspace ya aloja dos aplicaciones: un cambio que solo toca la
+    # landing no tiene por que redesplegar el dashboard.
+    paths:
+      - 'projects/dashboard/**'
+      - 'projects/shared-ui/**'
+      - 'angular.json'
+      - 'package.json'
+      - 'package-lock.json'
+      - 'tsconfig.json'
+      - '.github/workflows/deploy-dashboard.yml'
   workflow_dispatch: {}
 
 env:
