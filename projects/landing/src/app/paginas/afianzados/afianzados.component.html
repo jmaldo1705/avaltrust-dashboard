@@ -7,6 +7,14 @@
   <div class="at-container promesas">
     @for (promesa of promesas; track promesa.titulo) {
       <div class="promesa">
+        <span class="promesa__icono" aria-hidden="true">
+          @switch (promesa.icono) {
+            @case ('humano') { <svg lucideHeartHandshake></svg> }
+            @case ('seguro') { <svg lucideShieldCheck></svg> }
+            @case ('reloj') { <svg lucideClock></svg> }
+            @default { <svg lucideEye></svg> }
+          }
+        </span>
         <strong>{{ promesa.titulo }}</strong>
         <span>{{ promesa.texto }}</span>
       </div>
@@ -16,11 +24,17 @@
 
 <section class="at-section">
   <div class="at-container">
-    <h2 class="at-section-title">¿Qué Pasa Si No Puedo Pagar Mi Crédito?</h2>
-    <p class="at-section-lead">
-      No te preocupes. En AvalTrust entendemos que la vida a veces trae desafíos. Por eso hemos
-      diseñado un proceso transparente y humano para acompañarte.
-    </p>
+    <div class="at-media at-media--invertido">
+      <div class="at-media__texto">
+        <h2 class="at-section-title">¿Qué Pasa Si No Puedo Pagar Mi Crédito?</h2>
+        <p class="at-section-lead">
+          No te preocupes. En AvalTrust entendemos que la vida a veces trae desafíos. Por eso hemos
+          diseñado un proceso transparente y humano para acompañarte.
+        </p>
+      </div>
+
+      <at-foto nombre="asesor" alt="Asesor de AvalTrust acompañando a un afianzado" [ancho]="800" [alto]="600" />
+    </div>
 
     <ol class="acompanamiento">
       <li class="at-card">
@@ -80,6 +94,16 @@
 
 <section class="at-section creditos-seccion">
   <div class="at-container">
+    <at-foto
+      class="at-banda"
+      nombre="ahorro"
+      alt="Ahorro y planeación financiera"
+      [anchos]="[800, 1440]"
+      sizes="100vw"
+      [ancho]="1440"
+      [alto]="405"
+    />
+
     <h2 class="at-section-title">Tipos de Créditos que Respaldamos</h2>
     <p class="at-section-lead">
       Nuestro respaldo crediticio te abre las puertas a diferentes oportunidades de financiamiento
@@ -88,6 +112,16 @@
     <div class="creditos">
       @for (credito of creditos; track credito.titulo) {
         <article class="at-card">
+          <span class="icono" aria-hidden="true">
+            @switch (credito.icono) {
+              @case ('educacion') { <svg lucideGraduationCap></svg> }
+              @case ('vehiculo') { <svg lucideCar></svg> }
+              @case ('digital') { <svg lucideSmartphone></svg> }
+              @case ('vivienda') { <svg lucideHouse></svg> }
+              @case ('libranza') { <svg lucideBriefcase></svg> }
+              @default { <svg lucideShoppingBag></svg> }
+            }
+          </span>
           <h3>{{ credito.titulo }}</h3>
           <p>{{ credito.texto }}</p>
         </article>

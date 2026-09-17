@@ -1,6 +1,16 @@
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
+import {
+  LucideBuilding,
+  LucideHeadset,
+  LucideLandmark,
+  LucideLaptop,
+  LucideLightbulb,
+  LucideUser,
+  LucideUserCheck,
+} from '@lucide/angular';
+import { FotoComponent } from '../ui/foto.component';
 import { Meta, Title } from '@angular/platform-browser';
 import {
   CoberturaService,
@@ -11,6 +21,8 @@ import {
 interface Bloque {
   titulo: string;
   texto: string;
+  /** Clave del icono; la plantilla la resuelve con @switch. */
+  icono?: string;
 }
 
 interface Servicio extends Bloque {
@@ -41,7 +53,18 @@ const PORCENTAJE = new Intl.NumberFormat('es-CO', {
 
 @Component({
   selector: 'at-home',
-  imports: [FormsModule, RouterLink],
+  imports: [
+    FormsModule,
+    RouterLink,
+    FotoComponent,
+    LucideLaptop,
+    LucideHeadset,
+    LucideUserCheck,
+    LucideUser,
+    LucideBuilding,
+    LucideLightbulb,
+    LucideLandmark,
+  ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './home.component.html',
   styleUrl: './home.component.css',
@@ -79,16 +102,19 @@ export class HomeComponent {
   protected readonly queEsAvalTrust: readonly Bloque[] = [
     {
       titulo: 'Soluciones 100% digitales',
+      icono: 'laptop',
       texto:
         'Todas nuestras soluciones están completamente digitalizadas, eliminando la burocracia y acelerando los procesos de manera significativa.',
     },
     {
       titulo: 'Atención personalizada',
+      icono: 'headset',
       texto:
         'Ofrecemos un servicio adaptado a las necesidades específicas de cada cliente, con asesoría especializada en cada paso del proceso.',
     },
     {
       titulo: 'Garantías diseñadas para cada perfil',
+      icono: 'perfil',
       texto:
         'Nuestras garantías están diseñadas tanto para personas como para empresas, alineados con su perfil de riesgo específico.',
     },
@@ -120,24 +146,28 @@ export class HomeComponent {
   protected readonly servicios: readonly Servicio[] = [
     {
       titulo: 'Para Personas',
+      icono: 'persona',
       texto:
         'Crédito más accesible y seguro. Garantía digital ante imprevistos que te permite acceder al financiamiento que necesitas.',
       destino: '/afianzados',
     },
     {
       titulo: 'Para Empresas',
+      icono: 'empresa',
       texto:
         'Garantía para licitaciones y financiamiento empresarial. Impulsa el crecimiento de tu negocio con nuestro respaldo.',
       destino: '/servicio',
     },
     {
       titulo: 'Para Fintechs',
+      icono: 'fintech',
       texto:
         'Infraestructura de fianza digital. Fácil de integrar, lista para escalar y optimizar tu plataforma crediticia.',
       destino: '/servicio',
     },
     {
       titulo: 'Para Cooperativas',
+      icono: 'cooperativa',
       texto:
         'Fondos financieramente estables contra exposición al riesgo operativo. Mejoran la cartera crediticia y reducen significativamente las pérdidas.',
       destino: '/servicio',

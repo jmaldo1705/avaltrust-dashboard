@@ -273,6 +273,22 @@
   background: var(--at-white);
 }
 
+.que-es .at-media {
+  margin-bottom: var(--at-space-12);
+}
+
+/* Icono que encabeza cada tarjeta */
+.icono {
+  display: grid;
+  place-items: center;
+  width: 48px;
+  height: 48px;
+  margin-bottom: var(--at-space-4);
+  border-radius: var(--at-radius-md);
+  background: var(--at-gradient-accent);
+  color: var(--at-white);
+}
+
 .que-es__rejilla,
 .servicios {
   display: grid;

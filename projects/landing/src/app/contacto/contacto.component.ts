@@ -1,6 +1,7 @@
 import { ChangeDetectionStrategy, Component, inject, signal, viewChild } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { RouterLink } from '@angular/router';
+import { FotoComponent } from '../ui/foto.component';
 import { PageHeroComponent } from '../ui/page-hero.component';
 import { definirSeo } from '../ui/seo';
 import { MailService, plantillaCorreo } from './mail.service';
@@ -12,7 +13,7 @@ const DESTINATARIO = 'comercial@avaltrust.co';
 
 @Component({
   selector: 'at-contacto',
-  imports: [ReactiveFormsModule, PageHeroComponent, TurnstileComponent, RouterLink],
+  imports: [ReactiveFormsModule, PageHeroComponent, TurnstileComponent, RouterLink, FotoComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './contacto.component.html',
   styleUrl: './contacto.component.css',

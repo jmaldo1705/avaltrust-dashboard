@@ -257,6 +257,10 @@ button[disabled] {
   background: var(--at-slate-100);
 }
 
+.nota__ilustracion {
+  margin-bottom: var(--at-space-4);
+}
+
 .nota h2 {
   margin-bottom: var(--at-space-3);
   font-size: var(--at-text-base);

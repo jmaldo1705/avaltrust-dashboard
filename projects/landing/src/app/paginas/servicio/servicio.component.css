@@ -55,6 +55,21 @@
   margin-top: var(--at-space-8);
 }
 
+.icono {
+  display: grid;
+  place-items: center;
+  width: 48px;
+  height: 48px;
+  margin-bottom: var(--at-space-4);
+  border-radius: var(--at-radius-md);
+  background: var(--at-gradient-accent);
+  color: var(--at-white);
+}
+
+.at-banda {
+  margin: 0 0 var(--at-space-12);
+}
+
 .beneficios h3 { margin-bottom: var(--at-space-3); font-size: var(--at-text-lg); }
 .beneficios p { color: var(--at-text-muted); }
 

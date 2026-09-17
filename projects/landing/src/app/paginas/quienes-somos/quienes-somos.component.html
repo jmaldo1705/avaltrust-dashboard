@@ -5,22 +5,32 @@
 />
 
 <section class="at-section">
-  <div class="at-container nosotros">
-    <h2 class="at-section-title">Sobre Nosotros</h2>
-    <p>
-      AvalTrust nace de una visión compartida y la sólida experiencia de un equipo multidisciplinario
-      que cree firmemente en el poder de la inclusión financiera. Nos dedicamos a transformar el
-      acceso al crédito a través de soluciones innovadoras de aval y garantía, diseñadas para brindar
-      una capa de seguridad robusta que mitigue el riesgo para plataformas Fintech y otros
-      acreedores.
-    </p>
-    <p>
-      Comprendemos las dinámicas únicas del ecosistema Fintech y, por ello, nuestras garantías son
-      adaptadas y flexibles. Al ofrecer estas soluciones, no solo desbloqueamos un mercado
-      significativo y en constante crecimiento, sino que también impulsamos activamente la inclusión
-      financiera y el desarrollo económico. En AvalTrust, estamos construyendo puentes hacia un
-      futuro donde el acceso al crédito sea más seguro, confiable, equitativo y accesible para todos.
-    </p>
+  <div class="at-container at-media">
+    <div class="at-media__texto">
+      <h2 class="at-section-title">Sobre Nosotros</h2>
+      <p>
+        AvalTrust nace de una visión compartida y la sólida experiencia de un equipo multidisciplinario
+        que cree firmemente en el poder de la inclusión financiera. Nos dedicamos a transformar el
+        acceso al crédito a través de soluciones innovadoras de aval y garantía, diseñadas para brindar
+        una capa de seguridad robusta que mitigue el riesgo para plataformas Fintech y otros
+        acreedores.
+      </p>
+      <p>
+        Comprendemos las dinámicas únicas del ecosistema Fintech y, por ello, nuestras garantías son
+        adaptadas y flexibles. Al ofrecer estas soluciones, no solo desbloqueamos un mercado
+        significativo y en constante crecimiento, sino que también impulsamos activamente la inclusión
+        financiera y el desarrollo económico. En AvalTrust, estamos construyendo puentes hacia un
+        futuro donde el acceso al crédito sea más seguro, confiable, equitativo y accesible para todos.
+      </p>
+    </div>
+
+    <at-foto
+      nombre="equipo"
+      alt="Equipo de AvalTrust trabajando"
+      [ancho]="800"
+      [alto]="600"
+      [prioridad]="true"
+    />
   </div>
 </section>
 
@@ -31,6 +41,9 @@
 
     <div class="pilares">
       <article class="pilar">
+        <span class="pilar__icono" aria-hidden="true">
+          <svg lucideEye></svg>
+        </span>
         <h3>Nuestra Visión</h3>
         <p>
           Transformar el panorama del acceso al crédito en el sector Fintech de Colombia,
@@ -40,7 +53,11 @@
           democratización del financiamiento en el país.
         </p>
       </article>
+
       <article class="pilar">
+        <span class="pilar__icono" aria-hidden="true">
+          <svg lucideTarget></svg>
+        </span>
         <h3>Nuestra Misión</h3>
         <p>
           Colaborar estrechamente con el ecosistema Fintech para ofrecer soluciones de respaldo
@@ -57,27 +74,51 @@
 <section class="at-section valores-seccion">
   <div class="at-container">
     <h2 class="at-section-title">Nuestros Valores</h2>
-    <ul class="valores">
-      @for (valor of valores; track valor) {
-        <li>{{ valor }}</li>
-      }
-    </ul>
 
+    <ul class="valores">
+      <li class="valor">
+        <span class="valor__icono" aria-hidden="true"><svg lucideSparkles></svg></span>
+        <span class="valor__nombre">Innovación</span>
+      </li>
+      <li class="valor">
+        <span class="valor__icono" aria-hidden="true"><svg lucideAward></svg></span>
+        <span class="valor__nombre">Excelencia</span>
+      </li>
+      <li class="valor">
+        <span class="valor__icono" aria-hidden="true"><svg lucideHandshake></svg></span>
+        <span class="valor__nombre">Respeto</span>
+      </li>
+      <li class="valor">
+        <span class="valor__icono" aria-hidden="true"><svg lucideShieldCheck></svg></span>
+        <span class="valor__nombre">Integridad</span>
+      </li>
+      <li class="valor">
+        <span class="valor__icono" aria-hidden="true"><svg lucideScale></svg></span>
+        <span class="valor__nombre">Responsabilidad</span>
+      </li>
+    </ul>
+  </div>
+</section>
+
+<section class="at-section estrategia-seccion">
+  <div class="at-container">
     <div class="estrategia">
       <h3>Nuestra Estrategia</h3>
-      <p>
-        En AvalTrust, nuestra estrategia se basa en la integración inteligente de tecnología,
-        análisis avanzado de riesgo y alianzas estratégicas de alto valor. Esto nos permite
-        desarrollar soluciones de respaldo crediticio digital innovadoras, flexibles y seguras que se
-        ajustan a los distintos perfiles de nuestros clientes.
-      </p>
-      <p>
-        Nos especializamos en comprender las dinámicas del ecosistema Fintech, lo que nos permite
-        adaptar nuestros servicios de manera ágil y efectiva, respondiendo a las exigencias de un
-        mercado en constante evolución. A través de esta visión, promovemos el acceso al crédito de
-        forma eficiente, responsable y sostenible, contribuyendo al fortalecimiento de la inclusión
-        financiera.
-      </p>
+      <div class="estrategia__texto">
+        <p>
+          En AvalTrust, nuestra estrategia se basa en la integración inteligente de tecnología,
+          análisis avanzado de riesgo y alianzas estratégicas de alto valor. Esto nos permite
+          desarrollar soluciones de respaldo crediticio digital innovadoras, flexibles y seguras que se
+          ajustan a los distintos perfiles de nuestros clientes.
+        </p>
+        <p>
+          Nos especializamos en comprender las dinámicas del ecosistema Fintech, lo que nos permite
+          adaptar nuestros servicios de manera ágil y efectiva, respondiendo a las exigencias de un
+          mercado en constante evolución. A través de esta visión, promovemos el acceso al crédito de
+          forma eficiente, responsable y sostenible, contribuyendo al fortalecimiento de la inclusión
+          financiera.
+        </p>
+      </div>
     </div>
   </div>
 </section>

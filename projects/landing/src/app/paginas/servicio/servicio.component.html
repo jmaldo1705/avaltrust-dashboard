@@ -26,7 +26,8 @@
       innovación sostenible.
     </h2>
 
-    <div class="propuesta__texto">
+    <div class="at-media">
+      <div class="propuesta__texto at-media__texto">
       <p>
         En Avaltrust, construimos soluciones de respaldo digital que fortalecen la infraestructura de
         riesgo de plataformas financieras. Nuestra propuesta se basa en un fondo de estabilización
@@ -51,6 +52,9 @@
         <li>Autogestionado</li>
         <li>Transparente</li>
       </ul>
+      </div>
+
+      <at-foto nombre="operacion" alt="Operación respaldada por AvalTrust" [ancho]="800" [alto]="600" />
     </div>
   </div>
 </section>
@@ -92,6 +96,16 @@
     <div class="beneficios">
       @for (beneficio of beneficios; track beneficio.titulo) {
         <article class="at-card">
+          <span class="icono" aria-hidden="true">
+            @switch (beneficio.icono) {
+              @case ('enchufe') { <svg lucidePlug></svg> }
+              @case ('mensaje') { <svg lucideMessageSquare></svg> }
+              @case ('bloques') { <svg lucideBlocks></svg> }
+              @case ('medidor') { <svg lucideGauge></svg> }
+              @case ('papel') { <svg lucideFileX></svg> }
+              @default { <svg lucideShieldCheck></svg> }
+            }
+          </span>
           <h3>{{ beneficio.titulo }}</h3>
           <p>{{ beneficio.texto }}</p>
         </article>
@@ -104,6 +118,16 @@
 
 <section class="at-section">
   <div class="at-container">
+    <at-foto
+      class="at-banda"
+      nombre="acuerdo"
+      alt="Acuerdo entre AvalTrust y una entidad financiera"
+      [anchos]="[800, 1440]"
+      sizes="100vw"
+      [ancho]="1440"
+      [alto]="405"
+    />
+
     <h2 class="at-section-title">
       ¿Cómo opera AvalTrust bajo el Modelo de Cobertura Crediticia?
     </h2>

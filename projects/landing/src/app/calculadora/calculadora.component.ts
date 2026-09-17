@@ -8,6 +8,7 @@ import {
 } from '../cobertura/cobertura.service';
 import { MailService, plantillaCorreo } from '../contacto/mail.service';
 import { TurnstileComponent } from '../contacto/turnstile.component';
+import { FotoComponent } from '../ui/foto.component';
 import { PageHeroComponent } from '../ui/page-hero.component';
 import { definirSeo } from '../ui/seo';
 
@@ -28,7 +29,7 @@ const PORCENTAJE = new Intl.NumberFormat('es-CO', {
 
 @Component({
   selector: 'at-calculadora',
-  imports: [ReactiveFormsModule, PageHeroComponent, TurnstileComponent, RouterLink],
+  imports: [ReactiveFormsModule, PageHeroComponent, TurnstileComponent, RouterLink, FotoComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './calculadora.component.html',
   styleUrl: './calculadora.component.css',

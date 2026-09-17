@@ -14,11 +14,22 @@
   gap: var(--at-space-1);
 }
 
+.promesa .promesa__icono {
+  display: grid;
+  place-items: center;
+  width: 42px;
+  height: 42px;
+  margin-bottom: var(--at-space-2);
+  border-radius: var(--at-radius-md);
+  background: var(--at-slate-100);
+  color: var(--at-navy-700);
+}
+
 .promesa strong {
   font-size: var(--at-text-lg);
 }
 
-.promesa span {
+.promesa > span:not(.promesa__icono) {
   color: var(--at-text-muted);
   font-size: var(--at-text-sm);
 }
@@ -96,6 +107,21 @@
   grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
   gap: var(--at-space-6);
   margin-top: var(--at-space-8);
+}
+
+.icono {
+  display: grid;
+  place-items: center;
+  width: 48px;
+  height: 48px;
+  margin-bottom: var(--at-space-4);
+  border-radius: var(--at-radius-md);
+  background: var(--at-gradient-accent);
+  color: var(--at-white);
+}
+
+.at-banda {
+  margin: 0 0 var(--at-space-12);
 }
 
 .creditos h3 {

@@ -162,16 +162,29 @@
 
 <section id="que-es" class="at-section que-es">
   <div class="at-container">
-    <h2 class="at-section-title">¿Qué es AvalTrust?</h2>
-    <p class="at-section-lead">
-      AvalTrust es una empresa fintech que facilita el acceso al crédito mediante fianzas digitales
-      y garantías innovadoras, seguras y justas. Respaldamos tu crecimiento con tecnología y
-      experiencia.
-    </p>
+    <div class="at-media at-media--invertido">
+      <div class="at-media__texto">
+        <h2 class="at-section-title">¿Qué es AvalTrust?</h2>
+        <p class="at-section-lead">
+          AvalTrust es una empresa fintech que facilita el acceso al crédito mediante fianzas digitales
+          y garantías innovadoras, seguras y justas. Respaldamos tu crecimiento con tecnología y
+          experiencia.
+        </p>
+      </div>
+
+      <at-foto nombre="oficina" alt="Operación de AvalTrust" [ancho]="800" [alto]="450" />
+    </div>
 
     <div class="que-es__rejilla">
       @for (bloque of queEsAvalTrust; track bloque.titulo) {
         <article class="at-card">
+          <span class="icono" aria-hidden="true">
+            @switch (bloque.icono) {
+              @case ('laptop') { <svg lucideLaptop></svg> }
+              @case ('headset') { <svg lucideHeadset></svg> }
+              @default { <svg lucideUserCheck></svg> }
+            }
+          </span>
           <h3>{{ bloque.titulo }}</h3>
           <p>{{ bloque.texto }}</p>
         </article>
@@ -210,6 +223,14 @@
     <div class="servicios">
       @for (servicio of servicios; track servicio.titulo) {
         <article class="at-card servicio">
+          <span class="icono" aria-hidden="true">
+            @switch (servicio.icono) {
+              @case ('persona') { <svg lucideUser></svg> }
+              @case ('empresa') { <svg lucideBuilding></svg> }
+              @case ('fintech') { <svg lucideLightbulb></svg> }
+              @default { <svg lucideLandmark></svg> }
+            }
+          </span>
           <h3>{{ servicio.titulo }}</h3>
           <p>{{ servicio.texto }}</p>
           <a [routerLink]="servicio.destino">Conoce más</a>

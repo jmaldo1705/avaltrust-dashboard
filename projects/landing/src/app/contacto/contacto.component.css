@@ -140,12 +140,8 @@ button[disabled] {
   color: var(--at-white);
 }
 
-.puentes {
-  text-align: center;
-}
-
 .puentes .at-section-lead {
-  margin-inline: auto;
+  margin-top: var(--at-space-4);
 }
 
 .cierre-pagina {
