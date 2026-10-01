@@ -24,6 +24,16 @@ npm start            # dashboard en http://localhost:4200
 npm run start:landing # landing en http://localhost:4200
 ```
 
+El dashboard espera el backend en `http://localhost:8080`. Si ese puerto está
+ocupado y el backend corre en otro, se puede apuntar sin tocar el código:
+
+```bash
+npx ng serve dashboard --port 4300 --define AVALTRUST_API_URL="'http://localhost:8081'"
+```
+
+En ese caso el backend debe aceptar el origen nuevo en CORS
+(`APP_CORS_ALLOWED_ORIGINS=http://localhost:4300`).
+
 ## Build
 
 ```bash
@@ -57,6 +67,16 @@ repetir valores hexadecimales.
 
 ## Despliegue
 
-`.github/workflows/deploy.yml` despliega el **dashboard** a S3 + CloudFront en
-cada push a `master`, autenticándose con un rol OIDC (sin llaves estáticas).
-La landing se despliega desde su propio repositorio hasta el cutover.
+Cada push a `master` despliega a S3 + CloudFront, autenticándose con un rol
+OIDC (sin llaves estáticas). Hay un workflow por aplicación, filtrado por
+`paths:`:
+
+- `.github/workflows/deploy-dashboard.yml` → dashboard (app.avaltrust.co)
+- `.github/workflows/deploy-landing.yml` → landing (avaltrust.co)
+
+Un cambio en `projects/shared-ui/` o en `package.json` dispara los dos.
+
+## Plan de trabajo
+
+`docs/plan-modernizacion-movil.md` describe la migración del dashboard a
+snackbar, hojas inferiores en móvil y modales en escritorio.
