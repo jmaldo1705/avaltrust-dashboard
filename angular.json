@@ -78,10 +78,10 @@
           "builder": "@angular/build:dev-server",
           "configurations": {
             "production": {
-              "buildTarget": "avaltrust-dashboard:build:production"
+              "buildTarget": "dashboard:build:production"
             },
             "development": {
-              "buildTarget": "avaltrust-dashboard:build:development"
+              "buildTarget": "dashboard:build:development"
             }
           },
           "defaultConfiguration": "development"
