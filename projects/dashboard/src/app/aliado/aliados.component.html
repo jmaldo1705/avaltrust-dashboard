@@ -9,8 +9,15 @@
     (logout)="logout()">
   </app-header>
 
+  <div
+    class="overlay"
+    [class.active]="isSidebarOpen || isUserMenuOpen"
+    (click)="closeSidebar(); closeUserMenu()">
+  </div>
+
   <div class="dashboard-content">
     <app-sidebar
+      [isSidebarOpen]="isSidebarOpen"
       (sidebarClose)="onSidebarClose()"
       (navigate)="onSidebarNavigate($event)">
     </app-sidebar>

@@ -10,14 +10,10 @@
   display: flex;
 }
 
+/* Margenes, padding y alto los pone .main-content en styles.css */
 .main-content {
   flex: 1;
-  margin-left: 250px;
-  margin-top: 60px;
-  padding: 2rem 2rem 2rem 3rem;
   background: #f8fafc;
-  min-height: calc(100vh - 60px);
-  transition: margin-left 0.3s ease;
 }
 
 .page-header {
@@ -104,6 +100,7 @@
   border-radius: 12px;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
   overflow: hidden;
+  overflow-x: auto; /* si la tabla no cabe se desplaza en vez de cortarse */
 }
 
 .data-table {
