@@ -7,7 +7,12 @@
 //     literales de las interpolaciones;
 //   - los literales que se pasan a alert(, confirm( y a los toasts
 //     (toast*.success/error/warning/info/show, y el texto de respaldo de
-//     toast*.fromHttpError).
+//     toast*.fromHttpError);
+//   - los literales que un componente asigna a una propiedad que su plantilla
+//     interpola ({{ errorMessage }}, {{ success() }}, {{ uploadResult.x }}):
+//     this.errorMessage = '...', this.success.set('...') o el inicializador
+//     del campo. Asi un mensaje que pasa de un banner al toast sigue en el
+//     mismo archivo y no cambia, y si se cambia por el camino, FALLA.
 // Un texto hecho solo de iconos (emoji o simbolos graficos como ✓ ✕ ⚠ ℹ) no
 // cuenta: cambiar un icono de texto por uno de Lucide no toca la copia. El ×
 // suelto es el glifo de cerrar de los botones y tambien cuenta como icono;
@@ -18,11 +23,12 @@
 //   - mover un texto dentro del archivo o a otro archivo no avisa;
 //   - cambiar o quitar un texto existente FALLA (sale con 1);
 //   - un texto nuevo se lista como aviso para que se apruebe.
-// Un texto que aparece como nuevo pero ya estaba tal cual en el codigo de la
-// base (.ts y .html, sin specs) se cuenta como movido: es un mensaje que vivia
-// en una propiedad (this.successMessage = '...') y ahora se pasa al toast. Si
-// tiene partes variables (${...} o {{...}}), todas sus partes fijas tienen que
-// estar en un mismo archivo de la base. Se listan aparte, con su archivo.
+// Un texto que aparece como nuevo pero ya era, entero y tal cual, un texto
+// visible de la base en otro archivo (p. ej. "Plantilla descargada
+// exitosamente" de estado-cartera usado tambien en portfolio) es un texto
+// reutilizado: se lista aparte, con su archivo de origen. Un comentario, un
+// identificador o un trozo de otro texto de la base no cuentan: eso se lista
+// como nuevo.
 //
 // Uso: node scripts/text-diff.mjs <ref-base> [--approved=archivo]
 //   --approved: archivo con un texto aprobado por linea (las lineas con # se
@@ -328,13 +334,69 @@ function callArgs(src, open) {
   return src.slice(open + 1);
 }
 
-function scanTs(raw, push) {
+// Texto de una expresion que empieza en start y acaba en el ; (o en el cierre
+// del bloque) al mismo nivel.
+function exprUntil(src, start) {
+  let depth = 0;
+  let q = null;
+  for (let k = start; k < src.length; k++) {
+    const d = src[k];
+    if (q) { if (d === '\\') k++; else if (d === q) q = null; continue; }
+    if (d === '"' || d === "'" || d === '`') q = d;
+    else if (d === '(' || d === '[' || d === '{') depth++;
+    else if (d === ')' || d === ']' || d === '}') { if (--depth < 0) return src.slice(start, k); }
+    else if (d === ';' && depth === 0) return src.slice(start, k);
+  }
+  return src.slice(start);
+}
+
+// Propiedades que la plantilla muestra: la raiz de cada interpolacion que es
+// solo un nombre o una cadena de miembros ({{ x }}, {{ x() }}, {{ x?.y }}).
+function interpolatedNames(tpl) {
+  const names = new Set();
+  const s = tpl.replace(/<!--[\s\S]*?-->/g, ' ');
+  for (const m of s.matchAll(/\{\{([\s\S]*?)\}\}/g)) {
+    const r = /^(?:this\.)?([A-Za-z_$][\w$]*)(?:\(\))?(?:\??\.[A-Za-z_$][\w$]*(?:\(\))?)*$/.exec(m[1].trim());
+    if (r) names.add(r[1]);
+  }
+  return names;
+}
+
+// Literales que el componente asigna a esas propiedades.
+function propertyLiterals(src, names) {
+  const found = [];
+  const add = expr => found.push(...literals(expr, { template: true }));
+  for (const name of names) {
+    const id = name.replace(/\$/g, '\\$');
+    for (const m of src.matchAll(new RegExp(`\\bthis\\.${id}\\s*=(?![=>])`, 'g'))) {
+      add(exprUntil(src, m.index + m[0].length));
+    }
+    for (const m of src.matchAll(new RegExp(`\\bthis\\.${id}\\s*\\.\\s*set\\s*\\(`, 'g'))) {
+      add(callArgs(src, m.index + m[0].length - 1));
+    }
+    const field = new RegExp(`^[ \\t]*(?:(?:public|private|protected|readonly|override)\\s+)*${id}\\s*(?::[^=;\\n]+)?=(?![=>])`, 'gm');
+    for (const m of src.matchAll(field)) add(exprUntil(src, m.index + m[0].length));
+  }
+  return found;
+}
+
+function scanTs(raw, push, file, side) {
   const src = stripComments(raw);
+  const templates = [];
   for (const m of src.matchAll(/\btemplate\s*:\s*`/g)) {
     const start = m.index + m[0].length;
     let end = start;
     while (end < src.length && src[end] !== '`') end += src[end] === '\\' ? 2 : 1;
+    templates.push(src.slice(start, end));
     scanTemplate(src.slice(start, end), push);
+  }
+  for (const m of src.matchAll(/\btemplateUrl\s*:\s*(['"])([^'"]+)\1/g)) {
+    const html = side?.get(path.posix.join(path.posix.dirname(file), m[2]));
+    if (html !== undefined) templates.push(html);
+  }
+  if (templates.length) {
+    const names = new Set(templates.flatMap(t => [...interpolatedNames(t)]));
+    for (const l of propertyLiterals(src, names)) push(l, 'propiedad');
   }
   const calls = [
     [/(?<![\w$.])(?:window\.)?(alert|confirm)\s*\(/g, m => m[1]],
@@ -350,11 +412,13 @@ function scanTs(raw, push) {
   }
 }
 
-function extract(file, content) {
+// side: todos los archivos del mismo lado (base o arbol de trabajo), para leer
+// la plantilla (templateUrl) de un componente.
+function extract(file, content, side) {
   const items = [];
   const push = (text, kind) => { if (!isIconOnly(text)) items.push({ text, kind }); };
   if (file.endsWith('.html')) scanTemplate(content, push);
-  else scanTs(content, push);
+  else scanTs(content, push, file, side);
   return items;
 }
 
@@ -374,9 +438,12 @@ const removed = []; // { file, text, n }
 const added = [];
 let totalBase = 0;
 let totalNow = 0;
+// Archivos de la base donde aparece cada texto visible (para los reutilizados).
+const baseTexts = new Map();
 for (const file of new Set([...before.keys(), ...after.keys()])) {
-  const a = count(before.has(file) ? extract(file, before.get(file)) : []);
-  const b = count(after.has(file) ? extract(file, after.get(file)) : []);
+  const a = count(before.has(file) ? extract(file, before.get(file), before) : []);
+  const b = count(after.has(file) ? extract(file, after.get(file), after) : []);
+  for (const text of a.keys()) baseTexts.set(text, [...(baseTexts.get(text) || []), file]);
   for (const n of a.values()) totalBase += n;
   for (const n of b.values()) totalNow += n;
   for (const [text, n] of a) if (n > (b.get(text) || 0)) removed.push({ file, text, n: n - (b.get(text) || 0) });
@@ -398,35 +465,11 @@ for (const r of added) {
   if (t) { takenFromAdded.set(r.text, takenFromAdded.get(r.text) - t); r.n -= t; }
 }
 
-// Los nuevos que ya estaban tal cual en el codigo de la base son movimientos.
-const BASE_PATHSPECS = [
-  ...SCAN_DIRS.flatMap(d => [`${d}/*.ts`, `${d}/*.html`]),
-  ':(exclude)*.spec.ts',
-];
-const fixedParts = text => text.split(/\$\{…\}|\{\{…\}\}/).map(s => s.trim()).filter(Boolean);
-const baseHits = new Map();
-// Devuelve los archivos de la base que contienen el texto (vacio si ninguno).
-function inBaseSource(text) {
-  if (baseHits.has(text)) return baseHits.get(text);
-  const parts = fixedParts(text);
-  let files = [];
-  if (parts.length) {
-    // -F literal, --all-match: todas las partes en un mismo archivo.
-    const patterns = parts.flatMap(p => ['-e', p]);
-    try {
-      files = git(['grep', '-l', '-F', '-I', '--all-match', ...patterns, baseSha, '--', ...BASE_PATHSPECS])
-        .toString().split('\n').filter(Boolean).map(l => l.replace(`${baseSha}:`, ''));
-    } catch {
-      files = []; // git grep sale con 1 si no hay coincidencias
-    }
-  }
-  baseHits.set(text, files);
-  return files;
-}
+// Los nuevos que ya eran, enteros, un texto visible de la base se reutilizan.
 const movedFromSource = []; // { file, text, n, from }
 for (const r of added) {
   if (r.n <= 0) continue;
-  const files = inBaseSource(r.text);
+  const files = baseTexts.get(r.text) || [];
   // Como origen se muestra el mismo archivo si el texto ya estaba alli; si no, el primero.
   if (files.length) { movedFromSource.push({ ...r, from: files.includes(r.file) ? r.file : files[0] }); r.n = 0; }
 }
@@ -454,7 +497,7 @@ if (approvedHits.length) {
 console.log(`\nTextos nuevos (piden aprobacion): ${notices.length}`);
 show(notices, '+');
 console.log(`\nTextos movidos entre archivos: ${moved.reduce((n, r) => n + r.n, 0)}`);
-console.log(`Textos que ya estaban en el codigo de la base (movidos al toast o a la plantilla): ${movedFromSource.length}`);
+console.log(`Textos reutilizados (ya eran visibles en otro sitio de la base): ${movedFromSource.length}`);
 for (const [file, rows] of byFile(movedFromSource)) {
   console.log(`  ${file}`);
   for (const r of rows) console.log(`    = ${JSON.stringify(r.text)}${r.n > 1 ? ` x${r.n}` : ''}  (base: ${r.from})`);
@@ -469,7 +512,7 @@ if (process.env.GITHUB_ACTIONS === 'true') {
     const lines = ['### text-diff', '', `Base: \`${baseSha.slice(0, 7)}\``, '',
       `- Cambiados o eliminados: **${failing.length}**`, `- Nuevos (piden aprobacion): **${notices.length}**`,
       `- Movidos entre archivos: ${moved.reduce((n, r) => n + r.n, 0)}`,
-      `- Ya estaban en el codigo de la base: ${movedFromSource.length}`, ''];
+      `- Reutilizados de la base: ${movedFromSource.length}`, ''];
     for (const r of failing) lines.push(`- Cambia o desaparece en \`${r.file}\`: ${JSON.stringify(r.text)}`);
     for (const r of notices) lines.push(`- Nuevo en \`${r.file}\`: ${JSON.stringify(r.text)}`);
     for (const r of movedFromSource) lines.push(`- Ya estaba en \`${r.from}\`, ahora en \`${r.file}\`: ${JSON.stringify(r.text)}`);

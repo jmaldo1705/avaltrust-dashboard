@@ -124,7 +124,7 @@ Usa AtSheet con `sm` y `alertdialog`. No trae textos por defecto.
 - **`.at-table--stack`.** Tarjetas por debajo de 768 px, con `data-label` igual a la cabecera.
 - **`atFilters`.** Filtros en línea en escritorio; en móvil, el mismo `TemplateRef` en una hoja.
 - **`check-ui.mjs`.** Solo permite `@angular/material/snack-bar` y cuenta `alert(`, `confirm(` y `modal-overlay`.
-- **`text-diff.mjs`.** Compara contra master el conjunto de textos: nodos de plantilla y literales de `alert`/`confirm`/toast (también el texto de respaldo de `fromHttpError`). Mover un texto no avisa; cambiarlo o crear uno sí. Desde F1, un texto "nuevo" que ya estaba tal cual en el código de la base (p. ej. en `this.successMessage = '...'`) cuenta como movido y se lista aparte con su archivo de origen; y un texto hecho solo de iconos (emoji, ✕ o el × suelto de cerrar) no cuenta.
+- **`text-diff.mjs`.** Compara contra master el conjunto de textos: nodos de plantilla y literales de `alert`/`confirm`/toast (también el texto de respaldo de `fromHttpError`). Mover un texto no avisa; cambiarlo o crear uno sí. Desde F1 cuenta también los literales que un componente asigna a una propiedad que su plantilla interpola (`this.successMessage = '...'`, `this.success.set('...')`), así que pasar un mensaje de un banner al toast no cambia nada y cambiarlo por el camino falla. Un texto nuevo que ya era, entero, un texto visible de la base en otro archivo se lista aparte como reutilizado, con su archivo de origen; un comentario, un identificador o un trozo de otro texto no cuentan. Un texto hecho solo de iconos (emoji, ✕ o el × suelto de cerrar) no cuenta.
 
 ### 2.6 Escala de capas
 | Token | Valor | Reemplaza |
