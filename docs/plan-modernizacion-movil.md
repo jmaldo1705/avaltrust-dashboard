@@ -152,7 +152,7 @@ Los 1000/2000 de los modales viejos, el 9999 y el 10000 desaparecen al migrar ca
 - **Aceptación:** las 26 llamadas funcionan, solo quedan los 6 `alert` de afianzado, el snackbar se anuncia una vez y nada lo tapa.
 - **Envío:** 1a solo cambia el toast.
 
-**Estado de F1 (octubre 2026):** implementada en la rama `feat/movil-f1`, que sale de `feat/movil-fase-0`. Hay un commit por subpunto, más cuatro ajustes de `text-diff`, un arreglo y dos correcciones de la revisión.
+**Estado de F1 (octubre 2026):** implementada en la rama `feat/movil-f1`, que sale de `feat/movil-fase-0`. Hay un commit por subpunto, más cuatro ajustes de `text-diff`, un arreglo y cinco correcciones de las revisiones.
 
 | # | Commit | Qué cambia |
 |---|---|---|
@@ -165,14 +165,19 @@ Los 1000/2000 de los modales viejos, el 9999 y el 10000 desaparecen al migrar ca
 | 1e | `630e694` | Resultado de portfolio y claims al snackbar; los errores por fila siguen en la tarjeta; aviso al descargar la plantilla |
 | revisión | `958c81e` | `text-diff` cuenta los mensajes que un componente guarda en una propiedad que su plantilla muestra (cambiarlos al pasarlos al toast falla) y solo da por reutilizado un texto visible entero de la base, no un comentario, un identificador ni un trozo |
 | revisión | `f92b1ae` | `fromHttpError` lee el JSON en un `ArrayBuffer` y nunca muestra el texto de un error de red o de JavaScript (`TypeError`, `DOMException`, eventos) |
+| revisión UX | `90471b2` | `[atBottomBar]` reserva hasta el borde superior de la barra y solo si toca el aviso, medido con su alto real; también lo llevan los pies de los modales que avisan sin cerrarse. Antes el aviso tapaba "Limpiar" al final de portfolio y claims y, entero, "Guardar Actualización" en el modal de pago a 360, 390 y 844×390 |
+| revisión UX | `0647e42` | Sin popover (iOS < 17) el contenedor del CDK va a 10001: el aviso ya no queda bajo el fondo de los modales viejos a 2000 |
+| revisión UX | `5935274` | Al cerrar el aviso con el teclado, el foco vuelve al elemento de la página de donde vino |
 
 **Resultado**
 - **Diálogos nativos:** `alert(` baja de 20 a 6 (solo afianzado, que es F3) y `confirm(` sigue en 3 (F4).
 - **Avisos:** 64 llamadas directas a `ToastService` en 17 archivos, más 6 que pasan por `announceUploadResult`. De las 26 originales quedan 24: las 2 que repetían el banner del dashboard se quitaron.
 - **Textos:** `text-diff` da 0 cambiados o eliminados y 0 nuevos, con 9 textos movidos entre archivos y 5 reutilizados ("Plantilla descargada exitosamente" y "Error al descargar la plantilla" en portfolio y claims, y "Cerrar" en el snackbar). Los mensajes que vivían en propiedades se cuentan en su archivo, en la base y ahora.
-- **Pruebas:** 96 tests (eran 7 antes de F1). Además, 21 flujos a 390×844 y 1440×900 en Chrome contra el backend local, sin escrituras: 52 snackbars medidos, todos centrados, a 8 px del borde, sobre los modales y con cierre de 44 px.
+- **Pruebas:** 103 tests (eran 7 antes de F1). Además, 21 flujos a 390×844 y 1440×900 en Chrome contra el backend local, sin escrituras: 52 snackbars medidos, todos centrados, a 8 px del borde, sobre los modales y con cierre de 44 px.
 - **Auditoría:** la completa (168 visitas) no muestra overflow, errores de consola, recortes ni fallos de menú nuevos frente a F0.
-- **Bundle inicial:** 1.873.566 B, 361 KB con brotli: +122 KB sobre F0 (+23 KB con brotli). En el JS, el CDK suma 39 KB, `MatSnackBar` 15 KB, `MatButton` y el ripple 42 KB (entran por `SimpleSnackBar` aunque no se usen), Angular 8 KB, el código propio 7 KB y los 5 iconos Lucide 6 KB; los estilos, 4 KB. En F2, el facade puede cargar `MatSnackBar` bajo demanda en el primer aviso y sacar unos 100 KB del chunk inicial.
+- **Revisión de UX y accesibilidad:** a 360×740, 390×844, 844×390, 768×1024 y 1440×900, el aviso no tapa las acciones del header ni el menú de usuario, ni las barras Limpiar/Guardar (pegadas o al final del formulario), ni los botones del pie de los seis modales que avisan sin cerrarse, tampoco con un mensaje de 330 caracteres, que se parte en líneas sin recortes. Queda sobre los modales y sus fondos, con y sin popover. El texto tiene un contraste de 14:1 y el icono de error, de 3,6:1. Se anuncia una vez (assertive para errores y polite para el resto) y la región del snackbar queda en `off`. Con el puntero o el foco encima se pausa. Los duplicados se descartan y un éxito espera a que el error lleve 2 s. Tras reset-password se ve en el login. El cierre se alcanza con Tab y devuelve el foco. Las validaciones de curso y evaluación conservan el texto, enlazan `aria-invalid` y `aria-describedby` y llevan el foco al primer error sin dejarlo bajo el header.
+- **Límites conocidos:** con el menú lateral abierto en un teléfono, el aviso tapa los últimos enlaces del menú mientras dura (no queda franja libre a 360 o 390 de ancho). En modales que llenan la pantalla del teléfono puede tapar una parte de un campo: la zona "Seleccionar archivo" de carga masiva (49 % a 390×844, con el pie fuera de la vista) o el selector de aliado de exportar a 844×390 (69 %). Con las hojas de F5 el aviso sale arriba (2.2).
+- **Bundle inicial:** 1.875.263 B, 361 KB con brotli: +124 KB sobre F0 (+23 KB con brotli). En el JS, el CDK suma 39 KB, `MatSnackBar` 15 KB, `MatButton` y el ripple 42 KB (entran por `SimpleSnackBar` aunque no se usen), Angular 8 KB, el código propio 7 KB y los 5 iconos Lucide 6 KB; los estilos, 4 KB. En F2, el facade puede cargar `MatSnackBar` bajo demanda en el primer aviso y sacar unos 100 KB del chunk inicial.
 
 **Pendiente de aprobación**
 - **"Operacion exitosa":** el título sigue en la tarjeta de portfolio y claims, pero la tarjeta ya no aparece en los éxitos. ¿Se quita?
