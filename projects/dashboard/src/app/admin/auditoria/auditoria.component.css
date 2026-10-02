@@ -21,8 +21,7 @@
 .audit-shell,
 .tab-surface,
 .table-card,
-.empty-state,
-.alert-panel {
+.empty-state {
   background: rgba(255, 255, 255, 0.98);
   border: 1px solid var(--line);
   border-radius: 8px;
@@ -430,16 +429,6 @@
   max-width: 520px;
   margin: 0;
   color: var(--muted);
-}
-
-.alert-panel {
-  margin-bottom: 1rem;
-  padding: 0.85rem 1rem;
-  color: #991b1b;
-  background: #fff7f7;
-  border-color: #fecaca;
-  box-shadow: none;
-  font-weight: 800;
 }
 
 .pagination-bar {

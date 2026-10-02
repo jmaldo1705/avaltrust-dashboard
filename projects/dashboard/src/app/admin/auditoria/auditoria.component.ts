@@ -23,6 +23,7 @@ import { finalize } from 'rxjs/operators';
 import { HeaderComponent } from '../../header/header.component';
 import { SidebarComponent } from '../../sidebar/sidebar.component';
 import { AuthService } from '../../auth/auth.service';
+import { ToastService } from '../../services/toast.service';
 import {
   AuditEvent,
   AuditEventType,
@@ -66,6 +67,7 @@ export class AuditoriaComponent implements OnInit {
   private auditoriaService = inject(AuditoriaService);
   private authService = inject(AuthService);
   private router = inject(Router);
+  private toastService = inject(ToastService);
 
   isSidebarOpen = false;
   isUserMenuOpen = false;
@@ -88,7 +90,6 @@ export class AuditoriaComponent implements OnInit {
   loadingActivity = false;
   loadingConnections = false;
   loadingCourses = false;
-  errorMessage = '';
 
   eventFilters = {
     type: 'NAVIGATION' as AuditEventType | 'all',
@@ -145,7 +146,6 @@ export class AuditoriaComponent implements OnInit {
 
   loadInitialData(): void {
     this.loadingSummary = true;
-    this.errorMessage = '';
 
     forkJoin({
       summary: this.auditoriaService.getSummary(),
@@ -158,7 +158,7 @@ export class AuditoriaComponent implements OnInit {
         this.courseOptions = courseOptions || [];
       },
       error: () => {
-        this.errorMessage = 'No fue posible cargar el resumen de auditoria.';
+        this.toastService.error('No fue posible cargar el resumen de auditoria.');
       }
     });
 
@@ -186,7 +186,6 @@ export class AuditoriaComponent implements OnInit {
 
   loadActivity(page = this.currentPage): void {
     this.loadingActivity = true;
-    this.errorMessage = '';
 
     this.auditoriaService.getEvents({
       type: this.eventFilters.type,
@@ -205,7 +204,7 @@ export class AuditoriaComponent implements OnInit {
       },
       error: () => {
         this.events = [];
-        this.errorMessage = 'No fue posible cargar la actividad.';
+        this.toastService.error('No fue posible cargar la actividad.');
       }
     });
   }
@@ -235,7 +234,7 @@ export class AuditoriaComponent implements OnInit {
         },
         error: () => {
           this.lastConnections = [];
-          this.errorMessage = 'No fue posible cargar las ultimas conexiones.';
+          this.toastService.error('No fue posible cargar las ultimas conexiones.');
         }
       });
   }
@@ -250,7 +249,7 @@ export class AuditoriaComponent implements OnInit {
         },
         error: () => {
           this.courseProgress = [];
-          this.errorMessage = 'No fue posible cargar el avance de cursos.';
+          this.toastService.error('No fue posible cargar el avance de cursos.');
         }
       });
   }

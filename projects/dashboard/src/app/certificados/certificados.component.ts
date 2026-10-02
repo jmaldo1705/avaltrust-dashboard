@@ -1,4 +1,4 @@
-import { Component, inject, OnInit, ChangeDetectionStrategy } from '@angular/core';
+import { Component, Injector, inject, OnInit, ChangeDetectionStrategy } from '@angular/core';
 
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
@@ -11,7 +11,16 @@ import { HeaderComponent } from '../header/header.component';
 import { SidebarComponent } from '../sidebar/sidebar.component';
 import { AliadoService } from '../aliado/aliado.service';
 import { AliadoEstrategico } from '../aliado/aliado.interface';
+import { ToastService } from '../services/toast.service';
+import { focusFieldAfterRender } from '../ui/focus-field';
 import { CertificadosService, CertificadoIngresosResponse } from './certificados.service';
+
+/**
+ * Regla del formulario que falla al pedir el certificado: sin aliado, sin
+ * periodo completo o con la fecha de inicio despues de la de fin. El mensaje
+ * de cada una esta en la plantilla, junto a su campo.
+ */
+export type CertificadoError = 'aliado' | 'periodo' | 'orden';
 
 @Component({
   selector: 'app-certificados',
@@ -27,6 +36,8 @@ export class CertificadosComponent implements OnInit {
   private uiState = inject(UiStateService);
   private aliadoService = inject(AliadoService);
   private certificadosService = inject(CertificadosService);
+  private toastService = inject(ToastService);
+  private injector = inject(Injector);
 
   // Estados de UI usando el servicio compartido
   get isSidebarOpen() {
@@ -47,7 +58,8 @@ export class CertificadosComponent implements OnInit {
   isLoading = false;
   showPreview = false;
   previewData: CertificadoIngresosResponse | null = null;
-  errorMessage = '';
+  /** Regla que fallo en el ultimo intento; su mensaje sale junto al campo. */
+  formError: CertificadoError | null = null;
 
   // Tipo de certificado seleccionado
   selectedCertificateType = '';
@@ -69,7 +81,7 @@ export class CertificadosComponent implements OnInit {
       },
       error: (error) => {
         console.error('Error al cargar aliados:', error);
-        this.errorMessage = 'Error al cargar aliados estratégicos';
+        this.toastService.error('Error al cargar aliados estratégicos');
       }
     });
   }
@@ -141,7 +153,6 @@ export class CertificadosComponent implements OnInit {
     }
 
     this.isLoading = true;
-    this.errorMessage = '';
 
     this.certificadosService.previewCertificadoIngresos(
       this.selectedAliadoId!,
@@ -150,7 +161,7 @@ export class CertificadosComponent implements OnInit {
     ).pipe(
       catchError(error => {
         console.error('Error al generar vista previa:', error);
-        this.errorMessage = 'Error al generar vista previa del certificado';
+        void this.toastService.fromHttpError(error, 'Error al generar vista previa del certificado');
         return of(null);
       }),
       finalize(() => {
@@ -171,7 +182,6 @@ export class CertificadosComponent implements OnInit {
     }
 
     this.isLoading = true;
-    this.errorMessage = '';
 
     this.certificadosService.downloadCertificadoIngresos(
       this.selectedAliadoId!,
@@ -180,7 +190,8 @@ export class CertificadosComponent implements OnInit {
     ).pipe(
       catchError(error => {
         console.error('Error al descargar certificado:', error);
-        this.errorMessage = 'Error al descargar el certificado';
+        // El PDF se pide como Blob: fromHttpError lee el JSON de error que venga dentro.
+        void this.toastService.fromHttpError(error, 'Error al descargar el certificado');
         return of(null);
       }),
       finalize(() => {
@@ -196,31 +207,48 @@ export class CertificadosComponent implements OnInit {
     });
   }
 
-  // Validar formulario
+  // Validar formulario: el error sale junto a su campo y el foco va a el.
   validateForm(): boolean {
-    this.errorMessage = '';
+    this.formError = null;
 
     if (!this.selectedCertificateType) {
-      this.errorMessage = 'Por favor seleccione un tipo de certificado';
+      // Los botones solo aparecen con un tipo elegido; no hay campo al que llevar el foco.
+      this.toastService.warning('Por favor seleccione un tipo de certificado');
       return false;
     }
 
     if (!this.selectedAliadoId) {
-      this.errorMessage = 'Por favor seleccione un aliado estratégico';
-      return false;
+      return this.marcarError('aliado', 'aliadoSelect');
     }
 
     if (!this.fechaInicio || !this.fechaFin) {
-      this.errorMessage = 'Por favor seleccione el periodo a certificar';
-      return false;
+      return this.marcarError('periodo', this.fechaInicio ? 'fechaFin' : 'fechaInicio');
     }
 
     if (new Date(this.fechaInicio) > new Date(this.fechaFin)) {
-      this.errorMessage = 'La fecha de inicio debe ser anterior a la fecha fin';
-      return false;
+      return this.marcarError('orden', 'fechaInicio');
     }
 
     return true;
+  }
+
+  /** Quita el error cuando el usuario cambia uno de los campos de la regla. */
+  revisarCampo(campo: 'aliado' | 'fechas'): void {
+    const deEseCampo = campo === 'aliado'
+      ? this.formError === 'aliado'
+      : this.formError === 'periodo' || this.formError === 'orden';
+    if (deEseCampo) this.formError = null;
+  }
+
+  /** Fecha sin valor mientras el error de periodo esta activo (para marcarla como invalida). */
+  fechaFaltante(campo: 'fechaInicio' | 'fechaFin'): boolean {
+    return this.formError === 'periodo' && !this[campo];
+  }
+
+  private marcarError(error: CertificadoError, campo: string): false {
+    this.formError = error;
+    focusFieldAfterRender(this.injector, campo);
+    return false;
   }
 
   // Cerrar preview

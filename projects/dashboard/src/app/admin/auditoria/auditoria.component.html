@@ -87,12 +87,6 @@
       </section>
     </section>
 
-    @if (errorMessage) {
-      <div class="alert-panel">
-        {{ errorMessage }}
-      </div>
-    }
-
     <section class="audit-shell">
       <nav class="audit-tabs" aria-label="Secciones de auditoria">
         <button type="button" [class.active]="activeTab === 'activity'" (click)="setTab('activity')">

@@ -57,36 +57,6 @@
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
-/* Error Message */
-.error-message {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  padding: 1rem;
-  background-color: #fef2f2;
-  border: 1px solid #fecaca;
-  border-radius: 8px;
-  color: #dc2626;
-  margin-bottom: 1.5rem;
-}
-
-.error-message svg {
-  width: 20px;
-  height: 20px;
-  flex-shrink: 0;
-}
-
-.close-error {
-  margin-left: auto;
-  background: none;
-  border: none;
-  color: #dc2626;
-  font-size: 1.25rem;
-  cursor: pointer;
-  padding: 0;
-  line-height: 1;
-}
-
 /* Form Sections */
 .form-section {
   margin-bottom: 2rem;
@@ -211,6 +181,26 @@
   outline: none;
   border-color: #3b82f6;
   box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+/* Campo que falta o no es valido al pedir el certificado */
+.form-control[aria-invalid="true"] {
+  border-color: var(--at-danger);
+}
+
+.form-control[aria-invalid="true"]:focus {
+  box-shadow: 0 0 0 3px rgb(220 38 38 / 0.15);
+}
+
+.field-error {
+  margin: 0;
+  color: var(--at-danger);
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+.form-row + .field-error {
+  margin: -0.25rem 0 1rem;
 }
 
 /* Form Actions */

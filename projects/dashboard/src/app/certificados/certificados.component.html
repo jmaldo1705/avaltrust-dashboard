@@ -36,19 +36,6 @@
       </div>
 
       <div class="certificates-container">
-        <!-- Error Message -->
-        @if (errorMessage) {
-          <div class="error-message">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <circle cx="12" cy="12" r="10"/>
-              <line x1="12" y1="8" x2="12" y2="12"/>
-              <line x1="12" y1="16" x2="12.01" y2="16"/>
-            </svg>
-            <span>{{ errorMessage }}</span>
-            <button class="close-error" (click)="errorMessage = ''">×</button>
-          </div>
-        }
-
         <!-- Selección de Tipo de Certificado -->
         <div class="form-section">
           <h2 class="section-title">Tipo de Certificado</h2>
@@ -78,7 +65,10 @@
                 <select
                   id="aliadoSelect"
                   [(ngModel)]="selectedAliadoId"
-                  class="form-control">
+                  (ngModelChange)="revisarCampo('aliado')"
+                  class="form-control"
+                  [attr.aria-invalid]="formError === 'aliado' ? 'true' : null"
+                  [attr.aria-describedby]="formError === 'aliado' ? 'cert-aliado-error' : null">
                   <option [ngValue]="null">Seleccione un aliado</option>
                   @for (aliado of aliados; track aliado) {
                     <option [ngValue]="aliado.id">
@@ -86,6 +76,9 @@
                     </option>
                   }
                 </select>
+                @if (formError === 'aliado') {
+                  <p id="cert-aliado-error" class="field-error">Por favor seleccione un aliado estratégico</p>
+                }
               </div>
             </div>
             <div class="form-row">
@@ -95,7 +88,10 @@
                   type="date"
                   id="fechaInicio"
                   [(ngModel)]="fechaInicio"
-                  class="form-control">
+                  (ngModelChange)="revisarCampo('fechas')"
+                  class="form-control"
+                  [attr.aria-invalid]="formError === 'orden' || fechaFaltante('fechaInicio') ? 'true' : null"
+                  [attr.aria-describedby]="formError === 'orden' || formError === 'periodo' ? 'cert-fechas-error' : null">
                 </div>
                 <div class="form-group">
                   <label for="fechaFin">Fecha Fin del Periodo *</label>
@@ -103,9 +99,20 @@
                     type="date"
                     id="fechaFin"
                     [(ngModel)]="fechaFin"
-                    class="form-control">
+                    (ngModelChange)="revisarCampo('fechas')"
+                    class="form-control"
+                    [attr.aria-invalid]="fechaFaltante('fechaFin') ? 'true' : null"
+                    [attr.aria-describedby]="formError === 'orden' || formError === 'periodo' ? 'cert-fechas-error' : null">
                   </div>
                 </div>
+                @switch (formError) {
+                  @case ('periodo') {
+                    <p id="cert-fechas-error" class="field-error">Por favor seleccione el periodo a certificar</p>
+                  }
+                  @case ('orden') {
+                    <p id="cert-fechas-error" class="field-error">La fecha de inicio debe ser anterior a la fecha fin</p>
+                  }
+                }
               </div>
             }
 

@@ -21,6 +21,7 @@ import { AuthService } from '../auth/auth.service';
 import { UiStateService } from '../ui-state.service';
 import { HeaderComponent } from '../header/header.component';
 import { SidebarComponent } from '../sidebar/sidebar.component';
+import { ToastService } from '../services/toast.service';
 import { ReportsService } from './reports.service';
 
 @Component({
@@ -52,6 +53,7 @@ export class ReportsComponent implements OnInit {
   private fb = inject(FormBuilder);
   private uiState = inject(UiStateService);
   private reportsService = inject(ReportsService);
+  private toastService = inject(ToastService);
 
   // Estados de UI usando el servicio compartido
   get isSidebarOpen() {
@@ -227,7 +229,8 @@ export class ReportsComponent implements OnInit {
       .pipe(
         catchError(error => {
           console.error('Error al generar reporte:', error);
-          alert('Error al generar el reporte. Por favor, intente nuevamente.');
+          // Con responseType blob el JSON del error llega dentro de un Blob.
+          void this.toastService.fromHttpError(error, 'Error al generar el reporte. Por favor, intente nuevamente.');
           return of(null);
         }),
         finalize(() => {
@@ -273,7 +276,7 @@ export class ReportsComponent implements OnInit {
       .pipe(
         catchError(error => {
           console.error('Error al generar vista previa:', error);
-          alert('Error al generar vista previa. Por favor, intente nuevamente.');
+          void this.toastService.fromHttpError(error, 'Error al generar vista previa. Por favor, intente nuevamente.');
           return of(null);
         }),
         finalize(() => {
