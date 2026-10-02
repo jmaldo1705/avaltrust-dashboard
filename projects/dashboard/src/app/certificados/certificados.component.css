@@ -5,7 +5,7 @@
 
 .main-content {
   margin-left: 280px;
-  padding: 80px 20px 20px;
+  padding: 20px;
   transition: margin-left 0.3s ease;
 }
 
@@ -506,7 +506,7 @@
 /* Responsive - Pantallas pequeñas */
 @media (max-width: 768px) {
   .main-content {
-    padding: 70px 15px 15px;
+    padding: 15px;
   }
 
   .main-content.sidebar-open {
