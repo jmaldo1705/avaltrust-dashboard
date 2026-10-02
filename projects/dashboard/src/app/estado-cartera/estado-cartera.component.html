@@ -287,7 +287,9 @@
                   <th>Fecha Desembolso</th>
                   <th>Días Mora</th>
                   <th>Estado</th>
-                  <th class="th-actions">Acciones</th>
+                  @if (!isConsulta) {
+                    <th class="th-actions">Acciones</th>
+                  }
                 </tr>
               </thead>
               <tbody>
@@ -313,15 +315,17 @@
                         {{ portfolio.estadoCredito }}
                       </span>
                     </td>
-                    <td class="td-actions">
-                      <button
-                        class="btn-action"
-                        (click)="openActualizacionModal(portfolio)"
-                        title="Actualizar pago">
-                      <svg lucideWalletCards></svg>
-                      💰
-                    </button>
-                  </td>
+                    @if (!isConsulta) {
+                      <td class="td-actions">
+                        <button
+                          class="btn-action"
+                          (click)="openActualizacionModal(portfolio)"
+                          title="Actualizar pago">
+                        <svg lucideWalletCards></svg>
+                        💰
+                      </button>
+                    </td>
+                    }
                 </tr>
               }
             </tbody>
