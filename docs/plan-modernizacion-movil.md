@@ -152,7 +152,7 @@ Los 1000/2000 de los modales viejos, el 9999 y el 10000 desaparecen al migrar ca
 - **Aceptación:** las 26 llamadas funcionan, solo quedan los 6 `alert` de afianzado, el snackbar se anuncia una vez y nada lo tapa.
 - **Envío:** 1a solo cambia el toast.
 
-**Estado de F1 (octubre 2026):** implementada en la rama `feat/movil-f1`, que sale de `feat/movil-fase-0`. Hay un commit por subpunto, más cuatro ajustes de `text-diff` y un arreglo.
+**Estado de F1 (octubre 2026):** implementada en la rama `feat/movil-f1`, que sale de `feat/movil-fase-0`. Hay un commit por subpunto, más cuatro ajustes de `text-diff`, un arreglo y dos correcciones de la revisión.
 
 | # | Commit | Qué cambia |
 |---|---|---|
@@ -163,14 +163,16 @@ Los 1000/2000 de los modales viejos, el 9999 y el 10000 desaparecen al migrar ca
 | 1d | `8188713` | Banners de users, aliados y perfil al snackbar (los errores de formulario siguen en su modal); el dashboard deja el banner de carga y quita el toast repetido; éxitos de auth en un snackbar que sigue tras la redirección |
 | arreglo | `f90be9c` | "Exportar" del dashboard ya no se queda en "Exportando" |
 | 1e | `630e694` | Resultado de portfolio y claims al snackbar; los errores por fila siguen en la tarjeta; aviso al descargar la plantilla |
+| revisión | `958c81e` | `text-diff` cuenta los mensajes que un componente guarda en una propiedad que su plantilla muestra (cambiarlos al pasarlos al toast falla) y solo da por reutilizado un texto visible entero de la base, no un comentario, un identificador ni un trozo |
+| revisión | `f92b1ae` | `fromHttpError` lee el JSON en un `ArrayBuffer` y nunca muestra el texto de un error de red o de JavaScript (`TypeError`, `DOMException`, eventos) |
 
 **Resultado**
 - **Diálogos nativos:** `alert(` baja de 20 a 6 (solo afianzado, que es F3) y `confirm(` sigue en 3 (F4).
 - **Avisos:** 64 llamadas directas a `ToastService` en 17 archivos, más 6 que pasan por `announceUploadResult`. De las 26 originales quedan 24: las 2 que repetían el banner del dashboard se quitaron.
-- **Textos:** `text-diff` da 0 cambiados o eliminados y 0 nuevos. Los mensajes que vivían en propiedades figuran como ya existentes en la base.
-- **Pruebas:** 92 tests (eran 7 antes de F1). Además, 21 flujos a 390×844 y 1440×900 en Chrome contra el backend local, sin escrituras: 52 snackbars medidos, todos centrados, a 8 px del borde, sobre los modales y con cierre de 44 px.
+- **Textos:** `text-diff` da 0 cambiados o eliminados y 0 nuevos, con 9 textos movidos entre archivos y 5 reutilizados ("Plantilla descargada exitosamente" y "Error al descargar la plantilla" en portfolio y claims, y "Cerrar" en el snackbar). Los mensajes que vivían en propiedades se cuentan en su archivo, en la base y ahora.
+- **Pruebas:** 96 tests (eran 7 antes de F1). Además, 21 flujos a 390×844 y 1440×900 en Chrome contra el backend local, sin escrituras: 52 snackbars medidos, todos centrados, a 8 px del borde, sobre los modales y con cierre de 44 px.
 - **Auditoría:** la completa (168 visitas) no muestra overflow, errores de consola, recortes ni fallos de menú nuevos frente a F0.
-- **Bundle inicial:** 1.873.189 B, 361 KB con brotli (+3,3 KB sobre 1a).
+- **Bundle inicial:** 1.873.566 B, 361 KB con brotli: +122 KB sobre F0 (+23 KB con brotli). En el JS, el CDK suma 39 KB, `MatSnackBar` 15 KB, `MatButton` y el ripple 42 KB (entran por `SimpleSnackBar` aunque no se usen), Angular 8 KB, el código propio 7 KB y los 5 iconos Lucide 6 KB; los estilos, 4 KB. En F2, el facade puede cargar `MatSnackBar` bajo demanda en el primer aviso y sacar unos 100 KB del chunk inicial.
 
 **Pendiente de aprobación**
 - **"Operacion exitosa":** el título sigue en la tarjeta de portfolio y claims, pero la tarjeta ya no aparece en los éxitos. ¿Se quita?
