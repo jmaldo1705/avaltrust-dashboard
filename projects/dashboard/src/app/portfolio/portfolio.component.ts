@@ -29,6 +29,8 @@ import { ExcelTemplateService } from './excel-template.service';
 import { AliadoService } from '../aliado/aliado.service';
 import { AliadoEstrategico } from '../aliado/aliado.interface';
 import { AtBottomBarDirective } from '../ui/at-bottom-bar.directive';
+import { announceUploadResult } from '../ui/upload-result';
+import { ToastService } from '../services/toast.service';
 import * as XLSX from 'xlsx';
 
 @Component({
@@ -67,6 +69,7 @@ export class PortfolioComponent implements OnInit {
   private portfolioService = inject(PortfolioService);
   private excelTemplateService = inject(ExcelTemplateService);
   private aliadoService = inject(AliadoService);
+  private toastService = inject(ToastService);
 
   // Estados de UI usando el servicio compartido
   get isSidebarOpen() {
@@ -82,6 +85,7 @@ export class PortfolioComponent implements OnInit {
   portfolioForm!: FormGroup;
   isLoading = false;
   uploadedFile: File | null = null;
+  /** Resultado con errores por fila que se listan en la pagina; el mensaje general va al snackbar. */
   uploadResult: any = null;
   isDragging = false; // Para drag & drop
 
@@ -311,19 +315,17 @@ export class PortfolioComponent implements OnInit {
           })
         )
         .subscribe(response => {
-          this.uploadResult = {
+          this.uploadResult = announceUploadResult(this.toastService, {
             success: response.success,
             message: response.success ?
               'Registro de cartera guardado exitosamente' :
               response.message,
             records: response.success ? 1 : 0,
             errors: response.errors
-          };
+          });
 
           if (response.success) {
             this.portfolioForm.reset();
-            // Scroll to top to show result
-            window.scrollTo({ top: 0, behavior: 'smooth' });
           }
         });
     } else {
@@ -373,21 +375,21 @@ export class PortfolioComponent implements OnInit {
     ];
 
     if (!allowedTypes.includes(file.type)) {
-      this.uploadResult = {
+      this.uploadResult = announceUploadResult(this.toastService, {
         success: false,
         message: 'Tipo de archivo no permitido. Use Excel (.xls, .xlsx) o CSV (.csv)',
         errors: ['Formato de archivo inválido']
-      };
+      });
       return;
     }
 
     // Validar tamaño (10MB)
     if (file.size > 10 * 1024 * 1024) {
-      this.uploadResult = {
+      this.uploadResult = announceUploadResult(this.toastService, {
         success: false,
         message: 'El archivo es demasiado grande. El tamaño máximo permitido es 10MB.',
         errors: ['Archivo demasiado grande']
-      };
+      });
       return;
     }
 
@@ -453,7 +455,7 @@ export class PortfolioComponent implements OnInit {
         )
         .subscribe(response => {
           const friendly = this.toUserFriendlyUploadResult(response);
-          this.uploadResult = friendly;
+          this.uploadResult = announceUploadResult(this.toastService, friendly);
 
           if (friendly.success) {
             this.uploadedFile = null;
@@ -462,8 +464,6 @@ export class PortfolioComponent implements OnInit {
             if (fileInput) {
               fileInput.value = '';
             }
-            // Scroll to top to show result
-            window.scrollTo({ top: 0, behavior: 'smooth' });
 
             console.log(`Carga masiva completada: ${friendly.records} registros procesados`);
           } else {
@@ -591,7 +591,13 @@ export class PortfolioComponent implements OnInit {
 
           // Fallback: generar plantilla del lado del cliente
           console.log('Generando plantilla localmente como respaldo...');
-          this.excelTemplateService.generatePortfolioTemplate();
+          try {
+            this.excelTemplateService.generatePortfolioTemplate();
+            this.toastService.success('Plantilla descargada exitosamente');
+          } catch (e) {
+            console.error('Error al generar la plantilla local:', e);
+            this.toastService.error('Error al descargar la plantilla');
+          }
 
           return of(null);
         })
@@ -629,6 +635,7 @@ export class PortfolioComponent implements OnInit {
               document.body.removeChild(link);
               window.URL.revokeObjectURL(url);
             }
+            this.toastService.success('Plantilla descargada exitosamente');
           };
           reader.readAsArrayBuffer(blob);
         }

@@ -24,6 +24,8 @@ import { SidebarComponent } from '../sidebar/sidebar.component';
 import { ClaimsService, ClaimRequest } from './claims.service';
 import { ClaimsTemplateService } from './claims-template.service';
 import { AtBottomBarDirective } from '../ui/at-bottom-bar.directive';
+import { announceUploadResult } from '../ui/upload-result';
+import { ToastService } from '../services/toast.service';
 
 @Component({
   selector: 'app-claims',
@@ -56,6 +58,7 @@ export class ClaimsComponent implements OnInit {
   private uiState = inject(UiStateService);
   private claimsService = inject(ClaimsService);
   private claimsTemplateService = inject(ClaimsTemplateService);
+  private toastService = inject(ToastService);
 
   // Estados de UI usando el servicio compartido
   get isSidebarOpen() {
@@ -71,6 +74,7 @@ export class ClaimsComponent implements OnInit {
   claimsForm!: FormGroup;
   isLoading = false;
   uploadedFile: File | null = null;
+  /** Resultado con errores por fila que se listan en la pagina; el mensaje general va al snackbar. */
   uploadResult: any = null;
   isDragging = false; // Para drag & drop
 
@@ -191,18 +195,17 @@ export class ClaimsComponent implements OnInit {
           })
         )
         .subscribe(response => {
-          this.uploadResult = {
+          this.uploadResult = announceUploadResult(this.toastService, {
             success: response.success,
             message: response.success ?
               'Siniestro registrado exitosamente' :
               response.message,
             records: response.success ? 1 : 0,
             errors: response.errors
-          };
+          });
 
           if (response.success) {
             this.claimsForm.reset();
-            window.scrollTo({ top: 0, behavior: 'smooth' });
           }
         });
     } else {
@@ -250,20 +253,20 @@ export class ClaimsComponent implements OnInit {
     ];
 
     if (!allowedTypes.includes(file.type)) {
-      this.uploadResult = {
+      this.uploadResult = announceUploadResult(this.toastService, {
         success: false,
         message: 'Tipo de archivo no permitido. Use Excel (.xls, .xlsx) o CSV (.csv)',
         errors: ['Formato de archivo inválido']
-      };
+      });
       return;
     }
 
     if (file.size > 10 * 1024 * 1024) {
-      this.uploadResult = {
+      this.uploadResult = announceUploadResult(this.toastService, {
         success: false,
         message: 'El archivo es demasiado grande. El tamaño máximo permitido es 10MB.',
         errors: ['Archivo demasiado grande']
-      };
+      });
       return;
     }
 
@@ -326,14 +329,14 @@ export class ClaimsComponent implements OnInit {
           })
         )
         .subscribe(response => {
-          this.uploadResult = {
+          this.uploadResult = announceUploadResult(this.toastService, {
             success: response.success,
             message: response.success ?
               `Se procesaron exitosamente ${response.processedRecords || 0} siniestros` :
               response.message,
             records: response.processedRecords || 0,
             errors: response.errors || response.validationErrors || []
-          };
+          });
 
           if (response.success) {
             this.uploadedFile = null;
@@ -341,7 +344,6 @@ export class ClaimsComponent implements OnInit {
             if (fileInput) {
               fileInput.value = '';
             }
-            window.scrollTo({ top: 0, behavior: 'smooth' });
 
             console.log(`Carga masiva de siniestros completada: ${response.processedRecords} registros procesados`);
           } else {
@@ -359,7 +361,13 @@ export class ClaimsComponent implements OnInit {
         catchError(error => {
           console.error('Error al descargar plantilla del backend:', error);
           console.log('Generando plantilla localmente como respaldo...');
-          this.claimsTemplateService.generateClaimsTemplate();
+          try {
+            this.claimsTemplateService.generateClaimsTemplate();
+            this.toastService.success('Plantilla descargada exitosamente');
+          } catch (e) {
+            console.error('Error al generar la plantilla local:', e);
+            this.toastService.error('Error al descargar la plantilla');
+          }
           return of(null);
         })
       )
@@ -375,6 +383,7 @@ export class ClaimsComponent implements OnInit {
           window.URL.revokeObjectURL(url);
 
           console.log('Plantilla de siniestros descargada exitosamente');
+          this.toastService.success('Plantilla descargada exitosamente');
         }
       });
   }
