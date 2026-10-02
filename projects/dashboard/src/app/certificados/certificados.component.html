@@ -9,6 +9,12 @@
     (logout)="logout()">
   </app-header>
 
+  <div
+    class="overlay"
+    [class.active]="isSidebarOpen || isUserMenuOpen"
+    (click)="closeSidebar(); closeUserMenu()">
+  </div>
+
   <!-- Sidebar -->
   <app-sidebar
     [isOpen]="isSidebarOpen"

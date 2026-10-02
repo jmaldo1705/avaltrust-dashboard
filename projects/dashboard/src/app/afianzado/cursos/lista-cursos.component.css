@@ -1,11 +1,8 @@
+/* Margenes y alto los pone .main-content en styles.css */
 .main-content {
-  margin-left: 250px;
-  margin-top: 60px;
-  min-height: calc(100vh - 60px);
   background: linear-gradient(135deg, #f5f7fa 0%, #e8ecf1 100%);
   transition: margin-left 0.3s ease;
   padding: 0;
-  width: calc(100% - 250px);
   box-sizing: border-box;
   overflow-x: hidden;
 }
@@ -274,7 +271,6 @@
 @media (max-width: 768px) {
   .main-content {
     margin-left: 0;
-    margin-top: 60px;
     width: 100%;
     padding: 0;
   }
