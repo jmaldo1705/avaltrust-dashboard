@@ -11,8 +11,7 @@ import { ToastService, Toast } from './toast.service';
       @for (toast of toasts; track toast) {
         <div
           class="toast"
-          [ngClass]="'toast-' + toast.type"
-          [@slideIn]>
+          [ngClass]="'toast-' + toast.type">
           <div class="toast-icon">
             @if (toast.type === 'success') {
               <span>✓</span>
