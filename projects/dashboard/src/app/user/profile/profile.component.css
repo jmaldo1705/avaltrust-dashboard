@@ -171,18 +171,6 @@
   cursor: not-allowed;
 }
 
-.profile-alert {
-  display: flex;
-  align-items: center;
-  gap: 0.65rem;
-  margin-bottom: 1rem;
-  padding: 0.85rem 0.95rem;
-  color: #7f1d1d;
-  background: #fff1f2;
-  border: 1px solid #fecdd3;
-  border-radius: 8px;
-}
-
 .profile-grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -341,12 +329,6 @@
   color: #7f1d1d;
   background: #fff1f2;
   border: 1px solid #fecdd3;
-}
-
-.inline-alert.success {
-  color: #0f513f;
-  background: #eafaf5;
-  border: 1px solid #bcebd9;
 }
 
 .info-row span,

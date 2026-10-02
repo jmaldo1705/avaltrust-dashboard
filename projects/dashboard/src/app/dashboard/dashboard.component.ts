@@ -312,7 +312,6 @@ export class DashboardComponent implements OnInit, OnDestroy {
         error: err => {
           console.error('Error inesperado cargando dashboard', err);
           this.dashboardError = 'No fue posible actualizar el dashboard. Intenta nuevamente.';
-          this.toastService.error(this.dashboardError);
         }
       });
 
@@ -550,7 +549,6 @@ export class DashboardComponent implements OnInit, OnDestroy {
           this.delinquentsTotalElements = 0;
           this.delinquentsTotalPages = 1;
           this.delinquentsError = 'No fue posible cargar los usuarios con mora.';
-          this.toastService.error(this.delinquentsError);
         }
       });
   }

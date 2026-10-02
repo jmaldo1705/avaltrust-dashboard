@@ -18,6 +18,7 @@ import { AuthService } from '../../auth/auth.service';
 import { HeaderComponent } from '../../header/header.component';
 import { SidebarComponent } from '../../sidebar/sidebar.component';
 import { UiStateService } from '../../ui-state.service';
+import { ToastService } from '../../services/toast.service';
 
 @Component({
   selector: 'app-profile',
@@ -43,17 +44,16 @@ export class ProfileComponent implements OnInit, OnDestroy {
   private router = inject(Router);
   private auth = inject(AuthService);
   private uiState = inject(UiStateService);
+  private toastService = inject(ToastService);
   private destroy$ = new Subject<void>();
 
   userProfile = this.auth.userProfile;
   user = this.auth.user;
   userPermissions = this.auth.userPermissions;
   isLoading = false;
-  profileError: string | null = null;
   isPasswordFormOpen = false;
   isPasswordSaving = false;
   passwordError: string | null = null;
-  passwordSuccess: string | null = null;
   currentPassword = '';
   newPassword = '';
   confirmPassword = '';
@@ -116,12 +116,11 @@ export class ProfileComponent implements OnInit, OnDestroy {
 
   refreshProfile() {
     this.isLoading = true;
-    this.profileError = null;
 
     this.auth.getUserProfile()
       .pipe(
         catchError(() => {
-          this.profileError = 'No fue posible cargar la informacion del perfil.';
+          this.toastService.error('No fue posible cargar la informacion del perfil.');
           return of(null);
         }),
         finalize(() => this.isLoading = false),
@@ -169,7 +168,6 @@ export class ProfileComponent implements OnInit, OnDestroy {
   togglePasswordForm() {
     this.isPasswordFormOpen = !this.isPasswordFormOpen;
     this.passwordError = null;
-    this.passwordSuccess = null;
 
     if (!this.isPasswordFormOpen) {
       this.resetPasswordForm();
@@ -178,7 +176,6 @@ export class ProfileComponent implements OnInit, OnDestroy {
 
   submitPasswordChange() {
     this.passwordError = null;
-    this.passwordSuccess = null;
 
     if (!this.currentPassword || !this.newPassword || !this.confirmPassword) {
       this.passwordError = 'Completa todos los campos para actualizar la contrasena.';
@@ -209,7 +206,7 @@ export class ProfileComponent implements OnInit, OnDestroy {
       )
       .subscribe({
         next: () => {
-          this.passwordSuccess = 'Contrasena actualizada correctamente.';
+          this.toastService.success('Contrasena actualizada correctamente.');
           this.resetPasswordForm();
           this.isPasswordFormOpen = false;
           this.refreshProfile();

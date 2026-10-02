@@ -10,10 +10,6 @@
         <p>Inicia sesión para continuar.</p>
       </header>
 
-      @if (notice()) {
-        <div class="alert alert-success" role="status">{{ notice() }}</div>
-      }
-
       <form (ngSubmit)="onSubmit()" novalidate>
         <div class="field">
           <label for="username">Usuario</label>

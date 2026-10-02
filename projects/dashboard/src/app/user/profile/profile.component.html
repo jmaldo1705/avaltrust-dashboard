@@ -41,13 +41,6 @@
       </button>
     </section>
 
-    @if (profileError) {
-      <div class="profile-alert">
-        <svg lucideShieldCheck></svg>
-        <span>{{ profileError }}</span>
-      </div>
-    }
-
     <section class="profile-grid">
       <article class="profile-card identity-card">
         <div class="card-header">
@@ -136,13 +129,6 @@
           <svg lucideKeyRound></svg>
           {{ isPasswordFormOpen ? 'Cerrar cambio' : 'Cambiar contrasena' }}
         </button>
-
-        @if (passwordSuccess) {
-          <div class="inline-alert success">
-            <svg lucideShieldCheck></svg>
-            <span>{{ passwordSuccess }}</span>
-          </div>
-        }
 
         @if (isPasswordFormOpen) {
           <form class="password-form" (ngSubmit)="submitPasswordChange()">

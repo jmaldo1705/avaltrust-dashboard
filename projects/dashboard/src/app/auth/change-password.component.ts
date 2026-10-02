@@ -3,6 +3,7 @@ import { Component, inject, signal, ChangeDetectionStrategy } from '@angular/cor
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { AuthService } from './auth.service';
+import { ToastService } from '../services/toast.service';
 
 @Component({
   selector: 'app-change-password',
@@ -22,12 +23,6 @@ import { AuthService } from './auth.service';
           @if (error()) {
             <div class="alert alert-danger" role="alert">
               {{ error() }}
-            </div>
-          }
-    
-          @if (success()) {
-            <div class="alert alert-success" role="alert">
-              {{ success() }}
             </div>
           }
     
@@ -218,12 +213,6 @@ import { AuthService } from './auth.service';
       border: 1px solid #fcc;
     }
 
-    .alert-success {
-      background-color: #efe;
-      color: #3c3;
-      border: 1px solid #cfc;
-    }
-
     .alert-warning {
       background-color: #fff3cd;
       color: #856404;
@@ -347,13 +336,13 @@ import { AuthService } from './auth.service';
 export class ChangePasswordComponent {
   private readonly auth = inject(AuthService);
   private readonly router = inject(Router);
+  private readonly toastService = inject(ToastService);
 
   currentPassword = '';
   newPassword = '';
   confirmPassword = '';
   loading = signal(false);
   error = signal('');
-  success = signal('');
   isRequiredChange = signal(false);
 
   passwordMismatch = signal(false);
@@ -370,7 +359,6 @@ export class ChangePasswordComponent {
 
   onSubmit() {
     this.error.set('');
-    this.success.set('');
 
     // Validar que las contraseñas coincidan
     if (this.newPassword !== this.confirmPassword) {
@@ -398,7 +386,8 @@ export class ChangePasswordComponent {
     this.auth.changePassword(this.currentPassword, this.newPassword).subscribe({
       next: (response) => {
         this.loading.set(false);
-        this.success.set('Contrasena actualizada exitosamente');
+        // El snackbar sigue visible en la pagina de destino.
+        this.toastService.success('Contrasena actualizada exitosamente');
         
         // Esperar 1.5 segundos para que el usuario vea el mensaje de exito
         setTimeout(() => {

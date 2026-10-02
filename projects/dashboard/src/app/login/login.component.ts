@@ -3,6 +3,7 @@ import { Component, inject, signal, ChangeDetectionStrategy } from '@angular/cor
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { AuthService } from '../auth/auth.service';
+import { ToastService } from '../services/toast.service';
 
 @Component({
   selector: 'app-login',
@@ -16,6 +17,7 @@ export class LoginComponent {
   private readonly auth = inject(AuthService);
   private readonly router = inject(Router);
   private readonly route = inject(ActivatedRoute);
+  private readonly toastService = inject(ToastService);
 
   username = '';
   password = '';
@@ -25,7 +27,8 @@ export class LoginComponent {
   loading = signal(false);
   recoveryLoading = signal(false);
   error = signal('');
-  notice = signal('');
+  /** El aviso de ?reset=success esta en el snackbar. */
+  private noticeShown = false;
   recoveryError = signal('');
   recoveryMessage = signal('');
   showRecovery = signal(false);
@@ -37,7 +40,8 @@ export class LoginComponent {
     }
 
     if (this.route.snapshot.queryParamMap.get('reset') === 'success') {
-      this.notice.set('Contraseña actualizada. Ya puedes iniciar sesión.');
+      this.toastService.success('Contraseña actualizada. Ya puedes iniciar sesión.');
+      this.noticeShown = true;
     }
   }
 
@@ -45,7 +49,10 @@ export class LoginComponent {
     if (this.loading()) return;
 
     this.error.set('');
-    this.notice.set('');
+    if (this.noticeShown) {
+      this.noticeShown = false;
+      this.toastService.remove();
+    }
 
     if (!this.username.trim() || !this.password) {
       this.error.set('Ingresa tu usuario y contraseña.');

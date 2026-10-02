@@ -10,6 +10,7 @@ import { AuthService } from '../../auth/auth.service';
 import { UsersService, AppUser } from './users.service';
 import { AliadoService } from '../../aliado/aliado.service';
 import { AliadoEstrategico } from '../../aliado/aliado.interface';
+import { ToastService } from '../../services/toast.service';
 
 @Component({
   selector: 'app-users',
@@ -25,6 +26,7 @@ export class UsersComponent implements OnInit {
   private auth = inject(AuthService);
   private usersService = inject(UsersService);
   private aliadoService = inject(AliadoService);
+  private toastService = inject(ToastService);
 
   userProfile = this.auth.userProfile;
 
@@ -34,8 +36,8 @@ export class UsersComponent implements OnInit {
 
   // Local UI state
   isLoading = false;
+  /** Error del formulario del modal abierto (crear/editar o activar/desactivar). */
   errorMessage: string | null = null;
-  successMessage: string | null = null;
 
   // Data + filters (usando signals para reactividad)
   users = signal<AppUser[]>([]);
@@ -170,7 +172,6 @@ export class UsersComponent implements OnInit {
   loadUsers() {
     this.isLoading = true;
     this.errorMessage = null;
-    this.successMessage = null;
     this.usersService.getAllUsers().subscribe({
       next: (data: AppUser[]) => {
         this.users.set(data || []);
@@ -179,7 +180,7 @@ export class UsersComponent implements OnInit {
       },
       error: (err: any) => {
         console.error('Error loading users', err);
-        this.errorMessage = this.getErrorMessage(err) || 'Error cargando usuarios';
+        this.toastService.error(this.getErrorMessage(err) || 'Error cargando usuarios');
         this.isLoading = false;
       }
     });
@@ -199,7 +200,6 @@ export class UsersComponent implements OnInit {
     };
     this.showEditModal = true;
     this.errorMessage = null;
-    this.successMessage = null;
   }
 
   // Abrir modal para editar usuario
@@ -216,7 +216,6 @@ export class UsersComponent implements OnInit {
     };
     this.showEditModal = true;
     this.errorMessage = null;
-    this.successMessage = null;
   }
 
   // Cerrar modal
@@ -236,7 +235,6 @@ export class UsersComponent implements OnInit {
   // Guardar usuario (crear o editar)
   saveUser() {
     this.errorMessage = null;
-    this.successMessage = null;
 
     // Validaciones
     if (!this.editUserForm.username || !this.editUserForm.email) {
@@ -305,7 +303,7 @@ export class UsersComponent implements OnInit {
           if (this.editUserForm.roles.length !== 1 || this.editUserForm.roles[0] !== 'ROLE_USER') {
             this.usersService.updateUserRoles(response.id!, this.editUserForm.roles).subscribe({
               next: () => {
-                this.successMessage = `Usuario "${response.username}" creado exitosamente`;
+                this.toastService.success(`Usuario "${response.username}" creado exitosamente`);
                 this.closeEditModal();
                 this.loadUsers();
               },
@@ -315,7 +313,7 @@ export class UsersComponent implements OnInit {
               }
             });
           } else {
-            this.successMessage = `Usuario "${response.username}" creado exitosamente`;
+            this.toastService.success(`Usuario "${response.username}" creado exitosamente`);
             this.closeEditModal();
             this.loadUsers();
           }
@@ -335,7 +333,7 @@ export class UsersComponent implements OnInit {
         this.editUserForm.password // Enviar contraseña si se modificó
       ).subscribe({
         next: () => {
-          this.successMessage = 'Usuario actualizado exitosamente';
+          this.toastService.success('Usuario actualizado exitosamente');
           this.closeEditModal();
           this.loadUsers();
         },
@@ -392,7 +390,7 @@ export class UsersComponent implements OnInit {
     
     this.usersService.toggleUserStatus(user.id, newStatus).subscribe({
       next: (updatedUser: AppUser) => {
-        this.successMessage = `Usuario "${user.username}" ${newStatus ? 'activado' : 'desactivado'} correctamente`;
+        this.toastService.success(`Usuario "${user.username}" ${newStatus ? 'activado' : 'desactivado'} correctamente`);
         this.closeDeleteModal();
         this.loadUsers();
       },

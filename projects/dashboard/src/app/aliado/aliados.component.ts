@@ -10,6 +10,7 @@ import { HasRoleDirective } from '../auth/has-role.directive';
 import { HeaderComponent } from '../header/header.component';
 import { SidebarComponent } from '../sidebar/sidebar.component';
 import { UiStateService } from '../ui-state.service';
+import { ToastService } from '../services/toast.service';
 
 /**
  * Componente para gestión de Aliados Estratégicos
@@ -28,12 +29,13 @@ export class AliadosComponent implements OnInit {
   private authService = inject(AuthService);
   private router = inject(Router);
   private uiState = inject(UiStateService);
+  private toastService = inject(ToastService);
 
   // Estado
   aliados: AliadoEstrategico[] = [];
   loading = false;
+  /** Error del formulario del modal (validacion o fallo al guardar). */
   error = '';
-  successMessage = '';
   
   // Estados de UI usando el servicio compartido
   get isSidebarOpen() {
@@ -71,7 +73,6 @@ export class AliadosComponent implements OnInit {
    */
   loadAliados(): void {
     this.loading = true;
-    this.error = '';
 
     this.aliadoService.getAll().subscribe({
       next: (data) => {
@@ -79,7 +80,7 @@ export class AliadosComponent implements OnInit {
         this.loading = false;
       },
       error: (err) => {
-        this.error = err.message || 'Error al cargar aliados';
+        this.toastService.error(err.message || 'Error al cargar aliados');
         this.loading = false;
       }
     });
@@ -110,7 +111,6 @@ export class AliadosComponent implements OnInit {
     this.formData = this.getEmptyForm();
     this.showModal = true;
     this.error = '';
-    this.successMessage = '';
   }
 
   /**
@@ -134,7 +134,6 @@ export class AliadosComponent implements OnInit {
     };
     this.showModal = true;
     this.error = '';
-    this.successMessage = '';
   }
 
   /**
@@ -173,15 +172,14 @@ export class AliadosComponent implements OnInit {
 
     request$.subscribe({
       next: () => {
-        this.successMessage = this.modalMode === 'create'
-          ? 'Aliado creado exitosamente'
-          : 'Aliado actualizado exitosamente';
+        if (this.modalMode === 'create') {
+          this.toastService.success('Aliado creado exitosamente');
+        } else {
+          this.toastService.success('Aliado actualizado exitosamente');
+        }
         this.closeModal();
         this.loadAliados();
         this.loading = false;
-
-        // Ocultar mensaje después de 3 segundos
-        setTimeout(() => this.successMessage = '', 3000);
       },
       error: (err) => {
         this.error = err.message || 'Error al guardar aliado';
@@ -201,12 +199,11 @@ export class AliadosComponent implements OnInit {
     this.loading = true;
     this.aliadoService.delete(aliado.id).subscribe({
       next: () => {
-        this.successMessage = 'Aliado desactivado exitosamente';
+        this.toastService.success('Aliado desactivado exitosamente');
         this.loadAliados();
-        setTimeout(() => this.successMessage = '', 3000);
       },
       error: (err) => {
-        this.error = err.message || 'Error al desactivar aliado';
+        this.toastService.error(err.message || 'Error al desactivar aliado');
         this.loading = false;
       }
     });
@@ -219,12 +216,11 @@ export class AliadosComponent implements OnInit {
     this.loading = true;
     this.aliadoService.activate(aliado.id).subscribe({
       next: () => {
-        this.successMessage = 'Aliado activado exitosamente';
+        this.toastService.success('Aliado activado exitosamente');
         this.loadAliados();
-        setTimeout(() => this.successMessage = '', 3000);
       },
       error: (err) => {
-        this.error = err.message || 'Error al activar aliado';
+        this.toastService.error(err.message || 'Error al activar aliado');
         this.loading = false;
       }
     });

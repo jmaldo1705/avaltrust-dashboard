@@ -3,6 +3,7 @@ import { Component, inject, signal, ChangeDetectionStrategy } from '@angular/cor
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { AuthService } from './auth.service';
+import { ToastService } from '../services/toast.service';
 
 @Component({
   selector: 'app-reset-password',
@@ -22,10 +23,6 @@ import { AuthService } from './auth.service';
 
         @if (error()) {
           <div class="alert alert-danger" role="alert">{{ error() }}</div>
-        }
-
-        @if (success()) {
-          <div class="alert alert-success" role="status">{{ success() }}</div>
         }
 
         <form (ngSubmit)="onSubmit()" novalidate>
@@ -80,11 +77,11 @@ export class ResetPasswordComponent {
   private readonly auth = inject(AuthService);
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
+  private readonly toastService = inject(ToastService);
 
   token = signal('');
   loading = signal(false);
   error = signal('');
-  success = signal('');
 
   newPassword = '';
   confirmPassword = '';
@@ -114,13 +111,13 @@ export class ResetPasswordComponent {
     if (!this.canSubmit()) return;
 
     this.error.set('');
-    this.success.set('');
     this.loading.set(true);
 
     this.auth.resetPassword(this.token(), this.newPassword).subscribe({
       next: (response) => {
         this.loading.set(false);
-        this.success.set(response.message || 'Contraseña actualizada exitosamente.');
+        // El snackbar sigue visible al llegar al login, que muestra su propio aviso.
+        this.toastService.success(response.message || 'Contraseña actualizada exitosamente.');
 
         setTimeout(() => {
           this.router.navigate(['/login'], { queryParams: { reset: 'success' } });
