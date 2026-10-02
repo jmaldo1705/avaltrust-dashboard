@@ -1,0 +1,121 @@
+/* ──────────────────────────────────────────────────────────────
+   AvalTrust · overlays del dashboard (plan movil, 2.2 y 2.6)
+   Lo que se pinta fuera de la pagina: el contenedor de overlays del
+   CDK, el anunciador para lectores de pantalla y el snackbar
+   (MatSnackBar con AtSnackComponent).
+   Se carga desde angular.json entre tokens.css y styles.css. No hay
+   tema de Material: sin el no existen las --mat-sys-*, asi que aqui
+   se definen las --mat-snack-bar-* con los tokens --at-*.
+   ────────────────────────────────────────────────────────────── */
+
+/* Estructura minima del CDK: contenedor y paneles de overlay, y
+   .cdk-visually-hidden, que oculta el anunciador de LiveAnnouncer. */
+@import '@angular/cdk/overlay-prebuilt.css';
+@import '@angular/cdk/a11y-prebuilt.css';
+
+:root {
+  --mat-snack-bar-container-color: var(--at-navy-700);
+  --mat-snack-bar-container-shape: var(--at-radius-md);
+  --mat-snack-bar-supporting-text-color: var(--at-text-on-dark);
+  --mat-snack-bar-supporting-text-font: var(--at-font-sans);
+  --mat-snack-bar-supporting-text-size: var(--at-text-sm);
+  --mat-snack-bar-supporting-text-weight: var(--at-weight-medium);
+  --mat-snack-bar-supporting-text-line-height: 1.45;
+  --mat-snack-bar-button-color: var(--at-blue-500);
+}
+
+/* Sin popover (iOS < 17) el CDK usa su contenedor: va sobre toda la
+   escala de capas. Con popover el overlay sube a la top layer. */
+.cdk-overlay-container {
+  z-index: var(--at-z-overlay);
+}
+
+/* ---------- snackbar ------------------------------------------------ */
+
+/* Abajo al centro, por encima del area segura y de las barras fijas
+   de la pagina, que publican su altura con [atBottomBar]. */
+.mat-mdc-snack-bar-container.at-snack-panel {
+  margin: calc(8px + env(safe-area-inset-top, 0px)) calc(8px + env(safe-area-inset-right, 0px))
+    calc(8px + env(safe-area-inset-bottom, 0px) + var(--at-bottom-bar, 0px))
+    calc(8px + env(safe-area-inset-left, 0px));
+}
+
+.mat-mdc-snack-bar-container.at-snack-panel .mat-mdc-snackbar-surface {
+  min-width: min(344px, calc(100vw - 16px));
+  max-width: min(560px, calc(100vw - 16px));
+  padding: 0;
+  border-left: 4px solid var(--at-snack-accent, var(--at-blue-500));
+  box-shadow: var(--at-shadow-lg);
+}
+
+/* Acento por tipo: color del borde y del icono. Sobre --at-navy-700
+   todos pasan 3:1 (graficos): 6,9 / 3,6 / 8,1 / 4,7. */
+.at-snack-panel--success { --at-snack-accent: var(--at-success); }
+.at-snack-panel--error { --at-snack-accent: var(--at-danger); }
+.at-snack-panel--warning { --at-snack-accent: var(--at-warning); }
+.at-snack-panel--info { --at-snack-accent: var(--at-blue-500); }
+
+.at-snack {
+  display: flex;
+  align-items: center;
+  gap: var(--at-space-3);
+  width: 100%;
+  min-height: 48px;
+  padding-left: var(--at-space-4);
+}
+
+.at-snack__icon {
+  display: inline-flex;
+  flex: none;
+  color: var(--at-snack-accent, var(--at-blue-500));
+}
+
+.at-snack__icon svg {
+  width: 20px;
+  height: 20px;
+}
+
+.mat-mdc-snack-bar-container .at-snack .at-snack__message {
+  flex: 1 1 auto;
+  min-width: 0;
+  padding: 12px 0;
+  overflow-wrap: anywhere;
+}
+
+.at-snack__close {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  width: var(--at-tap-min);
+  height: var(--at-tap-min);
+  margin: 2px 2px 2px 0;
+  padding: 0;
+  border: 0;
+  border-radius: var(--at-radius-sm);
+  background: transparent;
+  color: var(--at-text-on-dark);
+  cursor: pointer;
+}
+
+.at-snack__close svg {
+  width: 18px;
+  height: 18px;
+}
+
+@media (hover: hover) {
+  .at-snack__close:hover {
+    background: rgb(255 255 255 / 0.1);
+  }
+}
+
+.at-snack__close:focus-visible {
+  outline: 2px solid var(--at-blue-500);
+  outline-offset: -2px;
+}
+
+@media (forced-colors: active) {
+  .at-snack__close {
+    border: 1px solid ButtonText;
+  }
+}

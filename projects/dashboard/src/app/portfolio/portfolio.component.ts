@@ -28,6 +28,7 @@ import { PortfolioService, PortfolioRequest } from './portfolio.service';
 import { ExcelTemplateService } from './excel-template.service';
 import { AliadoService } from '../aliado/aliado.service';
 import { AliadoEstrategico } from '../aliado/aliado.interface';
+import { AtBottomBarDirective } from '../ui/at-bottom-bar.directive';
 import * as XLSX from 'xlsx';
 
 @Component({
@@ -39,6 +40,7 @@ import * as XLSX from 'xlsx';
     FormsModule,
     HeaderComponent,
     SidebarComponent,
+    AtBottomBarDirective,
     LucideBuilding2,
     LucideCheckCircle,
     LucideCircleAlert,

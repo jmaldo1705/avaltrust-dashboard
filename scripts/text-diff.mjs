@@ -7,6 +7,9 @@
 //     literales de las interpolaciones;
 //   - los literales que se pasan a alert(, confirm( y a los toasts
 //     (toast*.success/error/warning/info/show).
+// Un texto hecho solo de iconos (emoji o simbolos graficos como ✓ ✕ ⚠ ℹ) no
+// cuenta: cambiar un icono de texto por uno de Lucide no toca la copia. La
+// puntuacion, las cifras y simbolos como $ % * × o las flechas si cuentan.
 // Compara la referencia base con el arbol de trabajo como multiconjuntos por
 // archivo:
 //   - mover un texto dentro del archivo o a otro archivo no avisa;
@@ -110,6 +113,14 @@ const unescapeJs = s => s.replace(/\\(u\{[0-9a-f]+\}|u[0-9a-f]{4}|x[0-9a-f]{2}|[
 const PH = '{{…}}';
 const norm = s => s.replace(/\s+/g, ' ').trim();
 const hasVisible = s => norm(s.split(PH).join('')).length > 0;
+// Icono: pictograma o "otro simbolo" Unicode desde U+2000 (asi © y ® siguen
+// contando), mas el selector de variacion y el ZWJ de los emoji compuestos.
+const isIconChar = ch => ch === '\uFE0F' || ch === '\u200D' ||
+  (ch.codePointAt(0) >= 0x2000 && /[\p{So}\p{Extended_Pictographic}]/u.test(ch));
+const isIconOnly = s => {
+  const chars = [...s.split(PH).join('').replace(/\s+/g, '')];
+  return chars.length > 0 && chars.every(isIconChar);
+};
 
 // ---------- literales dentro de expresiones ----------
 // Devuelve los literales de cadena de una expresion de plantilla o de TS.
@@ -332,7 +343,7 @@ function scanTs(raw, push) {
 
 function extract(file, content) {
   const items = [];
-  const push = (text, kind) => items.push({ text, kind });
+  const push = (text, kind) => { if (!isIconOnly(text)) items.push({ text, kind }); };
   if (file.endsWith('.html')) scanTemplate(content, push);
   else scanTs(content, push);
   return items;

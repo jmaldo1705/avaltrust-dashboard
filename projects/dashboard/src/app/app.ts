@@ -1,14 +1,13 @@
 import { Component, OnInit, OnDestroy, ChangeDetectionStrategy } from '@angular/core';
 import { NavigationEnd, Router, RouterOutlet } from '@angular/router';
 import { SessionWarningComponent } from './auth/session-warning.component';
-import { ToastContainerComponent } from './services/toast-container.component';
 import { AuthService } from './auth/auth.service';
 import { Subscription, filter } from 'rxjs';
 import { AuditoriaService } from './admin/auditoria/auditoria.service';
 
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet, SessionWarningComponent, ToastContainerComponent],
+  imports: [RouterOutlet, SessionWarningComponent],
   changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     <router-outlet />
@@ -18,7 +17,6 @@ import { AuditoriaService } from './admin/auditoria/auditoria.service';
       (continue)="onContinueSession()"
       (logout)="onLogoutSession()"
     />
-    <app-toast-container />
   `
 })
 export class App implements OnInit, OnDestroy {

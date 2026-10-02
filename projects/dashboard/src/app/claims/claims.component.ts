@@ -23,6 +23,7 @@ import { HeaderComponent } from '../header/header.component';
 import { SidebarComponent } from '../sidebar/sidebar.component';
 import { ClaimsService, ClaimRequest } from './claims.service';
 import { ClaimsTemplateService } from './claims-template.service';
+import { AtBottomBarDirective } from '../ui/at-bottom-bar.directive';
 
 @Component({
   selector: 'app-claims',
@@ -32,6 +33,7 @@ import { ClaimsTemplateService } from './claims-template.service';
     ReactiveFormsModule,
     HeaderComponent,
     SidebarComponent,
+    AtBottomBarDirective,
     LucideCheckCircle,
     LucideCircleAlert,
     LucideClipboardPenLine,

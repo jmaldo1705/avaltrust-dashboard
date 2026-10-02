@@ -31,6 +31,7 @@
             ],
             "styles": [
               "projects/shared-ui/styles/tokens.css",
+              "projects/dashboard/src/styles/overlays.css",
               "projects/dashboard/src/styles.css"
             ],
             "outputPath": "dist/avaltrust-dashboard"
