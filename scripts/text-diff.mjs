@@ -15,6 +15,11 @@
 //   - mover un texto dentro del archivo o a otro archivo no avisa;
 //   - cambiar o quitar un texto existente FALLA (sale con 1);
 //   - un texto nuevo se lista como aviso para que se apruebe.
+// Un texto que aparece como nuevo pero ya estaba tal cual en el codigo de la
+// base (.ts y .html, sin specs) se cuenta como movido: es un mensaje que vivia
+// en una propiedad (this.successMessage = '...') y ahora se pasa al toast. Si
+// tiene partes variables (${...} o {{...}}), todas sus partes fijas tienen que
+// estar en un mismo archivo de la base. Se listan aparte, con su archivo.
 //
 // Uso: node scripts/text-diff.mjs <ref-base> [--approved=archivo]
 //   --approved: archivo con un texto aprobado por linea (las lineas con # se
@@ -389,6 +394,37 @@ for (const r of added) {
   if (t) { takenFromAdded.set(r.text, takenFromAdded.get(r.text) - t); r.n -= t; }
 }
 
+// Los nuevos que ya estaban tal cual en el codigo de la base son movimientos.
+const BASE_PATHSPECS = [
+  ...SCAN_DIRS.flatMap(d => [`${d}/*.ts`, `${d}/*.html`]),
+  ':(exclude)*.spec.ts',
+];
+const fixedParts = text => text.split(/\$\{…\}|\{\{…\}\}/).map(s => s.trim()).filter(Boolean);
+const baseHits = new Map();
+function inBaseSource(text) {
+  if (baseHits.has(text)) return baseHits.get(text);
+  const parts = fixedParts(text);
+  let file = null;
+  if (parts.length) {
+    // -F literal, --all-match: todas las partes en un mismo archivo.
+    const patterns = parts.flatMap(p => ['-e', p]);
+    try {
+      file = git(['grep', '-l', '-F', '-I', '--all-match', ...patterns, baseSha, '--', ...BASE_PATHSPECS])
+        .toString().split('\n').find(Boolean)?.replace(`${baseSha}:`, '') ?? null;
+    } catch {
+      file = null; // git grep sale con 1 si no hay coincidencias
+    }
+  }
+  baseHits.set(text, file);
+  return file;
+}
+const movedFromSource = []; // { file, text, n, from }
+for (const r of added) {
+  if (r.n <= 0) continue;
+  const from = inBaseSource(r.text);
+  if (from) { movedFromSource.push({ ...r, from }); r.n = 0; }
+}
+
 const failing = removed.filter(r => r.n > 0 && !approved.has(r.text));
 const approvedHits = removed.filter(r => r.n > 0 && approved.has(r.text));
 const notices = added.filter(r => r.n > 0);
@@ -412,6 +448,11 @@ if (approvedHits.length) {
 console.log(`\nTextos nuevos (piden aprobacion): ${notices.length}`);
 show(notices, '+');
 console.log(`\nTextos movidos entre archivos: ${moved.reduce((n, r) => n + r.n, 0)}`);
+console.log(`Textos que ya estaban en el codigo de la base (movidos al toast o a la plantilla): ${movedFromSource.length}`);
+for (const [file, rows] of byFile(movedFromSource)) {
+  console.log(`  ${file}`);
+  for (const r of rows) console.log(`    = ${JSON.stringify(r.text)}${r.n > 1 ? ` x${r.n}` : ''}  (base: ${r.from})`);
+}
 console.log(failing.length ? '\nFALLA: hay textos publicados que cambian o desaparecen.' : '\nOK: ningun texto existente cambia.');
 
 if (process.env.GITHUB_ACTIONS === 'true') {
@@ -421,9 +462,11 @@ if (process.env.GITHUB_ACTIONS === 'true') {
   if (process.env.GITHUB_STEP_SUMMARY) {
     const lines = ['### text-diff', '', `Base: \`${baseSha.slice(0, 7)}\``, '',
       `- Cambiados o eliminados: **${failing.length}**`, `- Nuevos (piden aprobacion): **${notices.length}**`,
-      `- Movidos entre archivos: ${moved.reduce((n, r) => n + r.n, 0)}`, ''];
+      `- Movidos entre archivos: ${moved.reduce((n, r) => n + r.n, 0)}`,
+      `- Ya estaban en el codigo de la base: ${movedFromSource.length}`, ''];
     for (const r of failing) lines.push(`- Cambia o desaparece en \`${r.file}\`: ${JSON.stringify(r.text)}`);
     for (const r of notices) lines.push(`- Nuevo en \`${r.file}\`: ${JSON.stringify(r.text)}`);
+    for (const r of movedFromSource) lines.push(`- Ya estaba en \`${r.from}\`, ahora en \`${r.file}\`: ${JSON.stringify(r.text)}`);
     fs.appendFileSync(process.env.GITHUB_STEP_SUMMARY, lines.join('\n') + '\n\n');
   }
 }
