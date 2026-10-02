@@ -255,7 +255,12 @@ export class AuthService {
   }
 
 
-  logout(redirectToLogin = true): Observable<any> {
+  /**
+   * Cierra la sesión: limpia el estado local y avisa al servidor para que revoque el refresh token
+   * e invalide el access token. La petición la envía el propio servicio, así que quien llama no
+   * necesita suscribirse.
+   */
+  logout(redirectToLogin = true): void {
     const user = this._user();
     this.clearTokenRefreshTimer();
     this.clearKeepAliveTimer();
@@ -272,16 +277,17 @@ export class AuthService {
       this.router.navigate(['/login']);
     }
 
-    // Notificar al servidor (opcional, no bloquear UI)
+    // Notificar al servidor sin bloquear la UI. El estado local ya se limpió, así que el
+    // interceptor no agregaría el token: se envía explícito.
     if (user?.refreshToken) {
-      return this.http.post(`${this.API_URL}/logout`, {
+      this.http.post(`${this.API_URL}/logout`, {
         refreshToken: user.refreshToken
+      }, {
+        headers: { Authorization: `Bearer ${user.accessToken}` }
       }).pipe(
         catchError(() => EMPTY) // Ignorar errores de logout
-      );
+      ).subscribe();
     }
-
-    return EMPTY;
   }
 
   /**

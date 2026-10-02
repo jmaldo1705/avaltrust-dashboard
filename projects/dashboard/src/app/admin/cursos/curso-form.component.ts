@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
 import { HeaderComponent } from '../../header/header.component';
 import { SidebarComponent } from '../../sidebar/sidebar.component';
+import { AuthService } from '../../auth/auth.service';
 import { AdminCursosService, CursoAdmin, SeccionAdmin, PuntoContenidoAdmin, EjemploAdmin } from './admin-cursos.service';
 
 @Component({
@@ -18,6 +19,7 @@ export class CursoFormComponent implements OnInit {
   private adminCursosService = inject(AdminCursosService);
   private router = inject(Router);
   private route = inject(ActivatedRoute);
+  private authService = inject(AuthService);
 
   isEditMode = false;
   cursoId?: number;
@@ -221,6 +223,6 @@ export class CursoFormComponent implements OnInit {
   }
 
   onLogout(): void {
-    this.router.navigate(['/login']);
+    this.authService.logout(true);
   }
 }

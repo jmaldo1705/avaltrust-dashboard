@@ -70,6 +70,6 @@ export class App implements OnInit, OnDestroy {
 
   onLogoutSession() {
     this.showSessionWarning = false;
-    this.authService.logout(true).subscribe();
+    this.authService.logout(true);
   }
 }
