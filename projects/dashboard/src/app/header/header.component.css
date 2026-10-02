@@ -14,7 +14,7 @@
 .top-bar {
   position: fixed;
   inset: 0 0 auto 0;
-  z-index: 1002;
+  z-index: var(--at-z-header);
   display: grid;
   grid-template-columns: auto minmax(0, 1fr) auto;
   align-items: center;
@@ -24,6 +24,13 @@
   border-bottom: 1px solid rgba(2, 199, 217, 0.18);
   box-shadow: 0 14px 30px rgba(3, 10, 24, 0.28);
   backdrop-filter: blur(14px);
+}
+
+/* El menu de usuario tambien activa el fondo oscuro (.overlay) y su
+   desplegable cuelga por debajo del header: mientras esta abierto, el header
+   sube justo por encima del fondo para que el desplegable se pueda usar. */
+.top-bar.user-menu-open {
+  z-index: calc(var(--at-z-drawer-scrim) + 1);
 }
 
 .top-bar::before {

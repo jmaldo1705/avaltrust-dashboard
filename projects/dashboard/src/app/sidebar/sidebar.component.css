@@ -11,7 +11,7 @@
   position: fixed;
   top: 64px;
   left: -280px;
-  z-index: 1001;
+  z-index: var(--at-z-drawer);
   width: 280px;
   max-width: 90vw;
   height: calc(100vh - 64px);
@@ -270,12 +270,6 @@
 @media (min-width: 1025px) {
   .sidebar {
     left: 0;
-  }
-}
-
-@media (max-width: 1024px) {
-  .sidebar {
-    z-index: 1100;
   }
 }
 

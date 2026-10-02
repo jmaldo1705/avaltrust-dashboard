@@ -85,6 +85,20 @@
   --at-container: 1200px;
   --at-header-height: 64px;
   --at-sidebar-width: 280px;
+
+  /* Capas (z-index) -------------------------------------------- */
+  --at-z-sticky: 10;          /* barras fijas dentro de la pagina */
+  --at-z-header: 100;
+  --at-z-drawer-scrim: 190;   /* fondo del menu lateral */
+  --at-z-drawer: 200;         /* menu lateral */
+  --at-z-overlay: 1000;       /* modales y hojas (CDK sin popover) */
+
+  /* Movil ------------------------------------------------------ */
+  --at-tap-min: 44px;         /* area tactil minima */
+  --at-safe-top: env(safe-area-inset-top, 0px);
+  --at-safe-right: env(safe-area-inset-right, 0px);
+  --at-safe-bottom: env(safe-area-inset-bottom, 0px);
+  --at-safe-left: env(safe-area-inset-left, 0px);
 }
 
 /* Quien prefiera menos movimiento, que no lo tenga. */

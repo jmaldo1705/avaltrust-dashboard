@@ -1,4 +1,4 @@
-<header class="top-bar">
+<header class="top-bar" [class.user-menu-open]="isUserMenuOpen">
   <div class="top-bar-left">
     <button class="menu-toggle" type="button" (click)="onToggleSidebar()" aria-label="Abrir menu">
       <svg lucideMenu></svg>
