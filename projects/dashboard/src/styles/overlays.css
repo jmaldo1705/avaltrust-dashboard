@@ -24,10 +24,14 @@
   --mat-snack-bar-button-color: var(--at-blue-500);
 }
 
-/* Sin popover (iOS < 17) el CDK usa su contenedor: va sobre toda la
-   escala de capas. Con popover el overlay sube a la top layer. */
+/* Con popover el overlay sube a la top layer. Sin el (iOS < 17) el CDK
+   usa su contenedor, que tiene que quedar sobre todas las capas. Hasta
+   que se migren las piezas viejas hay modales a 2000, filtro-aliados a
+   9999 y session-warning a 10000, por encima de --at-z-overlay (1000):
+   el contenedor va a 10001, como en la top layer. Cuando desaparezcan
+   (F4, F5 y F7) vuelve a var(--at-z-overlay). */
 .cdk-overlay-container {
-  z-index: var(--at-z-overlay);
+  z-index: 10001;
 }
 
 /* ---------- snackbar ------------------------------------------------ */

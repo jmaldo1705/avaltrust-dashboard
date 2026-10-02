@@ -133,7 +133,7 @@ Usa AtSheet con `sm` y `alertdialog`. No trae textos por defecto.
 | `--at-z-header` | 100 | 1002 |
 | `--at-z-drawer-scrim` | 190 | `.overlay` 1000, 998, 999 |
 | `--at-z-drawer` | 200 | 1001/1100 |
-| `--at-z-overlay` | 1000 | CDK sin popover |
+| `--at-z-overlay` | 1000 | CDK sin popover (en F1 el contenedor va a 10001 mientras queden las capas viejas) |
 
 Los 1000/2000 de los modales viejos, el 9999 y el 10000 desaparecen al migrar cada pieza.
 
@@ -269,7 +269,7 @@ Los 1000/2000 de los modales viejos, el 9999 y el 10000 desaparecen al migrar ca
 | Código propio sin tests | Kit pequeño: el snackbar es de Material, el modo se fija al abrir y el gesto y el historial van aparte. Specs ≥80 % en `ui/` |
 | Snackbar sin tema o bajo un backdrop | `overlays.css` define `--mat-snack-bar-*`; se reabre al abrir un overlay |
 | El historial choca con el Router | Spike en dispositivos e interruptor `historyBack: false` |
-| Navegador sin popover | El CDK usa su contenedor a 1000, sobre toda la escala |
+| Navegador sin popover | El CDK usa su contenedor, a 10001 mientras queden modales a 2000, el 9999 y el 10000; después, a 1000 |
 | `--delete` borra chunks en uso | 2a antes de `loadComponent`, más recarga única |
 | La landing se redespliega | `build:landing` en el PR; tokens en un solo PR |
 | El teclado de iOS tapa la UI | `--at-vvh`, inputs de 16 px y prueba en un iPhone |
