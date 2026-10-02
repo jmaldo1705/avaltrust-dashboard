@@ -244,6 +244,40 @@ describe('ToastService (snackbar)', () => {
     });
   });
 
+  describe('teclado', () => {
+    it('al cerrarlo con el foco dentro, el foco vuelve al elemento de donde vino', async () => {
+      const { service } = setup();
+      const origin = document.body.appendChild(document.createElement('button'));
+      origin.focus();
+      service.error('Fallo');
+      await tick();
+      const close = snackEl().querySelector<HTMLButtonElement>('button.at-snack__close')!;
+      close.focus();
+      close.dispatchEvent(new FocusEvent('focusin', { bubbles: true, relatedTarget: origin }));
+      close.click();
+      await tick();
+      expect(snacks()).toHaveLength(0);
+      expect(document.activeElement).toBe(origin);
+      origin.remove();
+    });
+
+    it('si se cierra sin el foco dentro, no mueve el foco', async () => {
+      const { service } = setup();
+      const input = document.body.appendChild(document.createElement('input'));
+      const other = document.body.appendChild(document.createElement('button'));
+      service.info('Nota');
+      await tick();
+      // El foco paso por el aviso y volvio a la pagina antes de cerrarlo.
+      snackEl().dispatchEvent(new FocusEvent('focusin', { bubbles: true, relatedTarget: other }));
+      input.focus();
+      snackEl().querySelector<HTMLButtonElement>('button.at-snack__close')!.click();
+      await tick();
+      expect(document.activeElement).toBe(input);
+      input.remove();
+      other.remove();
+    });
+  });
+
   describe('prioridad y duplicados', () => {
     it('un exito no tapa a un error en sus primeros 2 s: sale despues y se anuncia entonces', async () => {
       const { service, announce } = setup();
