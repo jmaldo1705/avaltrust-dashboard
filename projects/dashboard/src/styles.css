@@ -35,7 +35,7 @@
   padding: 1rem;
   min-height: calc(100vh - 64px);
   transition: margin-left 0.3s ease;
-  width: 100%;
+  width: auto;
   box-sizing: border-box;
   overflow-x: hidden;
 }
@@ -140,18 +140,24 @@
 
 /* Responsive adjustments for shared classes */
 @media (min-width: 768px) {
-  .main-content { margin-left: 280px; width: calc(100vw - 280px); padding: 2rem; }
+  .main-content { padding: 2rem; }
   .metrics-grid { grid-template-columns: repeat(2, 1fr); gap: 1.5rem; }
   .charts-grid { grid-template-columns: repeat(2, 1fr); }
 }
 @media (min-width: 1024px) {
-  .main-content { margin-left: 280px; width: calc(100vw - 280px); padding: 2.5rem; }
+  .main-content { padding: 2.5rem; }
   .metrics-grid { grid-template-columns: repeat(4, 1fr); }
   .content-header h2 { font-size: 2rem; }
   .welcome-message { font-size: 1.1rem; }
 }
+/* El sidebar queda fijo desde 1025 px (sidebar.component.css), el mismo
+   corte en el que el header esconde la hamburguesa: solo entonces se le
+   deja sitio al contenido. */
+@media (min-width: 1025px) {
+  .main-content { margin-left: 280px; }
+}
 @media (max-width: 767px) {
-  .main-content { padding: 1rem; margin-left: 0; width: 100vw; }
+  .main-content { padding: 1rem; margin-left: 0; }
   .metrics-grid { grid-template-columns: 1fr; gap: 1rem; }
   .metric-card { padding: 1.25rem; }
   .metric-value { font-size: clamp(1rem, 4vw, 1.3rem); }
