@@ -1,0 +1,63 @@
+name: PR checks (dashboard, landing y shared-ui)
+
+# Los workflows de despliegue solo corren en push a master. Este corre en
+# cada PR hacia master (y a mano) para que nada llegue a produccion sin
+# compilar, sin tests o cambiando textos ya publicados.
+on:
+  pull_request:
+    branches: [master]
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+
+concurrency:
+  group: pr-dashboard-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  checks:
+    runs-on: ubuntu-latest
+    steps:
+      # Historial completo: text-diff compara contra la base del PR.
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+          cache: npm
+
+      - name: Install
+        run: npm ci
+
+      - name: Build dashboard
+        run: npm run build
+
+      - name: Build landing
+        run: npm run build:landing
+
+      - name: Build shared-ui
+        run: npx ng build shared-ui
+
+      - name: Tests dashboard
+        run: npx ng test dashboard --watch=false
+
+      - name: Tests landing
+        run: npx ng test landing --watch=false
+
+      - name: Tests shared-ui
+        run: npx ng test shared-ui --watch=false
+
+      # Fase 0: solo informa (alert, confirm, modales propios y Material).
+      - name: check-ui
+        run: node scripts/check-ui.mjs
+
+      # Falla si cambia o desaparece un texto publicado; los nuevos se
+      # listan como aviso para aprobarlos.
+      - name: text-diff
+        run: node scripts/text-diff.mjs "$BASE_REF"
+        env:
+          BASE_REF: ${{ github.event.pull_request.base.sha || 'origin/master' }}
