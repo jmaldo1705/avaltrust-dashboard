@@ -405,28 +405,30 @@ const BASE_PATHSPECS = [
 ];
 const fixedParts = text => text.split(/\$\{…\}|\{\{…\}\}/).map(s => s.trim()).filter(Boolean);
 const baseHits = new Map();
+// Devuelve los archivos de la base que contienen el texto (vacio si ninguno).
 function inBaseSource(text) {
   if (baseHits.has(text)) return baseHits.get(text);
   const parts = fixedParts(text);
-  let file = null;
+  let files = [];
   if (parts.length) {
     // -F literal, --all-match: todas las partes en un mismo archivo.
     const patterns = parts.flatMap(p => ['-e', p]);
     try {
-      file = git(['grep', '-l', '-F', '-I', '--all-match', ...patterns, baseSha, '--', ...BASE_PATHSPECS])
-        .toString().split('\n').find(Boolean)?.replace(`${baseSha}:`, '') ?? null;
+      files = git(['grep', '-l', '-F', '-I', '--all-match', ...patterns, baseSha, '--', ...BASE_PATHSPECS])
+        .toString().split('\n').filter(Boolean).map(l => l.replace(`${baseSha}:`, ''));
     } catch {
-      file = null; // git grep sale con 1 si no hay coincidencias
+      files = []; // git grep sale con 1 si no hay coincidencias
     }
   }
-  baseHits.set(text, file);
-  return file;
+  baseHits.set(text, files);
+  return files;
 }
 const movedFromSource = []; // { file, text, n, from }
 for (const r of added) {
   if (r.n <= 0) continue;
-  const from = inBaseSource(r.text);
-  if (from) { movedFromSource.push({ ...r, from }); r.n = 0; }
+  const files = inBaseSource(r.text);
+  // Como origen se muestra el mismo archivo si el texto ya estaba alli; si no, el primero.
+  if (files.length) { movedFromSource.push({ ...r, from: files.includes(r.file) ? r.file : files[0] }); r.n = 0; }
 }
 
 const failing = removed.filter(r => r.n > 0 && !approved.has(r.text));
