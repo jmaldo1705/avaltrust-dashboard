@@ -41,8 +41,21 @@
           <h2 class="section-title">📝 Información Básica</h2>
           <div class="form-grid">
             <div class="form-group">
-              <label>Título del Curso *</label>
-              <input type="text" [(ngModel)]="curso.titulo" name="titulo" class="form-control" placeholder="Ej: Presupuesto Personal" required>
+              <label for="curso-titulo">Título del Curso *</label>
+              <input
+                id="curso-titulo"
+                type="text"
+                [(ngModel)]="curso.titulo"
+                (ngModelChange)="revisarCampo('titulo', $event)"
+                name="titulo"
+                class="form-control"
+                placeholder="Ej: Presupuesto Personal"
+                required
+                [attr.aria-invalid]="errores.titulo ? 'true' : null"
+                [attr.aria-describedby]="errores.titulo ? 'curso-titulo-error' : null">
+              @if (errores.titulo) {
+                <p id="curso-titulo-error" class="field-error">El título es obligatorio</p>
+              }
             </div>
             <div class="form-group">
               <label>Icono (Emoji)</label>
@@ -68,8 +81,21 @@
               </div>
             </div>
             <div class="form-group">
-              <label>Descripción *</label>
-              <textarea [(ngModel)]="curso.descripcion" name="descripcion" class="form-control" rows="3" placeholder="Breve descripción del curso" required></textarea>
+              <label for="curso-descripcion">Descripción *</label>
+              <textarea
+                id="curso-descripcion"
+                [(ngModel)]="curso.descripcion"
+                (ngModelChange)="revisarCampo('descripcion', $event)"
+                name="descripcion"
+                class="form-control"
+                rows="3"
+                placeholder="Breve descripción del curso"
+                required
+                [attr.aria-invalid]="errores.descripcion ? 'true' : null"
+                [attr.aria-describedby]="errores.descripcion ? 'curso-descripcion-error' : null"></textarea>
+              @if (errores.descripcion) {
+                <p id="curso-descripcion-error" class="field-error">La descripción es obligatoria</p>
+              }
             </div>
             <div class="form-group">
               <label>Introducción</label>

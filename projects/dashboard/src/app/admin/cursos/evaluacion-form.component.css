@@ -165,6 +165,33 @@
   box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
 }
 
+/* Errores de validacion al guardar, junto a la pregunta */
+.pregunta-card .pregunta-texto-input[aria-invalid="true"] {
+  border-color: var(--at-danger);
+}
+
+.pregunta-card .pregunta-texto-input[aria-invalid="true"]:focus {
+  box-shadow: 0 0 0 3px rgb(220 38 38 / 0.15);
+}
+
+.field-error {
+  margin: 0;
+  color: var(--at-danger);
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+/* Fondo blanco: --at-danger sobre blanco da 4,8:1 (sobre --at-danger-soft no llega a 4,5:1). */
+.pregunta-error {
+  padding: 0.6rem 1.5rem;
+  background: var(--at-surface);
+  border-top: 2px solid var(--at-danger);
+}
+
+.lista-error {
+  margin-bottom: 1rem;
+}
+
 .pregunta-puntos {
   display: flex;
   align-items: center;

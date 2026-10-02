@@ -23,6 +23,7 @@ import { HeaderComponent } from '../../header/header.component';
 import { SidebarComponent } from '../../sidebar/sidebar.component';
 import { AdminCursosService, CursoAdmin } from './admin-cursos.service';
 import { AuthService } from '../../auth/auth.service';
+import { ToastService } from '../../services/toast.service';
 
 @Component({
   selector: 'app-admin-cursos',
@@ -54,6 +55,7 @@ export class AdminCursosComponent implements OnInit {
   private adminCursosService = inject(AdminCursosService);
   private router = inject(Router);
   private authService = inject(AuthService);
+  private toastService = inject(ToastService);
 
   cursos: CursoAdmin[] = [];
   loading = false;
@@ -190,7 +192,7 @@ export class AdminCursosComponent implements OnInit {
       },
       error: (error) => {
         console.error('Error al eliminar curso:', error);
-        alert('Error al eliminar el curso. Puede que tenga datos asociados.');
+        this.toastService.error('Error al eliminar el curso. Puede que tenga datos asociados.');
       }
     });
   }
@@ -263,7 +265,7 @@ export class AdminCursosComponent implements OnInit {
       error: (error) => {
         console.error('Error al actualizar orden:', error);
         this.isReordering = false;
-        alert('Error al guardar el nuevo orden. Recargando...');
+        this.toastService.error('Error al guardar el nuevo orden. Recargando...');
         this.cargarCursos(this.currentPage);
       }
     });

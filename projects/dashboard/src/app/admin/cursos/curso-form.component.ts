@@ -1,11 +1,16 @@
-import { Component, OnInit, inject, ChangeDetectionStrategy } from '@angular/core';
+import { Component, Injector, OnInit, inject, ChangeDetectionStrategy } from '@angular/core';
 
 import { FormsModule } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
 import { HeaderComponent } from '../../header/header.component';
 import { SidebarComponent } from '../../sidebar/sidebar.component';
 import { AuthService } from '../../auth/auth.service';
+import { ToastService } from '../../services/toast.service';
+import { focusFieldAfterRender } from '../../ui/focus-field';
 import { AdminCursosService, CursoAdmin, SeccionAdmin, PuntoContenidoAdmin, EjemploAdmin } from './admin-cursos.service';
+
+/** Campos obligatorios del formulario; el mensaje de cada uno esta en la plantilla. */
+export type CursoCampoObligatorio = 'titulo' | 'descripcion';
 
 @Component({
   selector: 'app-curso-form',
@@ -20,6 +25,8 @@ export class CursoFormComponent implements OnInit {
   private router = inject(Router);
   private route = inject(ActivatedRoute);
   private authService = inject(AuthService);
+  private toastService = inject(ToastService);
+  private injector = inject(Injector);
 
   isEditMode = false;
   cursoId?: number;
@@ -27,6 +34,9 @@ export class CursoFormComponent implements OnInit {
   saving = false;
   isSidebarOpen = false;
   isUserMenuOpen = false;
+
+  /** Campos obligatorios vacios en el ultimo intento de guardar. */
+  errores: Record<CursoCampoObligatorio, boolean> = { titulo: false, descripcion: false };
 
   curso: CursoAdmin = {
     titulo: '',
@@ -70,7 +80,8 @@ export class CursoFormComponent implements OnInit {
       error: (error) => {
         console.error('Error al cargar curso:', error);
         this.loading = false;
-        alert('Error al cargar el curso');
+        // El snackbar sigue visible en la lista tras la navegacion.
+        this.toastService.error('Error al cargar el curso');
         this.router.navigate(['/admin/cursos']);
       }
     });
@@ -90,13 +101,15 @@ export class CursoFormComponent implements OnInit {
   }
 
   guardarCurso(): void {
-    // Validaciones básicas
-    if (!this.curso.titulo.trim()) {
-      alert('El título es obligatorio');
-      return;
-    }
-    if (!this.curso.descripcion.trim()) {
-      alert('La descripción es obligatoria');
+    // Validaciones básicas: el error se muestra junto a cada campo y el foco
+    // va al primero que falta.
+    this.errores = {
+      titulo: !this.curso.titulo.trim(),
+      descripcion: !this.curso.descripcion.trim()
+    };
+    const primero = (['titulo', 'descripcion'] as const).find(campo => this.errores[campo]);
+    if (primero) {
+      focusFieldAfterRender(this.injector, `curso-${primero}`);
       return;
     }
 
@@ -116,9 +129,16 @@ export class CursoFormComponent implements OnInit {
       error: (error) => {
         console.error('Error al guardar curso:', error);
         this.saving = false;
-        alert('Error al guardar el curso');
+        this.toastService.error('Error al guardar el curso');
       }
     });
+  }
+
+  /** Quita el error de un campo obligatorio en cuanto deja de estar vacio. */
+  revisarCampo(campo: CursoCampoObligatorio, valor: string): void {
+    if (this.errores[campo] && (valor ?? '').trim()) {
+      this.errores = { ...this.errores, [campo]: false };
+    }
   }
 
   cancelar(): void {

@@ -51,13 +51,20 @@
       <div class="preguntas-container">
         <div class="section-header">
           <h2 class="section-title">❓ Preguntas de Evaluación</h2>
-          <button class="btn-add" (click)="agregarPregunta()">
+          <button
+            id="evaluacion-agregar-pregunta"
+            class="btn-add"
+            (click)="agregarPregunta()"
+            [attr.aria-describedby]="sinPreguntas ? 'evaluacion-sin-preguntas' : null">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <path d="M12 5v14M5 12h14"/>
             </svg>
             Agregar Pregunta
           </button>
         </div>
+        @if (sinPreguntas) {
+          <p id="evaluacion-sin-preguntas" class="field-error lista-error">Debes agregar al menos una pregunta</p>
+        }
         <div class="preguntas-list">
           @for (pregunta of preguntas; track pregunta; let pi = $index) {
             <div class="pregunta-card" [class.expanded]="preguntaExpandida === pi">
@@ -66,10 +73,14 @@
                   <span class="pregunta-numero">Pregunta {{ pi + 1 }}</span>
                   <input
                     type="text"
+                    [id]="'pregunta-' + pi + '-texto'"
                     [(ngModel)]="pregunta.textoPregunta"
+                    (ngModelChange)="revisarTexto(pregunta, $event)"
                     [name]="'pregunta_texto_' + pi"
                     class="pregunta-texto-input"
                     placeholder="Escribe aquí la pregunta..."
+                    [attr.aria-invalid]="errorDe(pregunta) === 'texto' ? 'true' : null"
+                    [attr.aria-describedby]="errorDe(pregunta) === 'texto' ? 'pregunta-' + pi + '-error' : null"
                     (click)="$event.stopPropagation()">
                     <div class="pregunta-puntos">
                       <span>Puntos:</span>
@@ -94,12 +105,28 @@
                       </svg>
                     </div>
                   </div>
+                  @switch (errorDe(pregunta)) {
+                    @case ('texto') {
+                      <p [id]="'pregunta-' + pi + '-error'" class="field-error pregunta-error">Todas las preguntas deben tener texto</p>
+                    }
+                    @case ('opciones') {
+                      <p [id]="'pregunta-' + pi + '-error'" class="field-error pregunta-error">Cada pregunta debe tener al menos 2 opciones</p>
+                    }
+                    @case ('correcta') {
+                      <p [id]="'pregunta-' + pi + '-error'" class="field-error pregunta-error">Cada pregunta debe tener al menos una opción correcta</p>
+                    }
+                  }
                   @if (preguntaExpandida === pi) {
                     <div class="pregunta-content">
                       <div class="opciones-section">
                         <div class="opciones-header">
                           <h4>✅ Opciones de Respuesta</h4>
-                          <button type="button" class="btn-small" (click)="agregarOpcion(pi)">
+                          <button
+                            type="button"
+                            class="btn-small"
+                            [id]="'pregunta-' + pi + '-agregar-opcion'"
+                            [attr.aria-describedby]="errorDe(pregunta) === 'opciones' ? 'pregunta-' + pi + '-error' : null"
+                            (click)="agregarOpcion(pi)">
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                               <path d="M12 5v14M5 12h14"/>
                             </svg>
@@ -114,6 +141,8 @@
                                   type="button"
                                   class="btn-marcar-correcta"
                                   [class.activa]="opcion.esCorrecta"
+                                  [id]="'pregunta-' + pi + '-correcta-' + oi"
+                                  [attr.aria-describedby]="errorDe(pregunta) === 'correcta' ? 'pregunta-' + pi + '-error' : null"
                                   (click)="marcarCorrecta(pi, oi)"
                                   title="Marcar como correcta">
                                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
