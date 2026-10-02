@@ -6,7 +6,8 @@
 //     los atributos visibles (title, placeholder, alt, aria-label...) y los
 //     literales de las interpolaciones;
 //   - los literales que se pasan a alert(, confirm( y a los toasts
-//     (toast*.success/error/warning/info/show).
+//     (toast*.success/error/warning/info/show, y el texto de respaldo de
+//     toast*.fromHttpError).
 // Un texto hecho solo de iconos (emoji o simbolos graficos como ✓ ✕ ⚠ ℹ) no
 // cuenta: cambiar un icono de texto por uno de Lucide no toca la copia. La
 // puntuacion, las cifras y simbolos como $ % * × o las flechas si cuentan.
@@ -334,7 +335,7 @@ function scanTs(raw, push) {
   }
   const calls = [
     [/(?<![\w$.])(?:window\.)?(alert|confirm)\s*\(/g, m => m[1]],
-    [/\b([A-Za-z_$][\w$]*)\s*\.\s*(success|error|warning|info|show)\s*\(/g, m => (/toast/i.test(m[1]) ? 'toast' : null)],
+    [/\b([A-Za-z_$][\w$]*)\s*\.\s*(success|error|warning|info|show|fromHttpError)\s*\(/g, m => (/toast/i.test(m[1]) ? 'toast' : null)],
   ];
   for (const [re, kindOf] of calls) {
     for (const m of src.matchAll(re)) {
