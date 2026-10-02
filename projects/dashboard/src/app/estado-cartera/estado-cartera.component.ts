@@ -27,6 +27,7 @@ import { AliadoService } from '../aliado/aliado.service';
 import { AliadoEstrategico } from '../aliado/aliado.interface';
 import { ActualizacionPagoModalComponent } from './actualizacion-pago-modal.component';
 import { ToastService } from '../services/toast.service';
+import { AtBottomBarDirective } from '../ui/at-bottom-bar.directive';
 
 interface PortfolioItem {
   id: number;
@@ -63,6 +64,7 @@ interface PortfolioItem {
     HeaderComponent,
     SidebarComponent,
     ActualizacionPagoModalComponent,
+    AtBottomBarDirective,
     LucideAlertTriangle,
     LucideBadgeDollarSign,
     LucideBuilding2,

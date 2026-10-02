@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, ElementRef, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, ElementRef, afterNextRender, inject } from '@angular/core';
 import { MAT_SNACK_BAR_DATA, MatSnackBarLabel, MatSnackBarRef } from '@angular/material/snack-bar';
 import {
   LucideCircleCheck,
@@ -16,6 +16,8 @@ export interface AtSnackData {
   type: AtSnackType;
   /** El facade pausa su temporizador mientras el puntero o el foco estan dentro. */
   hold?: (reason: AtSnackHold, active: boolean) => void;
+  /** Ya pintado: el facade mide su alto para dejarlo por encima de las barras de acciones. */
+  rendered?: (host: HTMLElement) => void;
 }
 
 /**
@@ -62,6 +64,10 @@ export class AtSnackComponent {
   readonly data = inject<AtSnackData>(MAT_SNACK_BAR_DATA);
   private readonly ref = inject<MatSnackBarRef<AtSnackComponent>>(MatSnackBarRef);
   private readonly host = inject<ElementRef<HTMLElement>>(ElementRef).nativeElement;
+
+  constructor() {
+    afterNextRender({ read: () => this.data.rendered?.(this.host) });
+  }
 
   close(): void {
     this.ref.dismiss();

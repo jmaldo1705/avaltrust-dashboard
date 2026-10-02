@@ -13,6 +13,7 @@ import { AliadoService } from '../aliado/aliado.service';
 import { AliadoEstrategico } from '../aliado/aliado.interface';
 import { ToastService } from '../services/toast.service';
 import { focusFieldAfterRender } from '../ui/focus-field';
+import { AtBottomBarDirective } from '../ui/at-bottom-bar.directive';
 import { CertificadosService, CertificadoIngresosResponse } from './certificados.service';
 
 /**
@@ -25,7 +26,7 @@ export type CertificadoError = 'aliado' | 'periodo' | 'orden';
 @Component({
   selector: 'app-certificados',
   standalone: true,
-  imports: [FormsModule, HeaderComponent, SidebarComponent],
+  imports: [FormsModule, HeaderComponent, SidebarComponent, AtBottomBarDirective],
   templateUrl: './certificados.component.html',
   changeDetection: ChangeDetectionStrategy.Eager,
   styleUrls: ['./certificados.component.css']

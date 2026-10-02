@@ -32,8 +32,9 @@
 
 /* ---------- snackbar ------------------------------------------------ */
 
-/* Abajo al centro, por encima del area segura y de las barras fijas
-   de la pagina, que publican su altura con [atBottomBar]. */
+/* Abajo al centro, por encima del area segura y de las barras de
+   acciones (Limpiar/Guardar o el pie de un modal), que publican con
+   [atBottomBar] el espacio que ocupan desde el borde inferior. */
 .mat-mdc-snack-bar-container.at-snack-panel {
   margin: calc(8px + env(safe-area-inset-top, 0px)) calc(8px + env(safe-area-inset-right, 0px))
     calc(8px + env(safe-area-inset-bottom, 0px) + var(--at-bottom-bar, 0px))

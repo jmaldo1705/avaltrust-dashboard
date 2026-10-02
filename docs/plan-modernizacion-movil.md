@@ -120,7 +120,7 @@ Usa AtSheet con `sm` y `alertdialog`. No trae textos por defecto.
 
 ### 2.5 Apoyo
 - **`DownloadService`.** Añade el `<a>` al DOM, revoca la URL con retraso y lee el error dentro del Blob. Sustituye los **10** `createObjectURL` de 9 archivos: `cursos.service:38`, `detalle-curso:110`, `evaluacion-curso:309`, `dashboard-afianzado:97`, `certificados.service:82`, `claims:366`, `estado-cartera:565`, `portfolio:609/621` y `reports.service:114`.
-- **`[atBottomBar]`.** Publica la altura de las barras fijas en `--at-bottom-bar` sobre `<html>`.
+- **`[atBottomBar]`.** Publica en `--at-bottom-bar` sobre `<html>` el espacio que ocupa una barra de acciones desde el borde inferior de la ventana: su alto si está pegada abajo y hasta su borde superior si queda un poco por encima (final del formulario o pie de un modal que llena la pantalla). Si deja libre la franja que ocupa el aviso (72 px hasta que se pinta y luego su alto real), no reserva nada. Se mide al cambiar de tamaño, al entrar o salir de pantalla, al detenerse un scroll y al abrir y pintar un aviso. En F1 la llevan las barras de portfolio y claims y el pie de los modales que muestran avisos sin cerrarse (los cuatro de estado-cartera, la vista previa de certificados y eliminar curso).
 - **`.at-table--stack`.** Tarjetas por debajo de 768 px, con `data-label` igual a la cabecera.
 - **`atFilters`.** Filtros en línea en escritorio; en móvil, el mismo `TemplateRef` en una hoja.
 - **`check-ui.mjs`.** Solo permite `@angular/material/snack-bar` y cuenta `alert(`, `confirm(` y `modal-overlay`.

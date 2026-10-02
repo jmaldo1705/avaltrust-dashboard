@@ -2,6 +2,7 @@ import { Component, EventEmitter, Input, Output, OnChanges, SimpleChanges, injec
 
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { ToastService } from '../services/toast.service';
+import { AtBottomBarDirective } from '../ui/at-bottom-bar.directive';
 
 interface PortfolioItem {
   id: number;
@@ -23,7 +24,7 @@ interface PortfolioItem {
 @Component({
   selector: 'app-actualizacion-pago-modal',
   standalone: true,
-  imports: [ReactiveFormsModule],
+  imports: [ReactiveFormsModule, AtBottomBarDirective],
   template: `
     @if (isOpen) {
       <div class="modal-overlay" (click)="closeModal()">
@@ -154,7 +155,7 @@ interface PortfolioItem {
                       <span>Esta actualización se guardará como un nuevo registro en el historial de pagos.</span>
                     </div>
                     <!-- Botones -->
-                    <div class="modal-footer">
+                    <div class="modal-footer" atBottomBar>
                       <button
                         type="button"
                         class="btn-secondary"

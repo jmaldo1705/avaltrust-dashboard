@@ -24,6 +24,7 @@ import { SidebarComponent } from '../../sidebar/sidebar.component';
 import { AdminCursosService, CursoAdmin } from './admin-cursos.service';
 import { AuthService } from '../../auth/auth.service';
 import { ToastService } from '../../services/toast.service';
+import { AtBottomBarDirective } from '../../ui/at-bottom-bar.directive';
 
 @Component({
   selector: 'app-admin-cursos',
@@ -31,6 +32,7 @@ import { ToastService } from '../../services/toast.service';
   imports: [
     HeaderComponent,
     SidebarComponent,
+    AtBottomBarDirective,
     LucideBookOpen,
     LucideChevronLeft,
     LucideChevronRight,

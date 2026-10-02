@@ -1,4 +1,4 @@
-import { Injectable, NgZone, inject } from '@angular/core';
+import { DOCUMENT, Injectable, NgZone, inject } from '@angular/core';
 import { LiveAnnouncer } from '@angular/cdk/a11y';
 import {
   MatSnackBar,
@@ -7,6 +7,7 @@ import {
 } from '@angular/material/snack-bar';
 import { BehaviorSubject } from 'rxjs';
 import { AtSnackComponent, AtSnackData, AtSnackHold } from '../ui/at-snack.component';
+import { AT_BOTTOM_BAR_VAR, refreshBottomBars } from '../ui/at-bottom-bar.directive';
 import { readHttpErrorMessage } from '../ui/http-error';
 
 export type ToastType = 'success' | 'error' | 'warning' | 'info';
@@ -65,6 +66,7 @@ export class ToastService {
   private readonly snackBar = inject(MatSnackBar);
   private readonly announcer = inject(LiveAnnouncer);
   private readonly zone = inject(NgZone);
+  private readonly document = inject(DOCUMENT);
 
   private readonly toastsSubject = new BehaviorSubject<Toast[]>([]);
   /** El aviso visible (cero o uno). */
@@ -156,7 +158,15 @@ export class ToastService {
     if (this.pending === toast) this.clearPending();
     if (this.active) this.stopTimer(this.active);
 
-    const data: AtSnackData = { message: toast.message, type: toast.type };
+    // rendered va desde el principio: si el aviso se abre fuera de la zona,
+    // Angular puede pintarlo antes de que zone.run devuelva la referencia.
+    const data: AtSnackData = {
+      message: toast.message,
+      type: toast.type,
+      rendered: host => this.fitAboveBars(host),
+    };
+    // Las barras de acciones ([atBottomBar]) se miden ahora: el aviso sale por encima.
+    refreshBottomBars(this.document);
     const ref = this.zone.run(() =>
       this.snackBar.openFromComponent(AtSnackComponent, {
         data,
@@ -189,6 +199,22 @@ export class ToastService {
       this.announcedId = toast.id;
       this.announcer.announce(toast.message, toast.type === 'error' ? 'assertive' : 'polite');
     }
+  }
+
+  /**
+   * Con el aviso pintado se conoce cuanto ocupa desde el borde inferior: las
+   * barras se vuelven a medir con ese alto y solo suben el aviso si lo tocan.
+   * Se usa offsetHeight porque la animacion de entrada lo escala.
+   */
+  private fitAboveBars(host: HTMLElement): void {
+    const container = host.closest<HTMLElement>('.mat-mdc-snack-bar-container');
+    const view = this.document.defaultView;
+    // Un aviso que ya se esta cerrando (lo reemplazo otro) no cuenta.
+    if (!container?.isConnected || container.hasAttribute('mat-exit') || !view) return;
+    const lifted = parseFloat(this.document.documentElement.style.getPropertyValue(AT_BOTTOM_BAR_VAR)) || 0;
+    const margin = parseFloat(view.getComputedStyle(container).marginBottom) || 0;
+    const zone = Math.ceil(container.offsetHeight + margin - lifted);
+    if (zone > 0) refreshBottomBars(this.document, zone);
   }
 
   private onDismissed(active: ActiveToast): void {
