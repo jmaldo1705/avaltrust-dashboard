@@ -16,6 +16,8 @@
 
 Todo es S, sin dependencias nuevas, un PR por punto y reversible con `git revert`.
 
+**Estado (octubre 2026):** implementada en la rama `feat/movil-fase-0`, un commit por punto. Cada punto se midió antes y después con una auditoría automática (Chrome sin interfaz, 4 roles, 7 tamaños de 360 a 1440 px).
+
 | # | Cambio | Dónde | Aceptación |
 |---|---|---|---|
 | 0.1 | Commit de la actualización ya hecha: `@angular/*` 22.2.1 exactos, zone.js ~0.16.3, vitest ^5.0.3, @types/node ^24, `buildTarget` de `serve` corregido y `AVALTRUST_API_URL` | `package.json`, lock, `angular.json`, `environment.ts` | Pasan build, `build:landing` y `ng test dashboard --watch=false`. Ojo: estos archivos redespliegan **también la landing** |
@@ -25,10 +27,11 @@ Todo es S, sin dependencias nuevas, un PR por punto y reversible con `git revert
 | 0.5 | Aliados: enlazar `[isSidebarOpen]`, añadir `.overlay` y quitar el margen de 250/60 px, que su bloque ≤768 px nunca resetea | `aliados.component.html:13`, `.css:13-21` | A 390 px el menú abre y el contenido empieza en x=0 |
 | 0.6 | El mismo desfase de 250/60 px, y `.overlay` donde falte | CSS de `curso-form`, `evaluacion-form`, `detalle-curso`, `lista-cursos` y `dashboard-afianzado` | Contenido alineado con el header (64 px) y el sidebar (280 px) |
 | 0.7 | Quitar el `padding-top` duplicado | `certificados.component.css:8` y `:509` | El título deja de estar a unos 140 px del borde |
-| 0.8 | `onLogout()` pasa a llamar a `AuthService.logout(true)` | `curso-form.component.ts:223`, `evaluacion-form.component.ts:190` | Ya no vuelve a `/dashboard` |
+| 0.8 | `onLogout()` pasa a llamar a `AuthService.logout(true)`, que hace todo el cierre (estado local, navegación y petición al servidor) y devuelve `void` | `curso-form.component.ts:223`, `evaluacion-form.component.ts:190`, `auth.service.ts` | Ya no vuelve a `/dashboard` y el cierre llega al servidor desde cualquier página |
 | 0.9 | Fondo y color de `body` con `--at-bg`/`--at-text` | `index.html:18` | Sin bandas oscuras en iOS; las pantallas sin fondo propio (p. ej. `evaluacion-curso`) se revisan |
-| 0.10 | `.tab-panel { overflow: clip }` | `portfolio.component.css:362` | Las barras Limpiar/Guardar de portfolio y claims vuelven a ser sticky |
+| 0.10 | `.tab-panel { overflow: clip }`, y `overflow-x: clip` en `.dashboard-layout`/`.main-content` solo bajo `.sticky-bars-layout` (portfolio y claims; con la regla general el panel sticky de documentos tapaba sus botones) | `portfolio.component.css:362`, plantillas de portfolio y claims | Las barras Limpiar/Guardar de portfolio y claims vuelven a ser sticky |
 | 0.11 | Tokens `--at-z-*`, `--at-tap-min` y `--at-safe-*` en un solo PR, y la escala de §2.6 aplicada | `tokens.css`, `header.component.css:17`, `sidebar.component.css:14/278`, `styles.css:24` y los fondos 998/999 | Los modales actuales quedan sobre el header |
+| 0.12 | Ocultar "Actualizar pago" y la columna Acciones a CONSULTA, que es solo lectura (el backend rechaza sus escrituras) | `estado-cartera.component.html` | CONSULTA no ve acciones de escritura; USER y ADMIN no cambian |
 
 ## 1. Decisión de arquitectura
 
@@ -133,6 +136,8 @@ Usa AtSheet con `sm` y `alertdialog`. No trae textos por defecto.
 | `--at-z-overlay` | 1000 | CDK sin popover |
 
 Los 1000/2000 de los modales viejos, el 9999 y el 10000 desaparecen al migrar cada pieza.
+
+**Regla del fondo y el header (aprendida en F0.11).** El fondo del menú lateral también se activa con el menú de usuario. Si quedara sobre el header, taparía el desplegable ("Cerrar sesión") y la hamburguesa. Por eso los fondos empiezan bajo el header (`top: var(--at-header-height)`), y mientras el menú de usuario está abierto el header sube a `calc(var(--at-z-drawer-scrim) + 1)` (clase `user-menu-open`). Cuando el menú de usuario pase a hoja o `cdkMenu` (F7), esta excepción se puede retirar.
 
 ## 3. Fases
 
