@@ -9,8 +9,10 @@
 //     (toast*.success/error/warning/info/show, y el texto de respaldo de
 //     toast*.fromHttpError).
 // Un texto hecho solo de iconos (emoji o simbolos graficos como ✓ ✕ ⚠ ℹ) no
-// cuenta: cambiar un icono de texto por uno de Lucide no toca la copia. La
-// puntuacion, las cifras y simbolos como $ % * × o las flechas si cuentan.
+// cuenta: cambiar un icono de texto por uno de Lucide no toca la copia. El ×
+// suelto es el glifo de cerrar de los botones y tambien cuenta como icono;
+// junto a cifras o palabras ("2 × 3") es texto. La puntuacion, las cifras y
+// simbolos como $ % * o las flechas si cuentan.
 // Compara la referencia base con el arbol de trabajo como multiconjuntos por
 // archivo:
 //   - mover un texto dentro del archivo o a otro archivo no avisa;
@@ -120,8 +122,9 @@ const PH = '{{…}}';
 const norm = s => s.replace(/\s+/g, ' ').trim();
 const hasVisible = s => norm(s.split(PH).join('')).length > 0;
 // Icono: pictograma o "otro simbolo" Unicode desde U+2000 (asi © y ® siguen
-// contando), mas el selector de variacion y el ZWJ de los emoji compuestos.
-const isIconChar = ch => ch === '\uFE0F' || ch === '\u200D' ||
+// contando), mas el selector de variacion y el ZWJ de los emoji compuestos, y
+// el × (U+00D7) de los botones de cerrar. Solo pesa si TODO el texto son iconos.
+const isIconChar = ch => ch === '\uFE0F' || ch === '\u200D' || ch === '\u00D7' ||
   (ch.codePointAt(0) >= 0x2000 && /[\p{So}\p{Extended_Pictographic}]/u.test(ch));
 const isIconOnly = s => {
   const chars = [...s.split(PH).join('').replace(/\s+/g, '')];
