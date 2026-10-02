@@ -59,7 +59,7 @@ Todo es S, sin dependencias nuevas, un PR por punto y reversible con `git revert
 | Kit `at-*` | +10–15 KB | +3–5 KB |
 | Borrar `toast-container` y el CSS de los modales | −10–20 KB | — |
 
-Hoy el chunk inicial pesa ≈1,70 MB (aviso a 1,3 MB, error a 2 MB). F2 lo recupera con `loadComponent` en las 21 rutas con componente y `xlsx` bajo demanda; la meta es ≤800 KB.
+Antes de F1 el chunk inicial pesaba ≈1,70 MB; tras F1 pesa 1,87 MB (aviso a 1,3 MB, error a 2 MB), así que F2 debe entrar antes de F4. F2 lo recupera con `loadComponent` en las 21 rutas con componente y `xlsx` bajo demanda; la meta es ≤800 KB.
 
 ## 2. Componentes y servicios base
 
@@ -124,7 +124,7 @@ Usa AtSheet con `sm` y `alertdialog`. No trae textos por defecto.
 - **`.at-table--stack`.** Tarjetas por debajo de 768 px, con `data-label` igual a la cabecera.
 - **`atFilters`.** Filtros en línea en escritorio; en móvil, el mismo `TemplateRef` en una hoja.
 - **`check-ui.mjs`.** Solo permite `@angular/material/snack-bar` y cuenta `alert(`, `confirm(` y `modal-overlay`.
-- **`text-diff.mjs`.** Compara contra master el conjunto de textos: nodos de plantilla y literales de `alert`/`confirm`/toast. Mover un texto no avisa; cambiarlo o crear uno sí.
+- **`text-diff.mjs`.** Compara contra master el conjunto de textos: nodos de plantilla y literales de `alert`/`confirm`/toast (también el texto de respaldo de `fromHttpError`). Mover un texto no avisa; cambiarlo o crear uno sí. Desde F1, un texto "nuevo" que ya estaba tal cual en el código de la base (p. ej. en `this.successMessage = '...'`) cuenta como movido y se lista aparte con su archivo de origen; y un texto hecho solo de iconos (emoji, ✕ o el × suelto de cerrar) no cuenta.
 
 ### 2.6 Escala de capas
 | Token | Valor | Reemplaza |
@@ -151,6 +151,32 @@ Los 1000/2000 de los modales viejos, el 9999 y el 10000 desaparecen al migrar ca
 - **1b–1e, un PR por área:** cursos admin, reports, banners y resultados de portfolio/claims. Errores al snackbar; validaciones en el formulario, con el mismo texto, `aria-invalid`/`aria-describedby` y foco en el primer error.
 - **Aceptación:** las 26 llamadas funcionan, solo quedan los 6 `alert` de afianzado, el snackbar se anuncia una vez y nada lo tapa.
 - **Envío:** 1a solo cambia el toast.
+
+**Estado de F1 (octubre 2026):** implementada en la rama `feat/movil-f1`, que sale de `feat/movil-fase-0`. Hay un commit por subpunto, más cuatro ajustes de `text-diff` y un arreglo.
+
+| # | Commit | Qué cambia |
+|---|---|---|
+| 1a | `cc58018` | CDK y Material 22.2.1, `overlays.css`, `AtSnackComponent`, `ToastService` sobre `MatSnackBar`, `[atBottomBar]`; se borra `toast-container` |
+| guarda | `fa6820b`, `9f9529d`, `f17fc2a`, `19f5d0c` | `text-diff`: textos que ya estaban en la base, `fromHttpError`, el × suelto como icono y el archivo de origen correcto |
+| 1b | `d5f3fd4` | Cursos admin: 12 `alert` menos; validaciones de curso y evaluación en el formulario |
+| 1c | `075245d` | Reports con `fromHttpError`; banners de certificados y auditoría al snackbar; validaciones de certificados en el formulario |
+| 1d | `8188713` | Banners de users, aliados y perfil al snackbar (los errores de formulario siguen en su modal); el dashboard deja el banner de carga y quita el toast repetido; éxitos de auth en un snackbar que sigue tras la redirección |
+| arreglo | `f90be9c` | "Exportar" del dashboard ya no se queda en "Exportando" |
+| 1e | `630e694` | Resultado de portfolio y claims al snackbar; los errores por fila siguen en la tarjeta; aviso al descargar la plantilla |
+
+**Resultado**
+- **Diálogos nativos:** `alert(` baja de 20 a 6 (solo afianzado, que es F3) y `confirm(` sigue en 3 (F4).
+- **Avisos:** 64 llamadas directas a `ToastService` en 17 archivos, más 6 que pasan por `announceUploadResult`. De las 26 originales quedan 24: las 2 que repetían el banner del dashboard se quitaron.
+- **Textos:** `text-diff` da 0 cambiados o eliminados y 0 nuevos. Los mensajes que vivían en propiedades figuran como ya existentes en la base.
+- **Pruebas:** 92 tests (eran 7 antes de F1). Además, 21 flujos a 390×844 y 1440×900 en Chrome contra el backend local, sin escrituras: 52 snackbars medidos, todos centrados, a 8 px del borde, sobre los modales y con cierre de 44 px.
+- **Auditoría:** la completa (168 visitas) no muestra overflow, errores de consola, recortes ni fallos de menú nuevos frente a F0.
+- **Bundle inicial:** 1.873.189 B, 361 KB con brotli (+3,3 KB sobre 1a).
+
+**Pendiente de aprobación**
+- **"Operacion exitosa":** el título sigue en la tarjeta de portfolio y claims, pero la tarjeta ya no aparece en los éxitos. ¿Se quita?
+- **Textos reutilizados:** portfolio y claims avisan la plantilla con "Plantilla descargada exitosamente" y "Error al descargar la plantilla", los textos que ya usa estado-cartera.
+- **Guarda:** `text-diff` ya no cuenta como texto el × suelto de los botones de cerrar (como la regla de iconos de 1a).
+- **Avisos sin texto:** eliminar o reordenar un curso con éxito y el fallo al cargar una evaluación siguen sin aviso, porque no hay un texto que reutilizar.
 
 **F2 · Carga diferida y despliegue seguro (S/M, 3 PRs, en paralelo con F1)**
 - **2a, primero:** `deploy-dashboard.yml` deja de borrar con `--delete` los chunks con hash anteriores (se podan los de más de 30 días). Además, `withNavigationErrorHandler` recarga una vez si falla un chunk.
