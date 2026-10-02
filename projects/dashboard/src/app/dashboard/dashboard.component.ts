@@ -959,7 +959,10 @@ export class DashboardComponent implements OnInit, OnDestroy {
       params.aliadoIds = this.selectedAliadoIds;
     }
     
-    this.dashboardService.getDelinquentUsers(params).subscribe({
+    // El boton vuelve a "Exportar" al terminar, con o sin datos y tambien si falla.
+    this.dashboardService.getDelinquentUsers(params).pipe(
+      finalize(() => this.isExportingDelinquents = false)
+    ).subscribe({
       next: (response: any) => {
         try {
           const data = Array.isArray(response?.content) ? response.content : [];

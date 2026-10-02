@@ -47,6 +47,20 @@ describe('DashboardComponent', () => {
     expect(toast.error).not.toHaveBeenCalled();
   });
 
+  it('Exportar vuelve a estar disponible al terminar, sin datos o con error', () => {
+    const { cmp, toast } = setup({});
+    cmp.exportTopDelinquents();
+    expect(toast.warning).toHaveBeenCalledWith('No hay datos para exportar.');
+    expect(cmp.isExportingDelinquents).toBe(false);
+
+    TestBed.resetTestingModule();
+    const ko = setup({});
+    (TestBed.inject(DashboardService) as unknown as { getDelinquentUsers: () => unknown }).getDelinquentUsers = () => throwError(() => new Error('500'));
+    ko.cmp.exportTopDelinquents();
+    expect(ko.toast.error).toHaveBeenCalledWith('Ocurrió un error al obtener los datos para exportar.');
+    expect(ko.cmp.isExportingDelinquents).toBe(false);
+  });
+
   it('la linea de tiempo de mora no tiene banner: su error va al snackbar', () => {
     const { cmp, toast } = setup({ getMoraTimeline: vi.fn(() => throwError(() => new Error('500'))) });
     cmp.loadTimelineData();
