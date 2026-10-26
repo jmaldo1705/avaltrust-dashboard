@@ -1,0 +1,13 @@
+{
+  "projects": {
+    "default": "avaltrust-prod"
+  },
+  "targets": {
+    "avaltrust-prod": {
+      "hosting": {
+        "landing": ["avaltrust-landing"],
+        "app": ["avaltrust-app"]
+      }
+    }
+  }
+}

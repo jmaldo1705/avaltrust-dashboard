@@ -1,0 +1,94 @@
+{
+  "hosting": [
+    {
+      "target": "landing",
+      "public": "dist/landing/browser",
+      "ignore": ["index.csr.html", "**/.*", "**/node_modules/**"],
+      "predeploy": ["node scripts/landing-404.mjs"],
+      "cleanUrls": false,
+      "trailingSlash": false,
+      "redirects": [
+        { "source": "/index.html", "destination": "/", "type": 301 },
+        { "source": "/about-us.html", "destination": "/quienes-somos", "type": 301 },
+        { "source": "/owr-service.html", "destination": "/servicio", "type": 301 },
+        { "source": "/people.html", "destination": "/afianzados", "type": 301 },
+        { "source": "/company.html", "destination": "/servicio", "type": 301 },
+        { "source": "/blog.html", "destination": "/blog", "type": 301 },
+        { "source": "/calculadora.html", "destination": "/calculadora", "type": 301 },
+        { "source": "/contact.html", "destination": "/contacto", "type": 301 },
+        { "source": "/politica-privacidad.html", "destination": "/politica-privacidad", "type": 301 },
+        { "source": "/terminos-condiciones.html", "destination": "/terminos-condiciones", "type": 301 },
+        { "source": "/login-avalados.html", "destination": "https://app.avaltrust.co/login", "type": 301 },
+        { "source": "/login-aliados.html", "destination": "https://app.avaltrust.co/login", "type": 301 },
+        { "source": "/login.html", "destination": "https://app.avaltrust.co/login", "type": 301 },
+        { "source": "/get-a-quote.html", "destination": "https://app.avaltrust.co/login", "type": 301 }
+      ],
+      "headers": [
+        {
+          "regex": "^/(?:.*/)?[^./]*$",
+          "headers": [{ "key": "Cache-Control", "value": "no-cache, no-store, must-revalidate" }]
+        },
+        {
+          "source": "**/*.html",
+          "headers": [{ "key": "Cache-Control", "value": "no-cache, no-store, must-revalidate" }]
+        },
+        {
+          "source": "404.html",
+          "headers": [{ "key": "Cache-Control", "value": "no-cache, no-store, must-revalidate" }]
+        },
+        {
+          "source": "**/*.@(js|css)",
+          "headers": [{ "key": "Cache-Control", "value": "public, max-age=31536000, immutable" }]
+        },
+        {
+          "source": "/media/**",
+          "headers": [{ "key": "Cache-Control", "value": "public, max-age=31536000, immutable" }]
+        },
+        {
+          "source": "/@(img|image)/**",
+          "headers": [{ "key": "Cache-Control", "value": "public, max-age=86400, must-revalidate" }]
+        },
+        {
+          "source": "/favicon.png",
+          "headers": [{ "key": "Cache-Control", "value": "public, max-age=86400, must-revalidate" }]
+        },
+        {
+          "source": "/@(robots.txt|sitemap.xml)",
+          "headers": [{ "key": "Cache-Control", "value": "public, max-age=3600, must-revalidate" }]
+        }
+      ]
+    },
+    {
+      "target": "app",
+      "public": "dist/avaltrust-dashboard/browser",
+      "ignore": ["**/.*", "**/node_modules/**"],
+      "rewrites": [{ "source": "**", "destination": "/index.html" }],
+      "headers": [
+        {
+          "regex": "^/(?:.*/)?[^./]*$",
+          "headers": [{ "key": "Cache-Control", "value": "no-cache, no-store, must-revalidate" }]
+        },
+        {
+          "source": "**/*.html",
+          "headers": [{ "key": "Cache-Control", "value": "no-cache, no-store, must-revalidate" }]
+        },
+        {
+          "source": "**/*.@(js|css)",
+          "headers": [{ "key": "Cache-Control", "value": "public, max-age=31536000, immutable" }]
+        },
+        {
+          "source": "/media/**",
+          "headers": [{ "key": "Cache-Control", "value": "public, max-age=31536000, immutable" }]
+        },
+        {
+          "source": "/assets/**",
+          "headers": [{ "key": "Cache-Control", "value": "public, max-age=3600, must-revalidate" }]
+        },
+        {
+          "source": "/favicon.png",
+          "headers": [{ "key": "Cache-Control", "value": "public, max-age=3600, must-revalidate" }]
+        }
+      ]
+    }
+  ]
+}

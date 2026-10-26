@@ -43,3 +43,7 @@ Thumbs.db
 
 # Salida de build de la landing
 /dist
+
+# Firebase CLI (cache de despliegue y logs)
+/.firebase
+firebase-debug.log*
