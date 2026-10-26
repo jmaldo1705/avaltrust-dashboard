@@ -57,4 +57,4 @@ jobs:
       # e index.html no se cachea. Firebase publica la version completa de
       # una vez, asi que no hay cache que invalidar.
       - name: Deploy to Firebase Hosting
-        run: npx firebase-tools@latest deploy --only hosting:app --project avaltrust-prod --non-interactive
+        run: npx firebase-tools@15.33.0 deploy --only hosting:app --project avaltrust-prod --non-interactive
