@@ -43,7 +43,7 @@ npm run build:landing  # landing   -> dist/landing/browser (HTML ya prerenderiza
 
 La landing usa `@angular/ssr` con `outputMode: "static"`: el prerender ocurre
 en el build y el resultado es HTML plano por ruta. **No hay servidor Node en
-producción** — se publica en S3 + CloudFront igual que el dashboard, y los
+producción** — se publica en Firebase Hosting igual que el dashboard, y los
 buscadores reciben el HTML completo en lugar de un `<div>` vacío.
 
 ## Tests
@@ -67,14 +67,41 @@ repetir valores hexadecimales.
 
 ## Despliegue
 
-Cada push a `master` despliega a S3 + CloudFront, autenticándose con un rol
-OIDC (sin llaves estáticas). Hay un workflow por aplicación, filtrado por
-`paths:`:
+Cada push a `master` despliega a Firebase Hosting con `firebase deploy`. GitHub
+Actions se autentica con Workload Identity Federation (sin llaves estáticas):
+el workflow toma el proveedor y la cuenta de despliegue de las variables del
+repo `GCP_WIF_PROVIDER` y `GCP_DEPLOY_SA`. Hay un workflow por aplicación,
+filtrado por `paths:` y con disparo manual (`workflow_dispatch`):
 
-- `.github/workflows/deploy-dashboard.yml` → dashboard (app.avaltrust.co)
-- `.github/workflows/deploy-landing.yml` → landing (avaltrust.co)
+- `.github/workflows/deploy-dashboard.yml` → target `app` (app.avaltrust.co)
+- `.github/workflows/deploy-landing.yml` → target `landing` (avaltrust.co)
 
-Un cambio en `projects/shared-ui/` o en `package.json` dispara los dos.
+Un cambio en `projects/shared-ui/`, en `package.json` o en `firebase.json`
+dispara los dos.
+
+`firebase.json` tiene la configuración de los dos sitios y `.firebaserc` liga
+cada target con su sitio:
+
+- **app**: SPA. Toda ruta que no es un archivo devuelve `index.html` con 200.
+- **landing**: HTML prerenderizado. `/ruta` se sirve desde `/ruta/index.html`,
+  `/ruta/` redirige a `/ruta`, las URLs `.html` del sitio anterior redirigen
+  con 301 a su ruta nueva y una URL que no existe devuelve la portada con 404
+  (`404.html` lo genera `scripts/landing-404.mjs` antes de cada despliegue).
+  `index.csr.html` no se publica.
+- En los dos, el HTML no se cachea y los bundles con hash se cachean un año
+  (`immutable`).
+
+Para probar la configuración en local, después de los builds:
+
+```bash
+node scripts/landing-404.mjs
+npx firebase-tools@latest emulators:start --only hosting --project avaltrust-prod
+```
+
+No hace falta `firebase login`. La landing queda en http://localhost:5000 y el
+dashboard en http://localhost:5005. En Windows el emulador no aplica las reglas `source` de `redirects` y
+`headers` (las rutas de glob salen con `\`); en Linux, macOS o un contenedor
+sí.
 
 ## Plan de trabajo
 
